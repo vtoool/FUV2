@@ -1967,10 +1967,12 @@ $('#addOverride')?.addEventListener('click', ()=>{
   }
   $('#resetForm')?.addEventListener('click', ()=>{ $('#clientForm').reset(); $('#clientId').value=''; });
  $('#saveCustomer')?.addEventListener('click', ()=>{
-  try{
-    const lb = $('#leadBlob');
-    if ((lb?.value || '').trim()){ parseBlob({ onlyFillEmpty:true }); }
-          if (res && res.mode === 'multi') return;
+   let res = null;
+if ((lb?.value || '').trim()){
+      res = parseBlob({ onlyFillEmpty:true });
+      // Bulk paste opens its own modal; bail out so we don't also submit the single form
+      if (res && res.mode === 'multi') return;
+    }
       const {client, exists} = collectClientFromForm();
       if(!client.name){ alert('Name is required'); $('#name').focus(); return; }
       if(!exists){
