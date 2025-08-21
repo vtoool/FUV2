@@ -166,21 +166,19 @@ async function copyRichEmailAndOpenGmail(to, subject, html, text){
       toast('Plain text copied — paste in Gmail', 'ok', 1800);
     }
   }catch(_){
-    // Last resort: open a window with the HTML to copy manually
-const w = safeOpen('about:blank');    w.document.write(html); w.document.close();
-    alert('Could not access clipboard. Copy from the new tab, then paste in Gmail.');
+    // Last-resort: open a tab with editable HTML to copy
+    const w = safeOpen('about:blank');
+    if (w){
+      w.document.write(`<div contenteditable="true" style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:20px">${html}</div>`);
+      w.document.close();
+    }
+    alert('Could not access clipboard. Press ⌘/Ctrl+A then ⌘/Ctrl+C to copy, then paste in Gmail.');
   }
 
-  // Open compose with To + Subject prefilled (body left blank for your paste)
-  const href = emailHref(to, subject, '');
-  safeOpen(href);
-  // inside the catch of copyRichEmailAndOpenGmail
-const w = window.open('', '_blank', 'noopener');
-w.document.write(`<div contenteditable="true" style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:20px">${html}</div>`);
-w.document.close();
-alert('Could not access clipboard. Press ⌘/Ctrl+A then ⌘/Ctrl+C to copy, then paste in Gmail.');
-
+  // Open Gmail compose after we’ve handled copying
+  safeOpen(emailHref(to, subject, ''));
 }
+
 
 // Pick template for an agenda task (Unreached Day N)
 function computeSmsText(t, client){
@@ -832,10 +830,7 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
   const e164 = toE164(rawPhone);
   if(!e164) return;
 
-  // Use the requested URI with a prefilled message
   const desktopPrimary = `rcapp://r/sms?type=new&number=${encodeURIComponent(e164)}&content=${encodeURIComponent(text)}`;
-
-  // Fallbacks
   const desktopNoNum   = `rcapp://r/sms?type=new&content=${encodeURIComponent(text)}`;
   const mobilePrimary  = `rcmobile://sms?number=${encodeURIComponent(e164)}`; // content may be ignored on mobile
   const web1           = `https://app.ringcentral.com/r/sms?type=new&number=${encodeURIComponent(e164)}`;
@@ -845,12 +840,19 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
   const fallbacks = isMobile() ? [web1, web2] : [desktopNoNum, web1, web2];
 
   let jumped = false;
-const tryOpen = (url, sameTab=true) => {
+  const tryOpen = (url, sameTab = true) => {
+    try{
+      if (sameTab) window.location.href = url;   // deep links should be same-tab
+      else safeOpen(url);                        // web fallbacks in a new tab
+      jumped = true;
+    }catch(_){}
+  };
 
   tryOpen(primary, true);
   setTimeout(()=>{ if(!jumped && fallbacks.length) tryOpen(fallbacks.shift(), true); }, 200);
   setTimeout(()=>{ if(!jumped && fallbacks.length) tryOpen(fallbacks.shift(), false); }, 600);
 }
+
 
 
   /* ========= Scheduling ========= */
@@ -1535,12 +1537,7 @@ function initMorePanel(){
   };
 
   // Run auto-grow after values are populated
-  const _origLoadIntoUI = loadIntoUI;
-  loadIntoUI = function () {
-    _origLoadIntoUI();  // fill fields as before
-    // Defer to next frame to ensure values are in the DOM
-    requestAnimationFrame(wireAutoGrow);
-  };
+
 }
 
 function loadIntoUI(){
