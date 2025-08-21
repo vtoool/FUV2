@@ -288,6 +288,32 @@ body.light .kpi .box{ background:var(--card); border-color:var(--line) }
 .note-preview:hover{text-decoration:underline}
 /* Actions cell: aligned with table rows */
 
+/* Show ring only for keyboard focus */
+.seg > button:focus:not(:focus-visible) { outline: none; }
+.seg > button:focus-visible {
+  outline: 2px solid var(--line);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Apply same ring to common buttons */
+.btn-icon:focus-visible,
+button.toggle:focus-visible,
+button.primary:focus-visible {
+  outline: 2px solid var(--line);
+  outline-offset: 2px;
+}
+
+/* High-contrast mode */
+@media (forced-colors: active){
+  .seg > button:focus-visible,
+  .btn-icon:focus-visible,
+  button.toggle:focus-visible,
+  button.primary:focus-visible {
+    outline: 1px solid CanvasText;
+    outline-offset: 2px;
+  }
+}
 
 .tbl td.actions .btn-icon{
   display:inline-flex;
@@ -578,6 +604,8 @@ body.light .seg > button.primary{
 }
 /* Right-side drawer for the calendar */
 /* Basic inert shim: block clicks and selection even if inert isn’t supported */
+[inert] { pointer-events: none; user-select: none; -webkit-user-select: none; }
+/* Basic inert shim so clicks and selection are blocked even if inert isn’t supported */
 [inert] { pointer-events: none; user-select: none; -webkit-user-select: none; }
 
 /* Nudge content so it isn't covered while docked */
