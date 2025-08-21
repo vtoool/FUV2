@@ -488,7 +488,7 @@ function initNamesDrawer(){
     document.body.appendChild(drawer);
   }
 
-  const list = drawer.querySelector('#namesList');
+  const listEl = drawer.querySelector('#namesList');
 
   // Pools + generator
 
@@ -511,10 +511,9 @@ function randomNames(n = 9){
   return out;
 }
 
-function renderNamesList(names){
-  const list = document.getElementById('namesList');
-  if (!list) return;
-  list.innerHTML = ''; // reset also clears any previous "used" state
++ function renderNamesList(names){
++  if (!listEl) return;
++  listEl.innerHTML = ''; // reset also clears any previous "used" state
 
   names.forEach(n => {
     const btn = document.createElement('button');
@@ -526,8 +525,7 @@ function renderNamesList(names){
       copyTextToClipboard(n, 'name'); // you already have this helper
       btn.classList.add('used');      // gray it out (but keep it usable)
     });
-    list.appendChild(btn);
-  });
+listEl.appendChild(btn);  });
 }
 function renderNames(){
  const uniqFirst = [...new Set(FIRST.map(s => s.trim()))];
