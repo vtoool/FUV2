@@ -995,9 +995,16 @@ function renderTask(t, opts = {}){
       const href = phoneHref(c.phone);
       contactHtml = `<span class="pill"><a class="mono" href="${href}">${escapeHtml(c.phone)}</a><button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button></span>`;
     } else if (t.type==='sms' && c.phone){
-      const e164 = c.phone;
-      contactHtml = `<span class="pill"><a class="mono" href="#" data-rcsms="${escapeHtml(e164)}">${escapeHtml(c.phone)}</a><button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button></span>`;
-    } else if (t.type==='email' && c.email){
+  const smsText = computeSmsText(t, c) || SMS_DEFAULT_TEXT; // uses your Day 1–5 templates
+  contactHtml = `<span class="pill">
+    <a class="mono"
+       href="#"
+       data-rcsms="${escapeHtml(c.phone)}"
+       data-smstext="${escapeHtml(smsText)}">${escapeHtml(c.phone)}</a>
+    <button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button>
+  </span>`;
+}
+ else if (t.type==='email' && c.email){
       const href = emailHref(c.email,'Follow-up','Hi …');
       contactHtml = `<span class="pill"><a class="mono" href="${href}" target="_blank" rel="noopener">${escapeHtml(c.email)}</a><button class="copy-btn" data-copy="${escapeHtml(c.email)}" data-what="email" title="Copy email" aria-label="Copy email">⧉</button></span>`;
     }
@@ -1125,15 +1132,7 @@ function updateProgress(){
   if (bar) bar.style.width = pct+'%';
 }
 
-  // Agenda action clicks (delete, bell, RC sms) ✨
-const rc = e.target.closest('[data-rcsms]');
-if (rc){
-  e.preventDefault();
-  const num = rc.getAttribute('data-rcsms') || '';
-  const txt = rc.getAttribute('data-smstext') || '';
-  openRingCentralSMS(num, txt);
-  return;
-}
+
 
 
 // Agenda controls
@@ -1172,6 +1171,43 @@ function mountSortGroupLabel(){
     oldWrap.parentElement.insertBefore(byType, oldWrap);
     if (!oldWrap.querySelector('button')) oldWrap.remove();
   }
+
+
+  
+  // Row wrapper (sibling to the segmented control)
+  let wrap = document.getElementById('sortWrap');
+  if (!wrap){
+    wrap = document.createElement('div');
+    wrap.id = 'sortWrap';
+    wrap.className = 'toolbar'; // same row style you use elsewhere
+    byClient.parentElement.insertBefore(wrap, byClient);
+  }
+
+  // Label chip (just like Show:)
+  let label = document.getElementById('sortLabel');
+  if (!label){
+    label = document.createElement('span');
+    label.id = 'sortLabel';
+    label.className = 'pill tiny mono';
+    label.textContent = 'Sort:';
+  } else {
+    label.textContent = 'Sort:';
+  }
+
+  // Segmented container (same look as Show)
+  let group = document.getElementById('sortGroup');
+  if (!group){
+    group = document.createElement('div');
+    group.id = 'sortGroup';
+    group.className = 'seg';    // ← NOT "btn-group"
+  }
+
+  wrap.appendChild(label);
+  wrap.appendChild(group);
+  group.appendChild(byClient);
+  group.appendChild(byType);
+}
+
 function initMorePanel(){
   // create button if missing
   if (!document.getElementById('moreBtn')){
@@ -1290,43 +1326,6 @@ function initMorePanel(){
   modal.querySelector('#moreSave')?.addEventListener('click', saveFromUI);
   modal.querySelector('#moreReset')?.addEventListener('click', resetDefaults);
 }
-
-  
-  // Row wrapper (sibling to the segmented control)
-  let wrap = document.getElementById('sortWrap');
-  if (!wrap){
-    wrap = document.createElement('div');
-    wrap.id = 'sortWrap';
-    wrap.className = 'toolbar'; // same row style you use elsewhere
-    byClient.parentElement.insertBefore(wrap, byClient);
-  }
-
-  // Label chip (just like Show:)
-  let label = document.getElementById('sortLabel');
-  if (!label){
-    label = document.createElement('span');
-    label.id = 'sortLabel';
-    label.className = 'pill tiny mono';
-    label.textContent = 'Sort:';
-  } else {
-    label.textContent = 'Sort:';
-  }
-
-  // Segmented container (same look as Show)
-  let group = document.getElementById('sortGroup');
-  if (!group){
-    group = document.createElement('div');
-    group.id = 'sortGroup';
-    group.className = 'seg';    // ← NOT "btn-group"
-  }
-
-  wrap.appendChild(label);
-  wrap.appendChild(group);
-  group.appendChild(byClient);
-  group.appendChild(byType);
-}
-
-
 
 
 
@@ -1914,9 +1913,21 @@ $('#addOverride')?.addEventListener('click', ()=>{
   if (rc){
     e.preventDefault();
     const num = rc.getAttribute('data-rcsms') || '';
-    openRingCentralSMS(num);
+    let txt = rc.getAttribute('data-smstext') || '';
+
+    // Fallback: compute live from the task + client if attribute missing
+    if (!txt){
+      const hostItem = rc.closest('.agenda-item');
+      const taskId = hostItem?.querySelector('input[data-taskid]')?.getAttribute('data-taskid');
+      const t = taskId ? state.tasks.find(x => x.id === taskId) : null;
+      const c = t?.clientId ? clientById(t.clientId) : null;
+      txt = computeSmsText(t, c) || SMS_DEFAULT_TEXT;
+    }
+
+    openRingCentralSMS(num, txt);
     return;
   }
+
   const saveBtn = e.target.closest('[data-save-notify]');
   if (saveBtn){
     const id = saveBtn.getAttribute('data-save-notify');
