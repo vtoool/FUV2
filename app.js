@@ -384,6 +384,83 @@ function initCalendarDrawer(){
   }
 }
 
+// --- Drawer: Random Names tool (docked by default, like calendar) ---
+function initNamesDrawer(){
+  // Ensure container
+  let drawer = document.getElementById('namesDrawer');
+  if(!drawer){
+    drawer = document.createElement('div');
+    drawer.id = 'namesDrawer';
+    drawer.innerHTML = `<div class="drawer-scrim"></div><aside class="drawer-panel"></aside>`;
+    document.body.appendChild(drawer);
+  }
+  const panel = drawer.querySelector('.drawer-panel');
+
+  // Move the Names card into the drawer
+  const card = document.getElementById('namesCard');
+  if(card){ panel.appendChild(card); card.style.display='block'; }
+
+  // Helper: keep body margin only if any drawer is pinned+open
+  function syncBodyPinned(){
+    const anyPinned = document.querySelector('#calendarDrawer.pinned.open, #namesDrawer.pinned.open');
+    document.body.classList.toggle('drawer-pinned', !!anyPinned);
+  }
+
+  // Close buttons / scrim behavior
+  document.getElementById('namesDrawerClose')?.addEventListener('click', ()=>{
+    drawer.classList.remove('open','pinned');
+    document.getElementById('openNames')?.setAttribute('aria-expanded','false');
+    syncBodyPinned();
+  });
+  drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
+    if(!drawer.classList.contains('pinned')){
+      drawer.classList.remove('open');
+      document.getElementById('openNames')?.setAttribute('aria-expanded','false');
+      syncBodyPinned();
+    }
+  });
+
+  // Name generator
+  const FIRST = ['Liam','Noah','Oliver','Elijah','James','William','Benjamin','Lucas','Henry','Alexander','Emma','Olivia','Ava','Sophia','Isabella','Mia','Amelia','Harper','Evelyn','Abigail'];
+  const LAST  = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin'];
+
+  function rand(n){ return Math.floor(Math.random()*n); }
+  function buildNames(count=9){
+    const out = new Set();
+    while(out.size < count){
+      const f = FIRST[rand(FIRST.length)];
+      const l = LAST[rand(LAST.length)];
+      out.add(`-${l.toUpperCase()}/${f.toUpperCase()}`);
+    }
+    return Array.from(out);
+  }
+
+  function renderNames(){
+    const list = document.getElementById('namesList');
+    const rows = buildNames(9).map(n =>
+      `<li class="name-item" data-copy="${escapeHtml(n)}" data-what="name">${escapeHtml(n)}</li>`
+    ).join('');
+    list.innerHTML = rows || '<li class="tiny">No names</li>';
+  }
+
+  document.getElementById('namesRefresh')?.addEventListener('click', renderNames);
+
+  // Open/close toggle button
+  const openBtn = document.getElementById('openNames');
+  if(openBtn){
+    openBtn.addEventListener('click', ()=>{
+      const opening = !drawer.classList.contains('open');
+      if(opening){
+        drawer.classList.add('open','pinned'); // docked
+        renderNames();                         // (re)generate on open
+      }else{
+        drawer.classList.remove('open','pinned');
+      }
+      openBtn.setAttribute('aria-expanded', String(opening));
+      syncBodyPinned();
+    });
+  }
+}
 
 
 
@@ -2295,6 +2372,8 @@ function bootstrap(){
   setShowButtons();
   initCalendarDrawer();
   initMorePanel();
+  initNamesDrawer();
+
 
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
