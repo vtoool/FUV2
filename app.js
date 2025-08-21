@@ -511,9 +511,9 @@ function randomNames(n = 9){
   return out;
 }
 
-+ function renderNamesList(names){
-+  if (!listEl) return;
-+  listEl.innerHTML = ''; // reset also clears any previous "used" state
+ function renderNamesList(names){
+  if (!listEl) return;
+  listEl.innerHTML = ''; // reset also clears any previous "used" state
 
   names.forEach(n => {
     const btn = document.createElement('button');
