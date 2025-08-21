@@ -613,3 +613,15 @@ body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 
 /* Optional: tidy group header chips under the client name */
 .group-hd .tiny { margin-top: 4px; }
+/* Docked calendar: no scrim, page stays interactive */
+#calendarDrawer.pinned .drawer-scrim{
+  opacity: 0 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* (Optional) keep the panel itself interactive */
+#calendarDrawer.pinned .drawer-panel{
+  pointer-events: auto;
+}
+
