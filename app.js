@@ -50,6 +50,30 @@ function safeOpen(url, target = '_blank'){
   try{ if (w) w.opener = null; }catch(_){}
   return w;
 }
+// Returns "-LAST/FIRST"
+function formatName(last, first){
+  return `-${String(last||'').toUpperCase()}/${String(first||'')}`;
+}
+
+// Pick n unique combos; falls back to best effort if arrays are tiny
+function pickUniqueCombos(firsts, lasts, n=9){
+  const out = new Set();
+  const maxTries = n * 50;
+  let tries = 0;
+  while (out.size < n && tries < maxTries){
+    const f = firsts[Math.floor(Math.random()*firsts.length)]?.trim();
+    const l = lasts[Math.floor(Math.random()*lasts.length)]?.trim();
+    if (f && l) out.add(formatName(l, f));
+    tries++;
+  }
+  // If arrays are very small, top up (allowing collisions) so we always return n
+  while (out.size < n){
+    const f = firsts[Math.floor(Math.random()*firsts.length)] || 'Alex';
+    const l = lasts[Math.floor(Math.random()*lasts.length)] || 'SMITH';
+    out.add(formatName(l, f));
+  }
+  return Array.from(out).slice(0, n);
+}
 
   // --- Email template helpers (simple version) ---
 const EMAIL_IMAGES = {
@@ -505,6 +529,25 @@ function renderNamesList(names){
     list.appendChild(btn);
   });
 }
+function generateAndRender9(){
+  // Use your big arrays (already in your file)
+  const uniqFirst = [...new Set(NAME_FIRST.map(s => s.trim()))];
+  const uniqLast  = [...new Set(NAME_LAST.map(s => s.trim().toUpperCase()))];
+
+  const names9 = pickUniqueCombos(uniqFirst, uniqLast, 9);
+  renderNamesList(names9);     // ← re-renders, wiping any previous “used” pills
+}
+
+// Wire the button
+(function wireNamesGenerate(){
+  const genBtn = document.getElementById('namesGen');
+  if (!genBtn) return; // silent if the drawer isn't on this page
+
+  genBtn.addEventListener('click', generateAndRender9);
+  genBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); generateAndRender9(); }
+  });
+})();
 
 
   // Expose to side-tab so it can refresh on open
@@ -2497,6 +2540,8 @@ function bootstrap(){
   initNamesDrawer();
   initSideTabs(); 
 initMorePanel();
+  generateAndRender9();
+
 
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
