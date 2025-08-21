@@ -55,9 +55,15 @@ function computeEmailContent(t, c){
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
       <tr><td align="center">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background:#fff;border-radius:8px;overflow:hidden">
-          <tr><td style="padding:28px 28px 0" align="left">
-            <img src="${EMAIL_IMAGES.logo}" alt="business tickets" style="max-width:180px;height:auto;border:0;display:block">
-          </td></tr>
+<tr>
+  <td align="center"
+      style="background:#f3f6fb;padding:24px 0;border-bottom:1px solid #e8ecf4">
+    <img src="${EMAIL_IMAGES.logo}" alt="business tickets"
+         width="180"
+         style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:180px;height:auto">
+  </td>
+</tr>
+
           <tr><td style="padding:20px 28px 8px;font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial">
             <p style="margin:0 0 14px">Dear ${first},</p>
             <p style="margin:0 0 14px">
