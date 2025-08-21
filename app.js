@@ -9,6 +9,37 @@
 const SORT_KEY  = 'followup_crm_sort';
 const SHOW_KEY  = 'followup_crm_show';
 
+function firstNameOf(full){
+  const n = String(full||'').trim();
+  if(!n) return '';
+  return n.split(/\s+/)[0];
+}
+function agentVars(){
+  const a = state.settings.agent || {};
+  const name  = (a.name||'').trim();
+  const phone = (a.phone||'').trim();
+  const emailLocal = name ? name.toLowerCase().replace(/\s+/g,'') : '';
+  return { name, phone, emailLocal };
+}
+function fillSmsTemplate(tpl, client){
+  const { name:agentName, phone:agentPhone, emailLocal } = agentVars();
+  const fn = firstNameOf(client?.name||'') || (client?.name||'');
+  return String(tpl||'')
+    .replace(/\bFIRSTNAME\b/g, fn)
+    .replace(/\(agent phone number\)/g, agentPhone || '')
+    .replace(/\(agent name\)/g, emailLocal || '')
+    .replace(/\(agent\)/g, agentName || '');
+}
+// Pick template for an agenda task (Unreached Day N)
+function computeSmsText(t, client){
+  let tpl = '';
+  const m = /Unreached\s+Day\s+(\d)/i.exec(t?.label||'');
+  if (t?.type==='sms' && m){
+    const day = Number(m[1]);
+    tpl = (state.settings.smsTemplates?.unreached||{})[day] || '';
+  }
+  return fillSmsTemplate(tpl, client);
+}
 
 
 
@@ -56,6 +87,17 @@ const SHOW_KEY  = 'followup_crm_show';
     copyTextToClipboard(text, what);
   });
 function onlyDigits(s){ return String(s||'').replace(/\D/g,''); }
+
+  // Default SMS templates (Unreached Day 1–5)
+const DEFAULT_SMS_TEMPLATES = {
+  unreached: {
+    1: `Hello, FIRSTNAME. I'd love to help you with booking the flight you are looking for. Please let me know when you have a few minutes to discuss some additional details. My email address is (agent name)@business-tickets.com. My direct line is (agent phone number). - (agent) @ Business Tickets`,
+    2: `Hello, FIRSTNAME. I would like to kindly ask you for your feedback on the flight options I emailed you. I can try to provide you with more suitable ones in case you are not satisfied. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
+    3: `Hello, FIRSTNAME. I am trying to get in touch with you about your flight booking request. Please contact me at your convenience by phone, text or email, I am available pretty much 24/7. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
+    4: `Hello, FIRSTNAME. Is there any update on the plans for your trip? Please let me know whenever it is convenient for you. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
+    5: `Hello, FIRSTNAME. I would like to kindly ask you to let me know your current plans for the flight you were going to book. Thank you and have a wonderful day.  - (agent) @ Business Tickets`,
+  }
+};
 
   // Close + reset the New Task UI (legacy safeguard)
   function closeNewTaskUI(){
@@ -196,22 +238,32 @@ function initCalendarDrawer(){
 
 
   /* ========= State ========= */
-  function defaults(){
-    return {
-      clients: [],
-      tasks: [],
-      settings: {
-        // ✨ Default non-working: Fri & Sat off
-        workingDays: { mon:true, tue:true, wed:true, thu:true, fri:false, sat:false, sun:true },
-        moveOffDays: true,
-        overrides: {}
-      }
-    };
-  }
+function defaults(){
+  return {
+    clients: [],
+    tasks: [],
+    settings: {
+      workingDays: { mon:true, tue:true, wed:true, thu:true, fri:false, sat:false, sun:true },
+      moveOffDays: true,
+      overrides: {},
+      agent: { name:'', phone:'' },
+      smsTemplates: JSON.parse(JSON.stringify(DEFAULT_SMS_TEMPLATES))
+    }
+  };
+}
+
   function load(){
     try{
       const s = JSON.parse(localStorage.getItem(storeKey) || 'null') || defaults();
       if(!s.settings) s.settings = defaults().settings;
+      // ensure new fields exist without nuking old settings
+if (!s.settings.agent) s.settings.agent = { name:'', phone:'' };
+if (!s.settings.smsTemplates) s.settings.smsTemplates = JSON.parse(JSON.stringify(DEFAULT_SMS_TEMPLATES));
+s.settings.smsTemplates.unreached = {
+  ...DEFAULT_SMS_TEMPLATES.unreached,
+  ...(s.settings.smsTemplates.unreached || {})
+};
+
       return s;
     }catch(e){ return defaults(); }
   }
@@ -1074,6 +1126,14 @@ function updateProgress(){
 }
 
   // Agenda action clicks (delete, bell, RC sms) ✨
+const rc = e.target.closest('[data-rcsms]');
+if (rc){
+  e.preventDefault();
+  const num = rc.getAttribute('data-rcsms') || '';
+  const txt = rc.getAttribute('data-smstext') || '';
+  openRingCentralSMS(num, txt);
+  return;
+}
 
 
 // Agenda controls
@@ -1112,7 +1172,126 @@ function mountSortGroupLabel(){
     oldWrap.parentElement.insertBefore(byType, oldWrap);
     if (!oldWrap.querySelector('button')) oldWrap.remove();
   }
+function initMorePanel(){
+  // create button if missing
+  if (!document.getElementById('moreBtn')){
+    const btn = document.createElement('button');
+    btn.id='moreBtn'; btn.className='toggle'; btn.textContent='☰ More';
+    btn.setAttribute('aria-label','More settings');
+    document.getElementById('themeToggle')?.after(btn);
+  }
 
+  // modal shell
+  let modal = document.createElement('div');
+  modal.id = 'moreModal';
+  modal.className = 'modal';
+  modal.style.display = 'none';
+  modal.innerHTML = `
+    <section class="card" style="max-width:min(900px,98vw)">
+      <div class="hd">
+        <strong>Agent & SMS Templates</strong>
+        <span class="space"></span>
+        <button type="button" class="btn-icon" id="moreClose" title="Close">✖</button>
+      </div>
+      <div class="bd">
+        <div class="row">
+          <div>
+            <label>Agent name</label>
+            <input id="agentName" placeholder="Jane Agent" />
+          </div>
+          <div>
+            <label>Agent phone</label>
+            <input id="agentPhone" placeholder="+1 555 123 4567" />
+          </div>
+        </div>
+
+        <div class="slab" style="margin-top:10px">
+          <h4>Unreached SMS templates (editable)</h4>
+          <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
+          <div class="row single" style="margin-top:8px">
+            <div>
+              <label>Day 1</label>
+              <textarea id="tpl_unr_1" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="row single">
+            <div>
+              <label>Day 2</label>
+              <textarea id="tpl_unr_2" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="row single">
+            <div>
+              <label>Day 3</label>
+              <textarea id="tpl_unr_3" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="row single">
+            <div>
+              <label>Day 4</label>
+              <textarea id="tpl_unr_4" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="row single">
+            <div>
+              <label>Day 5</label>
+              <textarea id="tpl_unr_5" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="right" style="margin-top:10px">
+          <button type="button" class="ghost" id="moreReset">Reset to defaults</button>
+          <button type="button" id="moreCancel" class="ghost">Cancel</button>
+          <button type="button" id="moreSave" class="primary">Save</button>
+        </div>
+      </div>
+    </section>
+  `;
+  document.body.appendChild(modal);
+
+  function loadIntoUI(){
+    const a = state.settings.agent || {};
+    document.getElementById('agentName').value  = a.name  || '';
+    document.getElementById('agentPhone').value = a.phone || '';
+    const map = state.settings.smsTemplates?.unreached || {};
+    for (let d=1; d<=5; d++){
+      const el = document.getElementById(`tpl_unr_${d}`);
+      if (el) el.value = map[d] || DEFAULT_SMS_TEMPLATES.unreached[d];
+    }
+  }
+  function saveFromUI(){
+    state.settings.agent = {
+      name:  (document.getElementById('agentName').value || '').trim(),
+      phone: (document.getElementById('agentPhone').value || '').trim()
+    };
+    const map = {};
+    for (let d=1; d<=5; d++){
+      map[d] = document.getElementById(`tpl_unr_${d}`).value || '';
+    }
+    state.settings.smsTemplates.unreached = map;
+    save();
+    toast('Settings saved');
+    close();
+  }
+  function resetDefaults(){
+    for (let d=1; d<=5; d++){
+      const el = document.getElementById(`tpl_unr_${d}`);
+      if (el) el.value = DEFAULT_SMS_TEMPLATES.unreached[d];
+    }
+  }
+  function open(){ modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); document.body.classList.add('modal-open'); }
+  function close(){ modal.classList.remove('open'); modal.style.display='none'; document.body.classList.remove('modal-open'); }
+
+  document.getElementById('moreBtn')?.addEventListener('click', open);
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) close(); });
+  modal.querySelector('#moreClose')?.addEventListener('click', close);
+  modal.querySelector('#moreCancel')?.addEventListener('click', close);
+  modal.querySelector('#moreSave')?.addEventListener('click', saveFromUI);
+  modal.querySelector('#moreReset')?.addEventListener('click', resetDefaults);
+}
+
+  
   // Row wrapper (sibling to the segmented control)
   let wrap = document.getElementById('sortWrap');
   if (!wrap){
@@ -1786,6 +1965,7 @@ function bootstrap(){
   setSortButtons();
   setShowButtons();
   initCalendarDrawer();
+  initMorePanel();
 
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
