@@ -1,5 +1,46 @@
 (function(){
   'use strict';
+// ====== BIG NAME POOLS ======
+const FIRST = [
+  "Liam","Noah","Oliver","Elijah","James","William","Benjamin","Lucas","Henry","Alexander","Mason","Michael","Ethan","Daniel","Jacob","Logan","Jackson","Levi","Sebastian","Mateo","Jack","Owen","Theodore","Aiden","Samuel","Joseph","John","David","Wyatt","Matthew","Luke","Asher","Carter","Julian","Grayson","Leo","Jayden","Gabriel","Isaac","Lincoln","Anthony","Hudson","Dylan","Ezra","Thomas","Charles","Christopher","Jaxon","Maverick","Josiah","Isaiah","Andrew","Elias","Joshua","Nathan","Caleb","Ryan","Adrian","Miles","Eli","Nolan","Christian","Aaron","Cameron","Ezekiel","Colton","Luca","Landon","Hunter","Jonathan","Santiago","Axel","Easton","Cooper","Jeremiah","Angel","Roman","Connor","Jameson","Robert","Greyson","Jordan","Ian","Carson","Jace","Adam","Xavier","Jose","Everett","Declan","Evan","Kayden","Parker","Wesley","Kai","Weston","Micah","Vincent","Silas","Bennett","Brooks","Harrison","Ryder","Gael","Rowan","George","Luis","Chase","Cole","Nathaniel","Zachary","Calvin","Jonah","Max","Maxwell","Antonio","Tyler","Diego","Jasper","Victor","Amir","Kingston","Maddox","Ryker","Ashton","Carlos","Damian","Atlas","Barrett","Leon","Felix","Emiliano","Alejandro","Tucker","Brandon","Kevin","Nicolas","Arlo","Emmanuel","Tristan","Malcolm","Omar","Odin","Remy","Edwin","Elliott","Edgar","Cesar","Mario","Marcos","Fernando","Miguel","Joaquin","Ricardo","Giovanni","Abel","Marco","Andres","Hector","Matias","Thiago","Enzo","Lorenzo","Angelo","Rafael","Bruno","Paolo","Pedro","Juan","Jorge","Pablo","Sergio","Alberto","Roberto","Lorenzo",
+  "Olivia","Emma","Charlotte","Amelia","Ava","Sophia","Isabella","Mia","Evelyn","Harper","Luna","Camila","Gianna","Elizabeth","Eleanor","Ella","Abigail","Sofia","Avery","Scarlett","Emily","Aria","Penelope","Chloe","Layla","Mila","Nora","Hazel","Madison","Ellie","Lily","Nova","Isla","Grace","Violet","Aurora","Riley","Zoey","Willow","Emilia","Stella","Zoe","Victoria","Hannah","Addison","Leah","Lucy","Eliana","Ivy","Everly","Lillian","Paisley","Elena","Naomi","Maya","Natalie","Kinsley","Audrey","Brooklyn","Bella","Claire","Skylar","Savannah","Aaliyah","Genesis","Sophie","Alice","Kennedy","Sadie","Hailey","Eva","Autumn","Quinn","Natalia","Josephine","Sarah","Cora","Emery","Samantha","Piper","Leilani","Ruby","Rylee","Athena","Aubrey","Ariana","Allison","Madelyn","Adeline","Peyton","Brielle","Taylor","Lauren","Katherine","Alexandra","Margaret","Juliet","Jade","Camille","Elodie","Amelie","Juliette",
+  "Mohammed","Muhammad","Ahmed","Ali","Omar","Youssef","Yusuf","Ibrahim","Ismail","Amir","Samir","Karim","Hassan","Hussein","Zain","Zayd","Faris","Noor","Zara","Aisha","Fatima",
+  "Aarav","Vivaan","Aditya","Vihaan","Arjun","Reyansh","Atharv","Arnav","Advait","Ishaan","Rohan","Kabir","Ayaan","Dhruv","Krish","Anaya","Ira","Diya","Aanya","Isha","Kiara","Mira","Riya","Saanvi","Navya","Tanya","Priya",
+  "Wei","Ming","Hao","Jian","Jia","Yue","Zhi","Lei","Tian","Xiao","Ling","Mei","Bo","Cheng","Xin","Li",
+  "Haru","Ren","Yuki","Sora","Riku","Akira","Daiki","Kaito","Takumi","Sota","Sakura","Yuna","Aoi","Hana",
+  "Minho","Jisoo","Jihoon","Seojun","Hyejin","Soo","Hyun","Joon",
+  "Alexei","Ivan","Nikita","Dmitri","Pavel","Oleg","Sergey","Andrei","Mikhail","Igor","Natalia","Tatiana","Olga","Irina","Anna","Svetlana",
+  "Louis","Jules","Hugo","Pierre","Mathieu","Antoine","Etienne","Camille","Elodie","Amelie","Julien","Luc","Marcel","Claire","Juliette",
+  "Kofi","Kwame","Kojo","Ama","Abena","Efua","Nana","Amina","Zuri","Nia","Thabo","Sipho","Naledi","Lerato","Zola",
+  "Noa","Yael","Shira","Lior","Eden","Gal","Tamar"
+];
+
+const LAST = [
+  "SMITH","JOHNSON","WILLIAMS","BROWN","JONES","GARCIA","MILLER","DAVIS","RODRIGUEZ","MARTINEZ","HERNANDEZ","LOPEZ","GONZALEZ","WILSON","ANDERSON","THOMAS","TAYLOR","MOORE","JACKSON","MARTIN",
+  "LEE","PEREZ","THOMPSON","WHITE","HARRIS","SANCHEZ","CLARK","RAMIREZ","LEWIS","ROBINSON","WALKER","YOUNG","ALLEN","KING","WRIGHT","SCOTT","TORRES","NGUYEN","HILL","FLORES",
+  "GREEN","ADAMS","NELSON","BAKER","HALL","RIVERA","CAMPBELL","MITCHELL","CARTER","ROBERTS","GOMEZ","PHILLIPS","EVANS","TURNER","DIAZ","PARKER","CRUZ","EDWARDS","COLLINS","REYES",
+  "STEWART","MORRIS","MORALES","MURPHY","COOK","ROGERS","GUTIERREZ","ORTIZ","MORGAN","COOPER","PETERSON","BAILEY","REED","KELLY","HOWARD","RAMOS","KIM","COX","WARD","RICHARDSON",
+  "WATSON","BROOKS","CHAVEZ","WOOD","JAMES","BENNETT","GRAY","MENDOZA","ALVAREZ","CASTILLO","SANDERS","PATEL","MYERS","LONG","ROSS","FOSTER","JIMENEZ","POWELL","JENKINS","PERRY",
+  "RUSSELL","SULLIVAN","BELL","COLEMAN","BUTLER","HENDERSON","BARNES","GONZALES","FISHER","VASQUEZ","SIMMONS","ROMERO","JORDAN","PATTERSON","ALEXANDER","HAMILTON","GRAHAM","REYNOLDS","GRIFFIN","WALLACE",
+  "MORENO","WEST","COLE","HAYES","BRYANT","HERRERA","GIBSON","ELLIS","TRAN","MEDINA","AGUILAR","STEVENS","MURRAY","FORD","CASTRO","MARSHALL","OWENS","HARRISON","FERNANDEZ","MCDONALD",
+  "WOODS","WASHINGTON","KENNEDY","WELLS","VARGAS","HENRY","CHEN","FREEMAN","WEBB","TUCKER","GUZMAN","BURNS","CRAWFORD","OLSON","SIMPSON","PORTER","HUNTER","GORDON","MENDEZ","SILVA",
+  "SHAW","SNYDER","MASON","DIXON","MUNOZ","HUNT","HICKS","HOLMES","PALMER","WAGNER","BLACK","ROBLES","DALTON","BISHOP","CARPENTER","CARLSON","CHANG","CHOI","CHO","CLARKE",
+  "DANIELS","DAVIDSON","DEAN","DELGADO","DENNIS","DOMINGUEZ","DUNCAN","DUNN","EATON","ESCOBAR","ESPINOZA","ESTRADA","FERGUSON","FIGUEROA","FLEMING","FRANKLIN","FUENTES","GALLAGHER","GARDNER","GARZA",
+  "GIBBS","GILBERT","GILL","GILMORE","GLASS","GLOVER","GOODMAN","GRANT","GREENE","GREGORY","GRIFFITH","GROSS","GUERRERO","HALE","HANSEN","HANSON","HARDY","HARPER","HART","HARVEY",
+  "HAWKINS","HAYNES","HEATH","HECTOR","HENDRICKS","HINES","HOFFMAN","HOGAN","HOLLAND","HOLT","HOPKINS","HORN","HOWE","HUANG","HUBBARD","HUDSON","HUFFMAN","HUGHES","HURST","IBARRA",
+  "INGRAM","JACOBS","JACOBSON","JENSEN","JOHNS","JOHNSTON","KANE","KAUFMAN","KELLER","KERR","KHAN","KHANNA","KLINE","KLEIN","KNIGHT","LAMB","LAMBERT","LANE","LARSON","LAWSON",
+  "LE","LEACH","LEON","LEONARD","LESTER","LI","LIN","LITTLE","LIU","LLOYD","LOVE","LOWE","LUCAS","LUNA","LYNN","MALDONADO","MARQUEZ","MASSEY","MATHEWS","MATTHEWS",
+  "MAXWELL","MAY","MCCARTHY","MCCOY","MCDOWELL","MCGEE","MCKENZIE","MCKINNEY","MEJIA","MEJIAS","MEYER","MEYERS","MELENDEZ","MERCADO","MEZA","MICHAEL","MIDDLETON","MIRANDA","MONROE","MONTES",
+  "MONTGOMERY","MONTOYA","MOODY","MORAN","MOSS","MUELLER","MULLINS","MURILLO","NASH","NAVARRO","NEAL","NG","NICHOLS","NICHOLSON","NIELSEN","NIEVES","NIXON","OCONNOR","ODONNELL","OLIVAS",
+  "OLIVEIRA","OLIVER","OLSON","ONEAL","ORR","ORTEGA","OSBORNE","PACE","PACHECO","PADILLA","PALMER","PARK","PARKS","PARRISH","PARSONS","PENA","PEREIRA","PERKINS","PETERS","PHAM",
+  "PIERCE","PINEDA","POPE","PORTILLO","POTTER","PRATT","PRICE","PRINCE","PUGH","QUINN","RAJ","RANGEL","RAY","REID","REILLY","RHODES","RICE","RICH","RICHARDS","RILEY",
+  "RIOS","RIVAS","RIVERA","ROBBINS","ROBLES","RODGERS","RODRIGUEZ","ROJAS","ROMAN","ROMERO","ROSA","ROSALES","ROSARIO","ROSE","ROY","RUIZ","RUSSO","SALAS","SALAZAR","SALDANA",
+  "SALGADO","SANDOVAL","SANTANA","SANTIAGO","SANTOS","SAUNDERS","SAVAGE","SCHMIDT","SCHNEIDER","SCHULTZ","SCHWARTZ","SELLERS","SERRANO","SHARMA","SHERMAN","SHORT","SIMON","SIMPSON","SINGH","SOLIS",
+  "SOLOMON","SOTO","SPARKS","SPENCER","STAFFORD","STANLEY","STEELE","STEPHENS","STEPHENSON","STEVENS","STEVENSON","STOKES","STONE","STRICKLAND","SUAREZ","SUMMERS","SWANSON","TAM","TAN","TATE",
+  "TERRY","THOMAS","THOMPSON","TODD","TORRES","TOWNSEND","TRUJILLO","TURNER","TYLER","VALDEZ","VALENZUELA","VASQUEZ","VEGA","VELASQUEZ","VELAZQUEZ","VELASCO","VILLANUEVA","VINCENT","WAGNER","WALSH",
+  "WALTERS","WALTON","WANG","WARNER","WARREN","WATERS","WATKINS","WATSON","WEEKS","WEISS","WELCH","WERNER","WEST","WHEELER","WHITE","WHITNEY","WILLIAMS","WILLIS","WILSON","WONG",
+  "WOOD","WOODARD","WOODS","WU","WYATT","XU","YANG","YE","YODER","YOUNG","ZAMORA","ZAVALA","ZHANG","ZHAO","ZHU","ZIMMERMAN"
+];
 
   /* ========= Helpers ========= */
   const $  = sel => document.querySelector(sel);
@@ -450,47 +491,6 @@ function initNamesDrawer(){
   const list = drawer.querySelector('#namesList');
 
   // Pools + generator
-// ====== BIG NAME POOLS ======
-const FIRST = [
-  "Liam","Noah","Oliver","Elijah","James","William","Benjamin","Lucas","Henry","Alexander","Mason","Michael","Ethan","Daniel","Jacob","Logan","Jackson","Levi","Sebastian","Mateo","Jack","Owen","Theodore","Aiden","Samuel","Joseph","John","David","Wyatt","Matthew","Luke","Asher","Carter","Julian","Grayson","Leo","Jayden","Gabriel","Isaac","Lincoln","Anthony","Hudson","Dylan","Ezra","Thomas","Charles","Christopher","Jaxon","Maverick","Josiah","Isaiah","Andrew","Elias","Joshua","Nathan","Caleb","Ryan","Adrian","Miles","Eli","Nolan","Christian","Aaron","Cameron","Ezekiel","Colton","Luca","Landon","Hunter","Jonathan","Santiago","Axel","Easton","Cooper","Jeremiah","Angel","Roman","Connor","Jameson","Robert","Greyson","Jordan","Ian","Carson","Jace","Adam","Xavier","Jose","Everett","Declan","Evan","Kayden","Parker","Wesley","Kai","Weston","Micah","Vincent","Silas","Bennett","Brooks","Harrison","Ryder","Gael","Rowan","George","Luis","Chase","Cole","Nathaniel","Zachary","Calvin","Jonah","Max","Maxwell","Antonio","Tyler","Diego","Jasper","Victor","Amir","Kingston","Maddox","Ryker","Ashton","Carlos","Damian","Atlas","Barrett","Leon","Felix","Emiliano","Alejandro","Tucker","Brandon","Kevin","Nicolas","Arlo","Emmanuel","Tristan","Malcolm","Omar","Odin","Remy","Edwin","Elliott","Edgar","Cesar","Mario","Marcos","Fernando","Miguel","Joaquin","Ricardo","Giovanni","Abel","Marco","Andres","Hector","Matias","Thiago","Enzo","Lorenzo","Angelo","Rafael","Bruno","Paolo","Pedro","Juan","Jorge","Pablo","Sergio","Alberto","Roberto","Lorenzo",
-  "Olivia","Emma","Charlotte","Amelia","Ava","Sophia","Isabella","Mia","Evelyn","Harper","Luna","Camila","Gianna","Elizabeth","Eleanor","Ella","Abigail","Sofia","Avery","Scarlett","Emily","Aria","Penelope","Chloe","Layla","Mila","Nora","Hazel","Madison","Ellie","Lily","Nova","Isla","Grace","Violet","Aurora","Riley","Zoey","Willow","Emilia","Stella","Zoe","Victoria","Hannah","Addison","Leah","Lucy","Eliana","Ivy","Everly","Lillian","Paisley","Elena","Naomi","Maya","Natalie","Kinsley","Audrey","Brooklyn","Bella","Claire","Skylar","Savannah","Aaliyah","Genesis","Sophie","Alice","Kennedy","Sadie","Hailey","Eva","Autumn","Quinn","Natalia","Josephine","Sarah","Cora","Emery","Samantha","Piper","Leilani","Ruby","Rylee","Athena","Aubrey","Ariana","Allison","Madelyn","Adeline","Peyton","Brielle","Taylor","Lauren","Katherine","Alexandra","Margaret","Juliet","Jade","Camille","Elodie","Amelie","Juliette",
-  "Mohammed","Muhammad","Ahmed","Ali","Omar","Youssef","Yusuf","Ibrahim","Ismail","Amir","Samir","Karim","Hassan","Hussein","Zain","Zayd","Faris","Noor","Zara","Aisha","Fatima",
-  "Aarav","Vivaan","Aditya","Vihaan","Arjun","Reyansh","Atharv","Arnav","Advait","Ishaan","Rohan","Kabir","Ayaan","Dhruv","Krish","Anaya","Ira","Diya","Aanya","Isha","Kiara","Mira","Riya","Saanvi","Navya","Tanya","Priya",
-  "Wei","Ming","Hao","Jian","Jia","Yue","Zhi","Lei","Tian","Xiao","Ling","Mei","Bo","Cheng","Xin","Li",
-  "Haru","Ren","Yuki","Sora","Riku","Akira","Daiki","Kaito","Takumi","Sota","Sakura","Yuna","Aoi","Hana",
-  "Minho","Jisoo","Jihoon","Seojun","Hyejin","Soo","Hyun","Joon",
-  "Alexei","Ivan","Nikita","Dmitri","Pavel","Oleg","Sergey","Andrei","Mikhail","Igor","Natalia","Tatiana","Olga","Irina","Anna","Svetlana",
-  "Louis","Jules","Hugo","Pierre","Mathieu","Antoine","Etienne","Camille","Elodie","Amelie","Julien","Luc","Marcel","Claire","Juliette",
-  "Kofi","Kwame","Kojo","Ama","Abena","Efua","Nana","Amina","Zuri","Nia","Thabo","Sipho","Naledi","Lerato","Zola",
-  "Noa","Yael","Shira","Lior","Eden","Gal","Tamar"
-];
-
-const LAST = [
-  "SMITH","JOHNSON","WILLIAMS","BROWN","JONES","GARCIA","MILLER","DAVIS","RODRIGUEZ","MARTINEZ","HERNANDEZ","LOPEZ","GONZALEZ","WILSON","ANDERSON","THOMAS","TAYLOR","MOORE","JACKSON","MARTIN",
-  "LEE","PEREZ","THOMPSON","WHITE","HARRIS","SANCHEZ","CLARK","RAMIREZ","LEWIS","ROBINSON","WALKER","YOUNG","ALLEN","KING","WRIGHT","SCOTT","TORRES","NGUYEN","HILL","FLORES",
-  "GREEN","ADAMS","NELSON","BAKER","HALL","RIVERA","CAMPBELL","MITCHELL","CARTER","ROBERTS","GOMEZ","PHILLIPS","EVANS","TURNER","DIAZ","PARKER","CRUZ","EDWARDS","COLLINS","REYES",
-  "STEWART","MORRIS","MORALES","MURPHY","COOK","ROGERS","GUTIERREZ","ORTIZ","MORGAN","COOPER","PETERSON","BAILEY","REED","KELLY","HOWARD","RAMOS","KIM","COX","WARD","RICHARDSON",
-  "WATSON","BROOKS","CHAVEZ","WOOD","JAMES","BENNETT","GRAY","MENDOZA","ALVAREZ","CASTILLO","SANDERS","PATEL","MYERS","LONG","ROSS","FOSTER","JIMENEZ","POWELL","JENKINS","PERRY",
-  "RUSSELL","SULLIVAN","BELL","COLEMAN","BUTLER","HENDERSON","BARNES","GONZALES","FISHER","VASQUEZ","SIMMONS","ROMERO","JORDAN","PATTERSON","ALEXANDER","HAMILTON","GRAHAM","REYNOLDS","GRIFFIN","WALLACE",
-  "MORENO","WEST","COLE","HAYES","BRYANT","HERRERA","GIBSON","ELLIS","TRAN","MEDINA","AGUILAR","STEVENS","MURRAY","FORD","CASTRO","MARSHALL","OWENS","HARRISON","FERNANDEZ","MCDONALD",
-  "WOODS","WASHINGTON","KENNEDY","WELLS","VARGAS","HENRY","CHEN","FREEMAN","WEBB","TUCKER","GUZMAN","BURNS","CRAWFORD","OLSON","SIMPSON","PORTER","HUNTER","GORDON","MENDEZ","SILVA",
-  "SHAW","SNYDER","MASON","DIXON","MUNOZ","HUNT","HICKS","HOLMES","PALMER","WAGNER","BLACK","ROBLES","DALTON","BISHOP","CARPENTER","CARLSON","CHANG","CHOI","CHO","CLARKE",
-  "DANIELS","DAVIDSON","DEAN","DELGADO","DENNIS","DOMINGUEZ","DUNCAN","DUNN","EATON","ESCOBAR","ESPINOZA","ESTRADA","FERGUSON","FIGUEROA","FLEMING","FRANKLIN","FUENTES","GALLAGHER","GARDNER","GARZA",
-  "GIBBS","GILBERT","GILL","GILMORE","GLASS","GLOVER","GOODMAN","GRANT","GREENE","GREGORY","GRIFFITH","GROSS","GUERRERO","HALE","HANSEN","HANSON","HARDY","HARPER","HART","HARVEY",
-  "HAWKINS","HAYNES","HEATH","HECTOR","HENDRICKS","HINES","HOFFMAN","HOGAN","HOLLAND","HOLT","HOPKINS","HORN","HOWE","HUANG","HUBBARD","HUDSON","HUFFMAN","HUGHES","HURST","IBARRA",
-  "INGRAM","JACOBS","JACOBSON","JENSEN","JOHNS","JOHNSTON","KANE","KAUFMAN","KELLER","KERR","KHAN","KHANNA","KLINE","KLEIN","KNIGHT","LAMB","LAMBERT","LANE","LARSON","LAWSON",
-  "LE","LEACH","LEON","LEONARD","LESTER","LI","LIN","LITTLE","LIU","LLOYD","LOVE","LOWE","LUCAS","LUNA","LYNN","MALDONADO","MARQUEZ","MASSEY","MATHEWS","MATTHEWS",
-  "MAXWELL","MAY","MCCARTHY","MCCOY","MCDOWELL","MCGEE","MCKENZIE","MCKINNEY","MEJIA","MEJIAS","MEYER","MEYERS","MELENDEZ","MERCADO","MEZA","MICHAEL","MIDDLETON","MIRANDA","MONROE","MONTES",
-  "MONTGOMERY","MONTOYA","MOODY","MORAN","MOSS","MUELLER","MULLINS","MURILLO","NASH","NAVARRO","NEAL","NG","NICHOLS","NICHOLSON","NIELSEN","NIEVES","NIXON","OCONNOR","ODONNELL","OLIVAS",
-  "OLIVEIRA","OLIVER","OLSON","ONEAL","ORR","ORTEGA","OSBORNE","PACE","PACHECO","PADILLA","PALMER","PARK","PARKS","PARRISH","PARSONS","PENA","PEREIRA","PERKINS","PETERS","PHAM",
-  "PIERCE","PINEDA","POPE","PORTILLO","POTTER","PRATT","PRICE","PRINCE","PUGH","QUINN","RAJ","RANGEL","RAY","REID","REILLY","RHODES","RICE","RICH","RICHARDS","RILEY",
-  "RIOS","RIVAS","RIVERA","ROBBINS","ROBLES","RODGERS","RODRIGUEZ","ROJAS","ROMAN","ROMERO","ROSA","ROSALES","ROSARIO","ROSE","ROY","RUIZ","RUSSO","SALAS","SALAZAR","SALDANA",
-  "SALGADO","SANDOVAL","SANTANA","SANTIAGO","SANTOS","SAUNDERS","SAVAGE","SCHMIDT","SCHNEIDER","SCHULTZ","SCHWARTZ","SELLERS","SERRANO","SHARMA","SHERMAN","SHORT","SIMON","SIMPSON","SINGH","SOLIS",
-  "SOLOMON","SOTO","SPARKS","SPENCER","STAFFORD","STANLEY","STEELE","STEPHENS","STEPHENSON","STEVENS","STEVENSON","STOKES","STONE","STRICKLAND","SUAREZ","SUMMERS","SWANSON","TAM","TAN","TATE",
-  "TERRY","THOMAS","THOMPSON","TODD","TORRES","TOWNSEND","TRUJILLO","TURNER","TYLER","VALDEZ","VALENZUELA","VASQUEZ","VEGA","VELASQUEZ","VELAZQUEZ","VELASCO","VILLANUEVA","VINCENT","WAGNER","WALSH",
-  "WALTERS","WALTON","WANG","WARNER","WARREN","WATERS","WATKINS","WATSON","WEEKS","WEISS","WELCH","WERNER","WEST","WHEELER","WHITE","WHITNEY","WILLIAMS","WILLIS","WILSON","WONG",
-  "WOOD","WOODARD","WOODS","WU","WYATT","XU","YANG","YE","YODER","YOUNG","ZAMORA","ZAVALA","ZHANG","ZHAO","ZHU","ZIMMERMAN"
-];
 
   const UC = s => String(s||'').toUpperCase();
 
@@ -529,25 +529,16 @@ function renderNamesList(names){
     list.appendChild(btn);
   });
 }
-function generateAndRender9(){
-  // Use your big arrays (already in your file)
-  const uniqFirst = [...new Set(NAME_FIRST.map(s => s.trim()))];
-  const uniqLast  = [...new Set(NAME_LAST.map(s => s.trim().toUpperCase()))];
-
+function renderNames(){
+ const uniqFirst = [...new Set(FIRST.map(s => s.trim()))];
+ const uniqLast  = [...new Set(LAST.map(s => s.trim().toUpperCase()))];
   const names9 = pickUniqueCombos(uniqFirst, uniqLast, 9);
-  renderNamesList(names9);     // ← re-renders, wiping any previous “used” pills
+  renderNamesList(names9);
 }
 
-// Wire the button
-(function wireNamesGenerate(){
-  const genBtn = document.getElementById('namesGen');
-  if (!genBtn) return; // silent if the drawer isn't on this page
 
-  genBtn.addEventListener('click', generateAndRender9);
-  genBtn.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); generateAndRender9(); }
-  });
-})();
+// Wire the button
+
 
 
   // Expose to side-tab so it can refresh on open
@@ -1822,7 +1813,7 @@ function loadIntoUI(){
       if (el) el.value = DEFAULT_SMS_TEMPLATES.unreached[d];
     }
   }
-  function open(){ modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); document.body.classList.add('modal-open'); }
+ function open(){ modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); wireAutoGrow(); document.body.classList.add('modal-open'); }
   function close(){ modal.classList.remove('open'); modal.style.display='none'; document.body.classList.remove('modal-open'); }
 
   document.getElementById('moreBtn')?.addEventListener('click', open);
@@ -1970,7 +1961,7 @@ if (agendaFilterClearEl && agendaFilterEl) {
 
   /* ========= Notifications ========= */
   const NOTIFY_KEY = 'followup_crm_notified_today';
-  function notifSupported(){ return typeof window.Notification === 'function'; }
+function notifSupported(){ return typeof window.Notification === 'function'; }
   function isSecure(){ return window.isSecureContext || location.protocol==='https:' || ['localhost','127.0.0.1','[::1]'].includes(location.hostname); }
   function setNotifStatus(txt){ const el=$('#notifStatus'); if(el) el.textContent = txt; }
   function fmtToday(){ return fmt(today()); }
@@ -2540,7 +2531,6 @@ function bootstrap(){
   initNamesDrawer();
   initSideTabs(); 
 initMorePanel();
-  generateAndRender9();
 
 
 // 🔎 Customers search + status filter
