@@ -408,6 +408,8 @@ if (leadBlobEl){
 
   leadBlobEl.addEventListener('keydown', (e)=>{
       if (document.getElementById('bulkModal')) return;
+      if (e.key === 'Enter' && !e.shiftKey) e.stopPropagation();
+
     if(e.key === 'Enter' && !e.shiftKey){
       const has = (leadBlobEl.value || '').trim();
       if(!has) return;
