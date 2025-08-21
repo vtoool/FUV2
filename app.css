@@ -275,6 +275,27 @@ body.light .kpi .box{ background:var(--card); border-color:var(--line) }
   margin-left:4px;
 }
 .tbl td.actions .btn-icon:first-child{ margin-left:0; }
+/* Customers → Contact column */
+.contact-line{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  max-width:100%;
+}
+.contact-line a.truncate{
+  flex:1 1 auto;
+  min-width:0;                /* enables ellipsis in flex rows */
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.contact-line .copy-btn{
+  flex:0 0 auto;              /* keep the button visible */
+}
+#clientsTbl td[data-label="Contact"] .contact-line + .contact-line{ margin-top:4px; }
+
+/* optional: give the column a floor */
+#clientsTbl td[data-label="Contact"]{ min-width:220px; }
 
 
 /* =================== AGENDA =================== */
