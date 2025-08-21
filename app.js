@@ -30,6 +30,105 @@ function fillSmsTemplate(tpl, client){
     .replace(/\(agent name\)/g, emailLocal || '')
     .replace(/\(agent\)/g, agentName || '');
 }
+
+  // --- Email template helpers (simple version) ---
+const EMAIL_IMAGES = {
+  logo: 'https://your-cdn/business-tickets-logo.png' // host this somewhere stable
+};
+
+// Pull last IATA in route (e.g., JFK-NAP -> NAP) → naive city map
+const IATA_CITY = { NAP: 'Naples', LHR: 'London', CDG: 'Paris', FCO: 'Rome' /* …extend… */ };
+function inferDestination(route){
+  const last = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean).pop();
+  return IATA_CITY[last] || last || 'your destination';
+}
+
+// Very lightweight template (match your screenshot; tweak copy as you like)
+function computeEmailContent(t, c){
+  const { name:agentName, phone:agentPhone, emailLocal } = agentVars();
+  const first = firstNameOf(c?.name || '') || (c?.name || 'there');
+  const dest  = inferDestination(c?.route);
+  const subject = `Trip to ${dest}: request for feedback`;
+
+  const html = `
+  <div style="background:#f5f7fb;padding:24px 0">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+      <tr><td align="center">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background:#fff;border-radius:8px;overflow:hidden">
+          <tr><td style="padding:28px 28px 0" align="left">
+            <img src="${EMAIL_IMAGES.logo}" alt="business tickets" style="max-width:180px;height:auto;border:0;display:block">
+          </td></tr>
+          <tr><td style="padding:20px 28px 8px;font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial">
+            <p style="margin:0 0 14px">Dear ${first},</p>
+            <p style="margin:0 0 14px">
+              You should see three discounted flight options for your trip to <strong>${dest}</strong> in your inbox.
+              Please let me know whether you received them and share any feedback—I’ll adjust options to your preferences.
+            </p>
+            <p style="margin:0 0 14px">
+              If you’re ready to proceed, I can handle everything and keep you updated throughout the process.
+              I’m available almost 24/7 if you prefer to call or text.
+            </p>
+            <p style="margin:0 0 14px">
+              If you booked elsewhere or plans changed, a quick note helps me close the loop.
+            </p>
+            <p style="margin:0 0 0">Thank you and have a wonderful day.</p>
+          </td></tr>
+          <tr><td style="padding:0 28px 24px">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e8ecf4">
+              <tr><td style="padding-top:16px;font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#111">
+                <strong>${agentName}</strong><br>
+                Travel advisor<br>
+                <a href="tel:${agentPhone.replace(/[^\d+]/g,'')}">${agentPhone}</a><br>
+                <a href="mailto:${emailLocal}@business-tickets.com">${emailLocal}@business-tickets.com</a>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </div>`;
+
+  const text = [
+    `Dear ${first},`,
+    ``,
+    `You should see three discounted flight options for your trip to ${dest}.`,
+    `Please reply with feedback and I’ll adjust accordingly.`,
+    ``,
+    `Thank you,`,
+    `${agentName}`,
+    `Phone: ${agentPhone}`,
+    `${emailLocal}@business-tickets.com`
+  ].join('\n');
+
+  return { subject, html, text };
+}
+
+// Clipboard: copy text/html + text/plain, then open Gmail compose
+async function copyRichEmailAndOpenGmail(to, subject, html, text){
+  try{
+    if (navigator.clipboard && window.ClipboardItem){
+      const item = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([text], { type: 'text/plain' })
+      });
+      await navigator.clipboard.write([item]);
+      toast('Template copied — paste in Gmail (Ctrl/Cmd+V)', 'ok', 1800);
+    } else {
+      await navigator.clipboard.writeText(text);
+      toast('Plain text copied — paste in Gmail', 'ok', 1800);
+    }
+  }catch(_){
+    // Last resort: open a window with the HTML to copy manually
+    const w = window.open('', '_blank');
+    w.document.write(html); w.document.close();
+    alert('Could not access clipboard. Copy from the new tab, then paste in Gmail.');
+  }
+
+  // Open compose with To + Subject prefilled (body left blank for your paste)
+  const href = emailHref(to, subject, '');
+  window.open(href, '_blank');
+}
+
 // Pick template for an agenda task (Unreached Day N)
 function computeSmsText(t, client){
   let tpl = '';
@@ -1003,11 +1102,16 @@ function renderTask(t, opts = {}){
        data-smstext="${escapeHtml(smsText)}">${escapeHtml(c.phone)}</a>
     <button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button>
   </span>`;
+} else if (t.type==='email' && c.email){
+  // Use data-gmailpaste → we’ll build & copy HTML on click
+  contactHtml = `<span class="pill">
+    <a class="mono" href="#"
+       data-gmailpaste="${escapeHtml(c.id || '')}"
+       data-to="${escapeHtml(c.email)}">${escapeHtml(c.email)}</a>
+    <button class="copy-btn" data-copy="${escapeHtml(c.email)}" data-what="email" title="Copy email" aria-label="Copy email">⧉</button>
+  </span>`;
 }
- else if (t.type==='email' && c.email){
-      const href = emailHref(c.email,'Follow-up','Hi …');
-      contactHtml = `<span class="pill"><a class="mono" href="${href}" target="_blank" rel="noopener">${escapeHtml(c.email)}</a><button class="copy-btn" data-copy="${escapeHtml(c.email)}" data-what="email" title="Copy email" aria-label="Copy email">⧉</button></span>`;
-    }
+
   }
 
   const src = t.source==='custom' ? ' (custom)' : (t.source==='manual' ? ' (manual)' : '');
@@ -1968,7 +2072,19 @@ $('#addOverride')?.addEventListener('click', ()=>{
     openRingCentralSMS(num, txt);
     return;
   }
+  const gp = e.target.closest('[data-gmailpaste]');
+  if (gp){
+    e.preventDefault();
+    const to = gp.getAttribute('data-to') || '';
+    const hostItem = gp.closest('.agenda-item');
+    const taskId = hostItem?.querySelector('input[data-taskid]')?.getAttribute('data-taskid');
+    const t = taskId ? state.tasks.find(x => x.id === taskId) : null;
+    const c = t?.clientId ? clientById(t.clientId) : null;
 
+    const { subject, html, text } = computeEmailContent(t, c);
+    copyRichEmailAndOpenGmail(to, subject, html, text);
+    return;
+  }
   const saveBtn = e.target.closest('[data-save-notify]');
   if (saveBtn){
     const id = saveBtn.getAttribute('data-save-notify');
