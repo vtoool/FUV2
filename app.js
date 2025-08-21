@@ -1501,16 +1501,25 @@ function initMorePanel(){
   };
 }
 
-  function loadIntoUI(){
-    const a = state.settings.agent || {};
-    document.getElementById('agentName').value  = a.name  || '';
-    document.getElementById('agentPhone').value = a.phone || '';
-    const map = state.settings.smsTemplates?.unreached || {};
-    for (let d=1; d<=5; d++){
-      const el = document.getElementById(`tpl_unr_${d}`);
-      if (el) el.value = map[d] || DEFAULT_SMS_TEMPLATES.unreached[d];
-    }
+function loadIntoUI(){
+  const a = state.settings.agent || {};
+  document.getElementById('agentName').value  = a.name  || '';
+  document.getElementById('agentPhone').value = a.phone || '';
+  const map = state.settings.smsTemplates?.unreached || {};
+  for (let d=1; d<=5; d++){
+    const el = document.getElementById(`tpl_unr_${d}`);
+    if (el) el.value = map[d] || DEFAULT_SMS_TEMPLATES.unreached[d];
   }
+
+  // ensure textareas fit after values are set
+  requestAnimationFrame(()=> {
+    modal.querySelectorAll('textarea[id^="tpl_unr_"]').forEach(t=>{
+      t.style.height = 'auto';
+      t.style.height = (t.scrollHeight + 2) + 'px';
+    });
+  });
+}
+
   function saveFromUI(){
     state.settings.agent = {
       name:  (document.getElementById('agentName').value || '').trim(),
@@ -1961,6 +1970,7 @@ $('#addOverride')?.addEventListener('click', ()=>{
   try{
     const lb = $('#leadBlob');
     if ((lb?.value || '').trim()){ parseBlob({ onlyFillEmpty:true }); }
+          if (res && res.mode === 'multi') return;
       const {client, exists} = collectClientFromForm();
       if(!client.name){ alert('Name is required'); $('#name').focus(); return; }
       if(!exists){
