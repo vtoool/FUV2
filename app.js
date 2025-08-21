@@ -43,6 +43,41 @@ const EMAIL_IMAGES = {
   logo: 'https://ci3.googleusercontent.com/meips/ADKq_NYmYfaRw3D78btVBQZAAF7_4qAnOg5xl0rM3mCNmoMYDyfAp3NjVS08hF1bnwWovNvKqVGpdEHyt4G7u0AKHVCZDlAoVHTNnP1q7xOdL4el8DNJK3PGK5_LVwIolv0oRBtcSyRdzovSwWxGdzoYsOfLZJWghi1Kn_cctsWUoETcFwWm8XE1Pg=s0-d-e1-ft#http://cdn.mcauto-images-production.sendgrid.net/5006d258c43a9894/219ba0f4-cad2-4073-b7d7-c4e5de05e227/260x64.png' // host this somewhere stable
 };
 
+  // Minimal inert shim for older browsers
+function applyInert(el){
+  if (!el) return;
+  el.setAttribute('inert','');
+  el.setAttribute('aria-hidden','true');
+
+  // Disable tab focus inside target
+  const focusables = el.querySelectorAll(
+    'a, button, input, select, textarea, details, [tabindex]:not([tabindex="-1"])'
+  );
+  focusables.forEach(n => {
+    if (!n.hasAttribute('data-inert-prev-tabindex')) {
+      const prev = n.getAttribute('tabindex');
+      if (prev !== null) n.setAttribute('data-inert-prev-tabindex', prev);
+      n.setAttribute('tabindex','-1');
+      n.setAttribute('data-inert-tmp','');
+    }
+  });
+}
+
+function removeInert(el){
+  if (!el) return;
+  el.removeAttribute('inert');
+  el.removeAttribute('aria-hidden');
+
+  const tmp = el.querySelectorAll('[data-inert-tmp]');
+  tmp.forEach(n => {
+    const prev = n.getAttribute('data-inert-prev-tabindex');
+    if (prev === null || prev === '') n.removeAttribute('tabindex');
+    else n.setAttribute('tabindex', prev);
+    n.removeAttribute('data-inert-prev-tabindex');
+    n.removeAttribute('data-inert-tmp');
+  });
+}
+
 // Pull last IATA in route (e.g., JFK-NAP -> NAP) → naive city map
 const IATA_CITY = { NAP: 'Naples', LHR: 'London', CDG: 'Paris', FCO: 'Rome' /* …extend… */ };
 function inferDestination(route){
@@ -673,8 +708,7 @@ if (idField) idField.value = '';
   // --- Block background UI while bulk modal is open ---
 const under = document.getElementById('addModal') || document.getElementById('addCard')?.parentElement;
 if (under) { 
-  under.setAttribute('inert', '');          // prevents focus & pointer events
-  under.setAttribute('aria-hidden', 'true'); // accessibility
+applyInert(under);
   modal._underRef = under;                   // remember to restore on close
 }
 
@@ -726,12 +760,10 @@ function closeBulkReview(){
   }
 
   // Restore background UI
-  if (m._underRef) {
-    m._underRef.removeAttribute('inert');
-    m._underRef.removeAttribute('aria-hidden');
-    m._underRef = null;
-  }
-
+ if (m._underRef) {
+   removeInert(m._underRef);
+   m._underRef = null;
+ }
   // Remove modal
   if (m._esc) document.removeEventListener('keydown', m._esc);
   m.remove();
