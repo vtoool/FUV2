@@ -31,6 +31,13 @@ function fillSmsTemplate(tpl, client){
     .replace(/\(agent\)/g, agentName || '');
 }
 
+  // Safe tab opener (no access back to this page)
+function safeOpen(url, target = '_blank'){
+  const w = window.open(url, target, 'noopener');
+  try{ if (w) w.opener = null; }catch(_){}
+  return w;
+}
+
   // --- Email template helpers (simple version) ---
 const EMAIL_IMAGES = {
   logo: 'https://ci3.googleusercontent.com/meips/ADKq_NYmYfaRw3D78btVBQZAAF7_4qAnOg5xl0rM3mCNmoMYDyfAp3NjVS08hF1bnwWovNvKqVGpdEHyt4G7u0AKHVCZDlAoVHTNnP1q7xOdL4el8DNJK3PGK5_LVwIolv0oRBtcSyRdzovSwWxGdzoYsOfLZJWghi1Kn_cctsWUoETcFwWm8XE1Pg=s0-d-e1-ft#http://cdn.mcauto-images-production.sendgrid.net/5006d258c43a9894/219ba0f4-cad2-4073-b7d7-c4e5de05e227/260x64.png' // host this somewhere stable
@@ -125,14 +132,19 @@ async function copyRichEmailAndOpenGmail(to, subject, html, text){
     }
   }catch(_){
     // Last resort: open a window with the HTML to copy manually
-    const w = window.open('', '_blank');
-    w.document.write(html); w.document.close();
+const w = safeOpen('about:blank');    w.document.write(html); w.document.close();
     alert('Could not access clipboard. Copy from the new tab, then paste in Gmail.');
   }
 
   // Open compose with To + Subject prefilled (body left blank for your paste)
   const href = emailHref(to, subject, '');
-  window.open(href, '_blank');
+  safeOpen(href);
+  // inside the catch of copyRichEmailAndOpenGmail
+const w = window.open('', '_blank', 'noopener');
+w.document.write(`<div contenteditable="true" style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:20px">${html}</div>`);
+w.document.close();
+alert('Could not access clipboard. Press ⌘/Ctrl+A then ⌘/Ctrl+C to copy, then paste in Gmail.');
+
 }
 
 // Pick template for an agenda task (Unreached Day N)
@@ -801,9 +813,7 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
   const fallbacks = isMobile() ? [web1, web2] : [desktopNoNum, web1, web2];
 
   let jumped = false;
-  const tryOpen = (url, sameTab=true) => {
-    try { sameTab ? (window.location.href = url) : window.open(url, '_blank'); jumped = true; } catch(_){}
-  };
+const tryOpen = (url, sameTab=true) => {
 
   tryOpen(primary, true);
   setTimeout(()=>{ if(!jumped && fallbacks.length) tryOpen(fallbacks.shift(), true); }, 200);
@@ -1676,7 +1686,7 @@ if (agendaFilterClearEl && agendaFilterEl) {
       const t = tasks[i++]; const c = clientById(t.clientId);
       const {subject, body} = emailTemplateFor(t, c||{});
       const href = emailHref(c.email, subject, body);
-      window.open(href, '_blank'); setTimeout(openNext, 600);
+      safeOpen(href); setTimeout(openNext, 600);
     })();
   }
   $('#sendDueEmails')?.addEventListener('click', ()=>{
