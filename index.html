@@ -28,6 +28,19 @@
   </header>
 
   <main class="wrap grid">
+<!-- Names tool card (moved into drawer) -->
+<section class="card" id="namesCard" style="display:none">
+  <div class="hd">
+    <strong>Random Names</strong>
+    <span class="space"></span>
+    <button type="button" id="namesRefresh" class="toggle" title="Refresh">↻ Refresh</button>
+    <button type="button" id="namesDrawerClose" class="btn-icon" title="Close">✖</button>
+  </div>
+  <div class="bd">
+    <div class="tiny">Click any line to copy.</div>
+    <ul id="namesList"></ul>
+  </div>
+</section>
 
     <!-- Add/Edit card (moved into modal at runtime) -->
     <section class="card" id="addCard">
@@ -200,6 +213,8 @@
             <button type="button" id="viewToday" class="primary">Today</button>
             <button type="button" id="viewWeek">Next 7 days</button>
             <button type="button" id="openCal" class="toggle" aria-controls="calendarDrawer" aria-expanded="false">📅 Calendar</button>
+            <button type="button" id="openNames" class="toggle" aria-controls="namesDrawer" aria-expanded="false">👥 Names</button>
+
             <input type="date" id="agendaDate" />
             <input type="text" id="agendaFilter" class="mono" placeholder="Filter by client…" style="max-width:220px" />
             <button type="button" id="agendaFilterClear" title="Clear filter">✖</button>
