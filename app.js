@@ -1296,8 +1296,8 @@ function initMorePanel(){
       #moreModal textarea {
         display: block;
         width: 100%;
-        min-height: 180px;   /* was rows=3; now roomy */
-        max-height: 60vh;    /* don’t take over the screen */
+        min-height: 120px;   /* was rows=3; now roomy */
+        max-height: 38vh;    /* don’t take over the screen */
         resize: vertical;    /* no horizontal scrollbar */
         overflow: hidden;    /* we'll auto-grow */
         font: inherit; line-height: 1.4;
@@ -1313,7 +1313,7 @@ function initMorePanel(){
   };
   const wireAutoGrow = () => {
     modal.querySelectorAll('textarea[id^="tpl_unr_"]').forEach(t => {
-      autoGrow(t);                       // fit on open
+     // autoGrow(t);                       // fit on open
       t.addEventListener('input', () => autoGrow(t)); // fit while typing
     });
   };
