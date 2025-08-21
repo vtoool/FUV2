@@ -407,6 +407,7 @@ if (leadBlobEl){
   });
 
   leadBlobEl.addEventListener('keydown', (e)=>{
+      if (document.getElementById('bulkModal')) return;
     if(e.key === 'Enter' && !e.shiftKey){
       const has = (leadBlobEl.value || '').trim();
       if(!has) return;
@@ -655,6 +656,43 @@ if (idField) idField.value = '';
   card.appendChild(bd);
   modal.appendChild(card);
   document.body.appendChild(modal);
+  // --- Block background UI while bulk modal is open ---
+const under = document.getElementById('addModal') || document.getElementById('addCard')?.parentElement;
+if (under) { 
+  under.setAttribute('inert', '');          // prevents focus & pointer events
+  under.setAttribute('aria-hidden', 'true'); // accessibility
+  modal._underRef = under;                   // remember to restore on close
+}
+
+// --- Make Enter = Save All; Shift+Enter = newline in textareas ---
+modal._keyHandler = (e) => {
+  if (e.isComposing) return; // IME safety
+
+  if (e.key === 'Enter') {
+    const isTextarea = e.target && e.target.tagName === 'TEXTAREA';
+    if (e.shiftKey && isTextarea) {
+      // Allow newline in notes
+      return; // don't preventDefault
+    }
+    // Everywhere else: Save All
+    e.preventDefault();
+    e.stopPropagation();
+    saveAll.click();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopPropagation();
+    closeBulkReview();
+  }
+};
+
+// Capture so background never sees the key
+document.addEventListener('keydown', modal._keyHandler, true);
+// Also stop keys from bubbling past the modal
+modal.addEventListener('keydown', (e)=> e.stopPropagation(), true);
+
+// Optional: focus the first Start date input for convenience
+try { modal.querySelector('input[type="date"]')?.focus(); } catch(_){}
+
 
   // Esc to close
   modal._esc = (e)=>{ if(e.key==='Escape') closeBulkReview(); };
@@ -666,9 +704,25 @@ if (idField) idField.value = '';
 function closeBulkReview(){
   const m = document.getElementById('bulkModal');
   if (!m) return;
-  if(m._esc) document.removeEventListener('keydown', m._esc);
+
+  // Remove global key listener
+  if (m._keyHandler) {
+    document.removeEventListener('keydown', m._keyHandler, true);
+    m._keyHandler = null;
+  }
+
+  // Restore background UI
+  if (m._underRef) {
+    m._underRef.removeAttribute('inert');
+    m._underRef.removeAttribute('aria-hidden');
+    m._underRef = null;
+  }
+
+  // Remove modal
+  if (m._esc) document.removeEventListener('keydown', m._esc);
   m.remove();
 }
+
 
 // UPDATED: parseBlob now handles bulk and returns a mode flag
 function parseBlob({ onlyFillEmpty } = { onlyFillEmpty:false }){
