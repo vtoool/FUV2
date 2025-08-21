@@ -33,7 +33,7 @@ function fillSmsTemplate(tpl, client){
 
   // --- Email template helpers (simple version) ---
 const EMAIL_IMAGES = {
-  logo: 'https://business-tickets.com/_ipx/q_80/images/header-logo.webp' // host this somewhere stable
+  logo: 'https://ci3.googleusercontent.com/meips/ADKq_NYmYfaRw3D78btVBQZAAF7_4qAnOg5xl0rM3mCNmoMYDyfAp3NjVS08hF1bnwWovNvKqVGpdEHyt4G7u0AKHVCZDlAoVHTNnP1q7xOdL4el8DNJK3PGK5_LVwIolv0oRBtcSyRdzovSwWxGdzoYsOfLZJWghi1Kn_cctsWUoETcFwWm8XE1Pg=s0-d-e1-ft#http://cdn.mcauto-images-production.sendgrid.net/5006d258c43a9894/219ba0f4-cad2-4073-b7d7-c4e5de05e227/260x64.png' // host this somewhere stable
 };
 
 // Pull last IATA in route (e.g., JFK-NAP -> NAP) → naive city map
