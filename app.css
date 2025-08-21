@@ -265,6 +265,15 @@ body.light .copy-btn{ background:#fff; }
 body.light .badge{ background:#eef2fb; color:#55607a }
 body.light .pill{ background:#f1f4ff; color:#1e2758 }
 
+/* Names tool: clicked pills appear muted but stay clickable */
+.name-pill.used{
+  opacity:.55;
+  filter:saturate(.6);
+  background:var(--chip);
+  border-color:var(--line);
+}
+
+
 /* Btn danger — soft “card-like” look, a bit bolder */
 .btn-danger{
   background: linear-gradient(180deg, rgba(220,80,80,.12), rgba(220,80,80,.07)) !important;
