@@ -1966,14 +1966,18 @@ $('#addOverride')?.addEventListener('click', ()=>{
     return { client, exists };
   }
   $('#resetForm')?.addEventListener('click', ()=>{ $('#clientForm').reset(); $('#clientId').value=''; });
- $('#saveCustomer')?.addEventListener('click', ()=>{
-   let res = null;
-if ((lb?.value || '').trim()){
+document.getElementById('saveCustomer')?.addEventListener('click', () => {
+  try{
+    let res = null;
+    const lbEl = document.getElementById('leadBlob');
+    if ((lbEl?.value || '').trim()){
       res = parseBlob({ onlyFillEmpty:true });
-      // Bulk paste opens its own modal; bail out so we don't also submit the single form
+      // Bulk paste opens its own modal; bail so we don't also submit the single form
       if (res && res.mode === 'multi') return;
     }
-      const {client, exists} = collectClientFromForm();
+    const {client, exists} = collectClientFromForm();
+    // ... (keep the rest of your handler exactly as-is)
+
       if(!client.name){ alert('Name is required'); $('#name').focus(); return; }
       if(!exists){
         state.clients.push(client);
