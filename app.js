@@ -487,23 +487,25 @@ function randomNames(n = 9){
   return out;
 }
 
+function renderNamesList(names){
+  const list = document.getElementById('namesList');
+  if (!list) return;
+  list.innerHTML = ''; // reset also clears any previous "used" state
 
-  function renderNames(){
-    const items = randomNames(9);
-    list.innerHTML = '';
-    for (const line of items){
-      const btn = document.createElement('button');
-      btn.className = 'toggle';               // pill style
-      btn.textContent = line;
-      btn.style.textAlign = 'left';
-      btn.style.justifyContent = 'flex-start';
-      btn.setAttribute('data-copy', line);    // uses global [data-copy] handler you already have
-      btn.setAttribute('data-what', 'name');
-      // Inline copy too (instant feel)
-      btn.addEventListener('click', ()=>{ try{ navigator.clipboard?.writeText(line); }catch(_){} });
-      list.appendChild(btn);
-    }
-  }
+  names.forEach(n => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pill name-pill';
+    btn.textContent = n;
+    btn.title = 'Click to copy';
+    btn.addEventListener('click', () => {
+      copyTextToClipboard(n, 'name'); // you already have this helper
+      btn.classList.add('used');      // gray it out (but keep it usable)
+    });
+    list.appendChild(btn);
+  });
+}
+
 
   // Expose to side-tab so it can refresh on open
   drawer.renderNames = renderNames;
