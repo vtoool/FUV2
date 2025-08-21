@@ -875,12 +875,20 @@ function refresh(){
       const tr = document.createElement('tr');
       tr.setAttribute('data-rowid', c.id);
 
-      const contactHtml = `
-         ${c.email ? `<a href="${emailHref(c.email,'Follow-up','Hi …')}" target="_blank" rel="noopener">${escapeHtml(c.email)}</a> <button class="copy-btn" data-copy="${escapeHtml(c.email)}" data-what="email" title="Copy email" aria-label="Copy email">⧉</button>` : '-'}
-         <br>
-        ${c.phone ? `<a href="${phoneHref(c.phone)}">${escapeHtml(c.phone)}</a> <button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button>` : '-'}`;
+const contactHtml = `
+  <div class="contact-line">
+    ${c.email
+      ? `<a class="truncate" href="${emailHref(c.email,'Follow-up','Hi …')}" target="_blank" rel="noopener" title="${escapeHtml(c.email)}">${escapeHtml(c.email)}</a>
+         <button class="copy-btn" data-copy="${escapeHtml(c.email)}" data-what="email" title="Copy email" aria-label="Copy email">⧉</button>`
+      : '<span>-</span>'}
+  </div>
+  <div class="contact-line">
+    ${c.phone
+      ? `<a class="truncate" href="${phoneHref(c.phone)}" title="${escapeHtml(c.phone)}">${escapeHtml(c.phone)}</a>
+         <button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button>`
+      : '<span>-</span>'}
+  </div>`;
 
-      const leadInline = c.leadId ? `<div class="tiny">${leadChipHtml(c.leadId)}</div>` : '';
 
 tr.innerHTML = `
   <td data-label="Name">
