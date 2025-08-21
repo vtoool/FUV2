@@ -1285,6 +1285,47 @@ function initMorePanel(){
     </section>
   `;
   document.body.appendChild(modal);
+// --- Make SMS template textareas bigger + auto-grow ---
+{
+  // 1) CSS: full width, larger minimum height, vertical resize only
+  if (!document.getElementById('moreModalTextareaStyles')) {
+    const st = document.createElement('style');
+    st.id = 'moreModalTextareaStyles';
+    st.textContent = `
+      #moreModal .row.single > div { width: 100%; }
+      #moreModal textarea {
+        display: block;
+        width: 100%;
+        min-height: 180px;   /* was rows=3; now roomy */
+        max-height: 60vh;    /* don’t take over the screen */
+        resize: vertical;    /* no horizontal scrollbar */
+        overflow: hidden;    /* we'll auto-grow */
+        font: inherit; line-height: 1.4;
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // 2) JS auto-grow so everything is visible at a glance
+  const autoGrow = (el) => {
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight + 2) + 'px';
+  };
+  const wireAutoGrow = () => {
+    modal.querySelectorAll('textarea[id^="tpl_unr_"]').forEach(t => {
+      autoGrow(t);                       // fit on open
+      t.addEventListener('input', () => autoGrow(t)); // fit while typing
+    });
+  };
+
+  // Run auto-grow after values are populated
+  const _origLoadIntoUI = loadIntoUI;
+  loadIntoUI = function () {
+    _origLoadIntoUI();  // fill fields as before
+    // Defer to next frame to ensure values are in the DOM
+    requestAnimationFrame(wireAutoGrow);
+  };
+}
 
   function loadIntoUI(){
     const a = state.settings.agent || {};
