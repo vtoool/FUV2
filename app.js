@@ -1993,7 +1993,43 @@ $('#addOverride')?.addEventListener('click', ()=>{
       toast('Save failed', 'err', 2200);
     }
   });
+// Let Enter submit the Add/Edit Customer form
+const clientForm = document.getElementById('clientForm');
+if (clientForm) {
+  // Submit funnels into the same handler as clicking Save
+  clientForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Don't submit while bulk modal is open
+    if (document.getElementById('bulkModal')) return;
+    document.getElementById('saveCustomer')?.click();
+  });
 
+  // Key handling so Enter saves; Shift+Enter adds newline in textareas
+  clientForm.addEventListener('keydown', (e) => {
+    if (e.isComposing) return; // IME safety
+    if (document.getElementById('bulkModal')) return; // bulk review owns Enter
+
+    if (e.key === 'Enter') {
+      const tag = (e.target.tagName || '').toUpperCase();
+      const isTextarea = tag === 'TEXTAREA';
+      // Allow Shift+Enter newline in notes/textarea
+      if (isTextarea && e.shiftKey) return;
+
+      // If we're in a textarea without Shift, you can choose:
+      //  A) save on Enter (uncomment next 3 lines), OR
+      //  B) ignore so Enter is a newline (default behavior below)
+      // if (isTextarea) { e.preventDefault(); document.getElementById('saveCustomer')?.click(); return; }
+
+      // In inputs/selects/buttons — Enter should save
+      if (!isTextarea) {
+        e.preventDefault();
+        document.getElementById('saveCustomer')?.click();
+      }
+    }
+  }, true); // capture so background never sees the key
+}
+
+  
   /* ===== Add Custom Task modal ===== */
   function titleDefaultFor(type){ return ({call:'Call', callvm:'Call + Voicemail', sms:'SMS', email:'Email'}[type] || ''); }
   function buildClientOptionsForPopover(){
