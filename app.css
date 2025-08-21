@@ -66,6 +66,40 @@ body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 #namesDrawer.pinned .drawer-scrim{
   opacity:0 !important; pointer-events:none !important; background:transparent !important;
 }
+/* === Right edge sticky tabs (Calendar + Names) === */
+#sideTabs{
+  position:fixed; right:8px; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:10px;
+  z-index:10000; pointer-events:none;   /* only buttons catch events */
+}
+#sideTabs .tab{
+  pointer-events:auto;
+  width:44px; height:44px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--chip);
+  border:1px solid var(--line);
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+  cursor:pointer;
+}
+#sideTabs .tab[aria-pressed="true"]{
+  background:var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line), 0 10px 26px rgba(0,0,0,.30);
+}
+body.light #sideTabs .tab{ background:#fff; }
+
+/* Mobile: move tabs to bottom-right and lay out horizontally */
+@media (max-width:760px){
+  #sideTabs{ right:8px; top:auto; bottom:12px; transform:none; flex-direction:row; }
+}
+
+/* When a drawer is docked/pinned, don’t dim or block the page */
+#calendarDrawer.pinned .drawer-scrim,
+#namesDrawer.pinned .drawer-scrim{
+  opacity:0 !important; pointer-events:none !important; background:transparent !important;
+}
+
+/* (you already have this) nudge main content when any drawer is pinned */
+body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 
 /* Names list styling */
 #namesCard .bd{ padding:12px; }
