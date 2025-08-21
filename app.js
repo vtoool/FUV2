@@ -33,7 +33,7 @@ function fillSmsTemplate(tpl, client){
 
   // --- Email template helpers (simple version) ---
 const EMAIL_IMAGES = {
-  logo: 'https://your-cdn/business-tickets-logo.png' // host this somewhere stable
+  logo: 'https://business-tickets.com/_ipx/q_80/images/header-logo.webp' // host this somewhere stable
 };
 
 // Pull last IATA in route (e.g., JFK-NAP -> NAP) → naive city map
