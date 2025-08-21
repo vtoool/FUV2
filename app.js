@@ -4,6 +4,19 @@
   /* ========= Helpers ========= */
   const $  = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
+  // === Drawer pin/unpin synchronizer (call after any open/close)
+function setBodyPinned(){
+  const calPinned   = !!document.querySelector('#calendarDrawer.open.pinned');
+  const namesPinned = !!document.querySelector('#namesDrawer.open.pinned');
+  document.body.classList.toggle('drawer-pinned', calPinned || namesPinned);
+
+  // Sync right-edge tab states if present
+  const tabCal   = document.getElementById('tabCal');
+  const tabNames = document.getElementById('tabNames');
+  if (tabCal)   tabCal.setAttribute('aria-pressed', String(calPinned));
+  if (tabNames) tabNames.setAttribute('aria-pressed', String(namesPinned));
+}
+
   const storeKey  = 'followup_crm_v21';
   const THEME_KEY = 'followup_crm_theme';
 const SORT_KEY  = 'followup_crm_sort';
@@ -344,19 +357,19 @@ function initCalendarDrawer(){
 
   // Move the existing Calendar card into the drawer
   const cal = document.getElementById('calendarCard');
-  if (cal) panel.appendChild(cal);
-  // Ensure settings panel moves with the calendar
+  if (cal && cal.parentElement !== panel) panel.appendChild(cal);
+
+  // Keep settings panel with the calendar (defensive)
   const calSettings = document.getElementById('calSettings');
   if (cal && calSettings && !cal.contains(calSettings)) {
     (cal.querySelector('.bd') || cal).appendChild(calSettings);
   }
 
-
-  // Header close (uses your existing #calDrawerClose in the HTML)
+  // Header close button
   document.getElementById('calDrawerClose')?.addEventListener('click', ()=>{
     drawer.classList.remove('open','pinned');
-    document.body.classList.remove('drawer-pinned');
     document.getElementById('openCal')?.setAttribute('aria-expanded','false');
+    setBodyPinned();
   });
 
   // Scrim closes only when NOT pinned
@@ -364,103 +377,162 @@ function initCalendarDrawer(){
     if (!drawer.classList.contains('pinned')){
       drawer.classList.remove('open');
       document.getElementById('openCal')?.setAttribute('aria-expanded','false');
+      setBodyPinned();
     }
   });
 
-  // Toolbar toggle (📅 Calendar) — open pinned / close + unpin
+  // Optional toolbar toggle (if you still have #openCal)
   const openBtn = document.getElementById('openCal');
   if (openBtn){
     openBtn.addEventListener('click', ()=>{
       const opening = !drawer.classList.contains('open');
+      const names = document.getElementById('namesDrawer');
       if (opening){
-        drawer.classList.add('open','pinned');
-        document.body.classList.add('drawer-pinned');
+        drawer.classList.add('open','pinned');     // docked, no scrim blocking
+        names?.classList.remove('open','pinned');  // one drawer at a time
       } else {
         drawer.classList.remove('open','pinned');
-        document.body.classList.remove('drawer-pinned');
       }
       openBtn.setAttribute('aria-expanded', String(opening));
+      setBodyPinned();
     });
   }
 }
 
+
 // --- Drawer: Random Names tool (docked by default, like calendar) ---
 function initNamesDrawer(){
-  // Ensure container
+  // Create container if missing
   let drawer = document.getElementById('namesDrawer');
   if(!drawer){
     drawer = document.createElement('div');
     drawer.id = 'namesDrawer';
-    drawer.innerHTML = `<div class="drawer-scrim"></div><aside class="drawer-panel"></aside>`;
+    drawer.innerHTML = `
+      <div class="drawer-scrim"></div>
+      <aside class="drawer-panel">
+        <section class="card" id="namesCard">
+          <div class="hd">
+            <strong>Random Names</strong>
+            <span class="space"></span>
+            <button type="button" id="namesRefresh" class="btn-icon" title="Refresh">↻</button>
+            <button type="button" id="namesClose" class="btn-icon" title="Close">✖</button>
+          </div>
+          <div class="bd" id="namesList" style="display:grid; gap:8px;"></div>
+        </section>
+      </aside>`;
     document.body.appendChild(drawer);
   }
-  const panel = drawer.querySelector('.drawer-panel');
 
-  // Move the Names card into the drawer
-  const card = document.getElementById('namesCard');
-  if(card){ panel.appendChild(card); card.style.display='block'; }
+  const list = drawer.querySelector('#namesList');
 
-  // Helper: keep body margin only if any drawer is pinned+open
-  function syncBodyPinned(){
-    const anyPinned = document.querySelector('#calendarDrawer.pinned.open, #namesDrawer.pinned.open');
-    document.body.classList.toggle('drawer-pinned', !!anyPinned);
-  }
+  // Pools + generator
+  const FIRST = ['Liam','Noah','Oliver','Elijah','James','William','Benjamin','Lucas','Henry','Alexander','Emma','Olivia','Ava','Sophia','Isabella','Mia','Charlotte','Amelia','Harper','Evelyn'];
+  const LAST  = ['SMITH','JOHNSON','WILLIAMS','BROWN','JONES','GARCIA','MILLER','DAVIS','RODRIGUEZ','MARTINEZ','HERNANDEZ','LOPEZ','GONZALEZ','WILSON','ANDERSON','THOMAS','TAYLOR','MOORE','JACKSON','MARTIN'];
+  const UC = s => String(s||'').toUpperCase();
 
-  // Close buttons / scrim behavior
-  document.getElementById('namesDrawerClose')?.addEventListener('click', ()=>{
-    drawer.classList.remove('open','pinned');
-    document.getElementById('openNames')?.setAttribute('aria-expanded','false');
-    syncBodyPinned();
-  });
-  drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
-    if(!drawer.classList.contains('pinned')){
-      drawer.classList.remove('open');
-      document.getElementById('openNames')?.setAttribute('aria-expanded','false');
-      syncBodyPinned();
+  function randomNames(n=9){
+    const out = [];
+    for(let i=0;i<n;i++){
+      const f = FIRST[Math.floor(Math.random()*FIRST.length)];
+      const l = LAST[Math.floor(Math.random()*LAST.length)];
+      out.push(`-${l}/${UC(f)}`);
     }
-  });
-
-  // Name generator
-  const FIRST = ['Liam','Noah','Oliver','Elijah','James','William','Benjamin','Lucas','Henry','Alexander','Emma','Olivia','Ava','Sophia','Isabella','Mia','Amelia','Harper','Evelyn','Abigail'];
-  const LAST  = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin'];
-
-  function rand(n){ return Math.floor(Math.random()*n); }
-  function buildNames(count=9){
-    const out = new Set();
-    while(out.size < count){
-      const f = FIRST[rand(FIRST.length)];
-      const l = LAST[rand(LAST.length)];
-      out.add(`-${l.toUpperCase()}/${f.toUpperCase()}`);
-    }
-    return Array.from(out);
+    return out;
   }
 
   function renderNames(){
-    const list = document.getElementById('namesList');
-    const rows = buildNames(9).map(n =>
-      `<li class="name-item" data-copy="${escapeHtml(n)}" data-what="name">${escapeHtml(n)}</li>`
-    ).join('');
-    list.innerHTML = rows || '<li class="tiny">No names</li>';
+    const items = randomNames(9);
+    list.innerHTML = '';
+    for (const line of items){
+      const btn = document.createElement('button');
+      btn.className = 'toggle';               // pill style
+      btn.textContent = line;
+      btn.style.textAlign = 'left';
+      btn.style.justifyContent = 'flex-start';
+      btn.setAttribute('data-copy', line);    // uses global [data-copy] handler you already have
+      btn.setAttribute('data-what', 'name');
+      // Inline copy too (instant feel)
+      btn.addEventListener('click', ()=>{ try{ navigator.clipboard?.writeText(line); }catch(_){} });
+      list.appendChild(btn);
+    }
   }
 
-  document.getElementById('namesRefresh')?.addEventListener('click', renderNames);
+  // Expose to side-tab so it can refresh on open
+  drawer.renderNames = renderNames;
 
-  // Open/close toggle button
+  // Top buttons
+  drawer.querySelector('#namesRefresh')?.addEventListener('click', renderNames);
+  drawer.querySelector('#namesClose')?.addEventListener('click', ()=>{
+    drawer.classList.remove('open','pinned');
+    document.getElementById('openNames')?.setAttribute('aria-expanded','false');
+    setBodyPinned();
+  });
+
+  // Scrim closes only when NOT pinned
+  drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
+    if (!drawer.classList.contains('pinned')){
+      drawer.classList.remove('open');
+      document.getElementById('openNames')?.setAttribute('aria-expanded','false');
+      setBodyPinned();
+    }
+  });
+
+  // Optional toolbar button support (if you add/keep one)
   const openBtn = document.getElementById('openNames');
-  if(openBtn){
+  if (openBtn){
     openBtn.addEventListener('click', ()=>{
       const opening = !drawer.classList.contains('open');
-      if(opening){
-        drawer.classList.add('open','pinned'); // docked
-        renderNames();                         // (re)generate on open
-      }else{
+      const cal = document.getElementById('calendarDrawer');
+      if (opening){
+        drawer.classList.add('open','pinned');
+        cal?.classList.remove('open','pinned');
+        renderNames();
+      } else {
         drawer.classList.remove('open','pinned');
       }
       openBtn.setAttribute('aria-expanded', String(opening));
-      syncBodyPinned();
+      setBodyPinned();
     });
   }
+
+  // Prepare initial list (so it isn't empty if opened via toolbar)
+  renderNames();
 }
+function initSideTabs(){
+  const calTab      = document.getElementById('tabCal');
+  const namesTab    = document.getElementById('tabNames');
+  const calDrawer   = document.getElementById('calendarDrawer');
+  const namesDrawer = document.getElementById('namesDrawer');
+
+  calTab?.addEventListener('click', ()=>{
+    const opening = !calDrawer.classList.contains('open');
+    if (opening){
+      calDrawer.classList.add('open','pinned');
+      namesDrawer?.classList.remove('open','pinned');
+    } else {
+      calDrawer.classList.remove('open','pinned');
+    }
+    setBodyPinned();
+  });
+
+  namesTab?.addEventListener('click', ()=>{
+    const opening = !namesDrawer.classList.contains('open');
+    if (opening){
+      namesDrawer.classList.add('open','pinned');
+      calDrawer?.classList.remove('open','pinned');
+      namesDrawer.renderNames?.();     // refresh list on open
+    } else {
+      namesDrawer.classList.remove('open','pinned');
+    }
+    setBodyPinned();
+  });
+
+  // Keep tab states in sync if drawers are opened via toolbar buttons
+  const obs = new MutationObserver(setBodyPinned);
+  calDrawer   && obs.observe(calDrawer,   { attributes:true, attributeFilter:['class'] });
+  namesDrawer && obs.observe(namesDrawer, { attributes:true, attributeFilter:['class'] });
+}
+
 
 
 
@@ -1226,6 +1298,7 @@ $('#clientsTbl')?.addEventListener('click', e=>{
     save();
   }
 
+  
   /* ========= Agenda ========= */
   let currentAgendaDate = today();
   // ✨ Default sort is "client"
@@ -2371,9 +2444,9 @@ function bootstrap(){
   setSortButtons();
   setShowButtons();
   initCalendarDrawer();
-  initMorePanel();
   initNamesDrawer();
-
+  initSideTabs(); 
+initMorePanel();
 
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
