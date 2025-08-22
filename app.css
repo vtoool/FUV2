@@ -537,7 +537,7 @@ body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 
 /* Cards inside drawers */
 #calendarDrawer .card, #namesDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
-#calendarDrawer .card .bd, #namesDrawer .card .bd{ flex:1 1 auto; overflow:auto; }
+#calendarDrawer .card .bd, #namesDrawer .card .bd{overflow:auto; }
 
 /* Right edge sticky tabs */
 #sideTabs{
