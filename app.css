@@ -34,9 +34,7 @@
   --pill-dk-br: color-mix(in oklab, var(--line) 60%, #425272 40%);
   --pill-dk-fg: #eef3ff;
 
---client-dk-bg:#ffffff;   /* white pill */
---client-dk-br:#cfd6f8;   /* soft indigo ring */
---client-dk-fg:#0f1f56;   /* dark navy text */
+
 
   /* Contact pill (dark) */
   --contact-dk-fg:#ced7ff;       /* softer than white */
