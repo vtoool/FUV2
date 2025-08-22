@@ -34,10 +34,9 @@
   --pill-dk-br: color-mix(in oklab, var(--line) 60%, #425272 40%);
   --pill-dk-fg: #eef3ff;
 
-  /* Client name pill (dark) */
-  --client-dk-bg:#1d2942;        /* higher-contrast navy */
-  --client-dk-br:#3a4a74;
-  --client-dk-fg:#f7f9ff;
+--client-dk-bg:#ffffff;   /* white pill */
+--client-dk-br:#cfd6f8;   /* soft indigo ring */
+--client-dk-fg:#0f1f56;   /* dark navy text */
 
   /* Contact pill (dark) */
   --contact-dk-fg:#ced7ff;       /* softer than white */
