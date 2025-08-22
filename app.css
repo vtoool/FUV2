@@ -9,6 +9,8 @@
 
 /* =================== TOKENS =================== */
 :root{
+   --rail-w: 56px; /* width of the right-side tool rail */
+
   /* Dark theme */
   --bg:#0f1117; --panel:#141a24; --card:#171f2c; --chip:#151d2a; --surface:#10161f;
   --ink:#eaf0fb; --muted:#9aa6c7; --line:#2a3548;
@@ -85,8 +87,6 @@ a:hover{ text-decoration:underline }
 }
 /* Reserve a small lane for the floating side tabs (desktop only) */
 @media (min-width: 761px){
-  .wrap{ padding-right: calc(var(--page-pad) + 58px); } /* 58 ≈ tab size + gap */
-}
 
 .grid{display:grid; gap:16px; grid-template-columns:1fr; align-items:start}
 .grid > *, .row > * { min-width:0; }
