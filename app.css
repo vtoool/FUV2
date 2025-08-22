@@ -210,72 +210,36 @@ body.light .pill{ background:var(--pill-li-bg); border:1px solid var(--pill-li-b
 .copy-btn:active{ transform:translateY(1px); }
 body.light .badge, body.light .copy-btn{ background:#fff; color:var(--ink) }
 
-/* ===== Client name pill emphasis ===== */
-.agenda-item .pill:first-of-type,
-.pill.client, .pill--client, .client-pill{
-  font-weight:700;
-  background:var(--client-dk-bg);
-  border-color:var(--client-dk-br);
-  color:var(--client-dk-fg) !important;
-}
-.agenda-item .pill:first-of-type a,
-.pill.client a, .pill--client a, .client-pill a{ color:inherit !important; } /* force inherit in dark */
+/* ===== Name pill = WHITE in dark, stronger but not loud ===== */
 
-/* Light theme client pill */
-body.light .agenda-item .pill:first-of-type,
-body.light .pill.client, body.light .pill--client, body.light .client-pill{
-  background:var(--client-li-bg);
-  border-color:var(--client-li-br);
-  color:var(--client-li-fg) !important;
+/* Base: all pills stay normal weight */
+.pill { font-weight: 400; }
+
+/* Make only the Name pill bolder */
+.agenda-item .pill:first-child,
+.pill.client, .pill--client, .client-pill {
+  font-weight: 600;
 }
 
-/* ===== Contact (phone/email) pill: softer in dark ===== */
-.agenda-item .pill a[href^="tel"],
-.agenda-item .pill a[href^="mailto"]{
-  color:var(--contact-dk-fg) !important;
-  font-weight:500;                 /* not bold */
-  text-decoration:none;
-}
-body.light .agenda-item .pill a[href^="tel"],
-body.light .agenda-item .pill a[href^="mailto"]{
-  color:var(--pill-li-fg) !important; /* normal in light */
-  font-weight:500;
+/* Dark theme: force white pill for the Name pill only */
+body:not(.light) .agenda-item .pill:first-child,
+body:not(.light) .pill.client,
+body:not(.light) .pill--client,
+body:not(.light) .client-pill{
+  background: #ffffff !important;
+  border-color: #cfd6f8 !important;
+  color: #0f1f56 !important;         /* readable navy */
 }
 
-/* Names tool: clicked pills appear muted but stay clickable */
-.name-pill.used{ opacity:.55; filter:saturate(.6); background:var(--chip); border-color:var(--line); }
-
-/* Btn danger */
-.btn-danger{
-  background: linear-gradient(180deg, #ff6e6e, #e14949) !important;
-  border:1px solid var(--danger-border) !important;
-  color:#fff !important; box-shadow:var(--sh-1) !important;
+/* Light theme: keep it just a touch stronger (no change in look) */
+body.light .agenda-item .pill:first-child,
+body.light .pill.client,
+body.light .pill--client,
+body.light .client-pill{
+  background: #e9edff;
+  border-color: #cfd6f8;
+  color: #0f1f56;
 }
-.btn-danger:hover{ filter:brightness(1.03) }
-.btn-danger:active{ transform:translateY(1px) }
-.btn-danger:focus{ box-shadow:0 0 0 3px var(--danger-ring) !important }
-
-/* Quiet danger look for Wipe All */
-#wipeAll{ border-radius:16px; height:40px; padding:0 16px; }
-body.light #wipeAll{
-  background:linear-gradient(0deg, rgba(242,85,85,.10), rgba(242,85,85,.10)), #fff !important;
-  border:1px solid #ffd7d7 !important; color:#a23b3b !important; box-shadow:none !important;
-}
-body.light #wipeAll:hover{ background:linear-gradient(0deg, rgba(242,85,85,.14), rgba(242,85,85,.14)), #fff !important; }
-body:not(.light) #wipeAll{
-  background:linear-gradient(0deg, rgba(242,85,85,.12), rgba(242,85,85,.08)), var(--surface) !important;
-  border:1px solid #a55c5c !important; color:#ffbcbc !important; box-shadow:inset 0 0 0 1px rgba(220,120,120,.15) !important;
-}
-
-/* Lead paste block */
-.lead-block{ display:block; margin-bottom:10px; }
-.lead-actions{ display:none; }
-.lead-block.highlight{
-  padding:10px; border:1px dashed var(--accent); border-radius:12px;
-  background: linear-gradient(180deg, rgba(124,92,255,.09), rgba(124,92,255,.04)), var(--surface);
-}
-.slab{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px }
-.flex-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
 
 /* =================== LAYOUT HELPERS =================== */
 .row{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px}
