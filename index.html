@@ -16,10 +16,18 @@
 </head>
 <body>
   <!-- Sticky right-edge tabs -->
-<div id="sideTabs" aria-label="Side tools">
-  <button id="tabCal"   class="tab" aria-controls="calendarDrawer" aria-pressed="false" title="Calendar">📅</button>
-  <button id="tabNames" class="tab" aria-controls="namesDrawer"    aria-pressed="false" title="Random names">👥</button>
-</div>
+<aside id="toolRail" aria-label="Tools">
+  <button class="tool" data-target="calendarDrawer" aria-pressed="false" title="Calendar">
+    <!-- your calendar icon -->
+    <span class="ico">📅</span>
+  </button>
+
+  <button class="tool" data-target="namesDrawer" aria-pressed="false" title="Random Names">
+    <!-- your names icon -->
+    <span class="ico">👥</span>
+  </button>
+</aside>
+
 
   <header>
     <div class="wrap" style="display:flex; align-items:center; gap:12px">
