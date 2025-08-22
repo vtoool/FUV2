@@ -181,7 +181,7 @@ body.modal-open{ overflow:hidden; }
   color:#eef3ff;
   font-weight:400;
 }
-.pill a{ color:inherit; }    /* client name links inherit */
+.pill a{ color:inherit;font-weight:inherit;  }    /* client name links inherit */
 
 .copy-btn{
   margin-left:6px; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center;
@@ -200,6 +200,29 @@ body.light .pill{
 
 /* Names tool: clicked pills appear muted but stay clickable */
 .name-pill.used{ opacity:.55; filter:saturate(.6); background:var(--chip); border-color:var(--line); }
+/* ===== Client name pill emphasis (both themes) ===== */
+.agenda-item .pill:first-of-type,
+.agenda-item .pill:first-of-type a,
+.pill.client, .pill--client, .client-pill{
+  font-weight:700;                           /* bolder than the rest */
+}
+
+/* Dark theme: higher-contrast background + bright text */
+.agenda-item .pill:first-of-type,
+.pill.client, .pill--client, .client-pill{
+  background: color-mix(in oklab, var(--accent) 22%, var(--chip) 78%);
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--line) 65%);
+  color:#f6f8ff !important;                  /* force bright text in dark */
+}
+
+/* Light theme: just a bit bolder + crisp text */
+body.light .agenda-item .pill:first-of-type,
+body.light .pill.client, body.light .pill--client, body.light .client-pill{
+  background:#e6ebff;
+  border-color:#c3cef9;
+  color:#0f1f56 !important;
+}
+
 /* Client name pill only */
 .agenda-item .pill:first-of-type,
 .pill.client,
