@@ -560,3 +560,16 @@ body.light #sideTabs .tab{ background:#fff; }
 }
 @keyframes pop{ from{ opacity:0; transform:translateY(8px) scale(.985) } to{ opacity:1; transform:none } }
 #addCard{ display:none; }
+/* Name pill: white in dark, crisp in light */
+body:not(.light) .client-pill{
+  background:#fff !important;
+  border-color:#cfd6f8 !important;
+  color:#0f1f56 !important;
+  font-weight:600;
+}
+body.light .client-pill{
+  background:#e9edff;
+  border-color:#cfd6f8;
+  color:#0f1f56;
+  font-weight:600;
+}
