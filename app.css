@@ -87,10 +87,15 @@ h1{font-size:28px; margin:0 0 4px; font-weight:800; line-height:1.1}
 .card .bd{padding:14px 16px 16px}
 
 label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
-input,select,textarea,button{
-  border-radius:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
-  padding:10px 12px; outline:none; height:40px; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
+/* exclude checkboxes from the generic input styling */
+input:not([type="checkbox"]), select, textarea, button{
+  border-radius:12px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink);
+  padding:10px 12px; outline:none;
+  height:40px;                     /* only for text inputs, selects, etc. */
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
 }
+
 textarea{height:auto; min-height:72px; resize:vertical}
 input:focus,select:focus,textarea:focus{ border-color:color-mix(in oklab, var(--accent) 55%, white 0%); box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent) }
 body.light input, body.light select, body.light textarea{ background:#fff; color:var(--ink); border-color:var(--line); }
@@ -450,14 +455,38 @@ body.light .seg > button.primary{
 }
 
 /* =================== CHECKBOX (square + centered ✓) =================== */
+/* Square, centered checkmark */
 input[type="checkbox"]{
   appearance:none; -webkit-appearance:none;
-  width:var(--chk-size); aspect-ratio:1/1; border-radius:var(--chk-radius);
-  border:1px solid var(--line); background:var(--surface);
+  width:var(--chk-size);
+  height:var(--chk-size);           /* <-- this line fixes the “too tall” issue */
+  aspect-ratio:1/1;                 /* keeps it square even if width changes */
+  border-radius:var(--chk-radius);
+  border:1px solid var(--line);
+  background:var(--surface);
+
   display:flex; align-items:center; justify-content:center;
   padding:0; margin:0; line-height:0; vertical-align:middle; box-sizing:border-box;
+
   transition:background .14s ease, border-color .14s ease, box-shadow .14s ease;
 }
+input[type="checkbox"]:hover{ box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent); }
+input[type="checkbox"]::before{
+  content:""; width:calc(var(--chk-size)*.56); aspect-ratio:1/1; background:#fff; transform:scale(0); transition:transform .14s ease;
+  -webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10"><path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center/contain;
+          mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10"><path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center/contain;
+}
+input[type="checkbox"]:checked{
+  background: color-mix(in oklab, var(--accent) 94%, black 6%);
+  border-color: color-mix(in oklab, var(--accent) 70%, black 10%);
+}
+input[type="checkbox"]:checked::before{ transform:scale(1); }
+body.light input[type="checkbox"]{ background:#fff; border-color:rgba(15,23,42,.22); }
+body.light input[type="checkbox"]:checked{
+  background: color-mix(in oklab, var(--accent) 94%, white 6%);
+  border-color: color-mix(in oklab, var(--accent) 70%, black 6%);
+}
+
 input[type="checkbox"]:hover{ box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent); }
 input[type="checkbox"]::before{
   content:""; width:calc(var(--chk-size)*.56); aspect-ratio:1/1; background:#fff; transform:scale(0); transition:transform .14s ease;
