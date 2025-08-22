@@ -1,240 +1,153 @@
-/* ===== Lead paste block (textarea + side buttons) ===== */
-.lead-block{ display:block; margin-bottom:10px; }
-.lead-actions{ display:none; }
-@media (max-width:760px){ .lead-block{ display:block; } }
-
-/* Bottom-right action buttons on the form */
-.form-actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
-.form-actions.is-end{ align-self:end; }
+/* =========================================================
+   Follow‑Up CRM — Polished Styles (dark default, light alt)
+   Notes:
+   • All original IDs/classes preserved (no JS breakage)
+   • Drawers: scrim blocks only when not pinned; pinned keeps page usable
+   • Better spacing/typography, consistent focus rings, subtle elevation
+   • Mobile refinements; accessible contrast; reduced duplication
+   ========================================================= */
 
 /* =================== TOKENS =================== */
 :root{
+  /* Surfaces */
   --bg:#0f1117; --panel:#151a21; --card:#1a2130; --chip:#1b2230; --surface:#10151d;
+
+  /* Text & lines */
   --ink:#e8ecf3; --muted:#9aa3c7; --line:#262b36;
+
+  /* Accents */
   --accent:#7c5cff; --accent-2:#28c076;
+
+  /* Danger */
   --danger:#d94a4a; --danger-border:#9e3636; --danger-ring:rgba(217,74,74,.25);
+
+  /* Layout */
   --page-max:1080px; --page-pad:16px; --radius:16px;
+
+  /* Elevation */
+  --elev-1:0 6px 18px rgba(0,0,0,.22);
+  --elev-2:0 10px 30px rgba(0,0,0,.28);
+  --elev-3:-18px 0 40px rgba(0,0,0,.35);
+
+  /* Scrollbars */
+  --sb-size:12px; --sb-radius:10px;
+  --sb-thumb:#2f3547; --sb-thumb-hover:#3b4362; --sb-thumb-active:#4a568e; --sb-track:transparent;
+
+  /* Content width */
+  --content-width:1040px;
 }
+
 body.light{
   --bg:#f7f8fb; --panel:#ffffff; --card:#f2f4ff; --chip:#eef2fb; --surface:#ffffff;
   --ink:#0f1115; --muted:#55607a; --line:#e2e7f3;
-  --accent:#7c5cff; --accent-2:#28c076;
-  --danger:#d94a4a; --danger-border:#c64545; --danger-ring:rgba(217,74,74,.25);
-}
-/* === Right-side drawer for the calendar === */
-#calendarDrawer{ position:fixed; inset:0; pointer-events:none; z-index:9990; }
-#calendarDrawer .drawer-scrim{
-  position:absolute; inset:0; background:rgba(0,0,0,.45);
-  opacity:0; transition:opacity .18s ease; pointer-events:none;
-}
-#calendarDrawer .drawer-panel{
-  position:absolute; top:0; right:0; height:100%; width:min(420px, 92vw);
-  background:var(--panel); border-left:1px solid var(--line);
-  box-shadow:-18px 0 40px rgba(0,0,0,.35);
-  transform:translateX(100%); transition:transform .22s ease;
-  display:flex; flex-direction:column; gap:0; pointer-events:auto;
-}
-#calendarDrawer.open{ pointer-events:auto; }
-#calendarDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
-#calendarDrawer.open .drawer-panel{ transform:none; }
 
-/* “Pinned” state keeps layout nudged (you already add body.drawer-pinned) */
-body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
-
-/* Make sure the card fills the drawer nicely */
-#calendarDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
-#calendarDrawer .card .bd{ flex:1 1 auto; overflow:auto; }
-
-/* === Right-side drawer: Random Names tool === */
-#namesDrawer{ position:fixed; inset:0; pointer-events:none; z-index:9990; }
-#namesDrawer .drawer-scrim{
-  position:absolute; inset:0; background:rgba(0,0,0,.45);
-  opacity:0; transition:opacity .18s ease; pointer-events:none;
+  --danger-border:#c64545;
+  --sb-thumb:#c1c9ee; --sb-thumb-hover:#aeb8ea; --sb-thumb-active:#97a4e6; --sb-track:#eef2ff;
 }
-#namesDrawer .drawer-panel{
-  position:absolute; top:0; right:0; height:100%; width:min(420px, 92vw);
-  background:var(--panel); border-left:1px solid var(--line);
-  box-shadow:-18px 0 40px rgba(0,0,0,.35);
-  transform:translateX(100%); transition:transform .22s ease;
-  display:flex; flex-direction:column; pointer-events:auto;
-}
-#namesDrawer.open{ pointer-events:auto; }
-#namesDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
-#namesDrawer.open .drawer-panel{ transform:none; }
-
-/* When a drawer is docked/pinned, let the page be fully usable.
-   Only the visible panel should catch pointer events. */
-#calendarDrawer.open.pinned,
-#namesDrawer.open.pinned {
-  pointer-events: none;                 /* pass through */
-}
-
-#calendarDrawer.open.pinned .drawer-panel,
-#namesDrawer.open.pinned .drawer-panel {
-  pointer-events: auto;                 /* keep panel interactive */
-}
-
-/* (you already have this) — keep the scrim inert while pinned */
-#calendarDrawer.pinned .drawer-scrim,
-#namesDrawer.pinned .drawer-scrim {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  background: transparent !important;
-}
-#namesDrawer .card { border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
-#namesDrawer .card .bd { flex:1 1 auto; overflow:auto; }
-
-/* Docked state: page stays usable (no scrim) */
-#namesDrawer.pinned .drawer-scrim{
-  opacity:0 !important; pointer-events:none !important; background:transparent !important;
-}
-/* === Right edge sticky tabs (Calendar + Names) === */
-#sideTabs{
-  position:fixed; right:8px; top:50%; transform:translateY(-50%);
-  display:flex; flex-direction:column; gap:10px;
-  z-index:10000; pointer-events:none;   /* only buttons catch events */
-}
-#sideTabs .tab{
-  pointer-events:auto;
-  width:44px; height:44px; border-radius:12px;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--chip);
-  border:1px solid var(--line);
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-  cursor:pointer;
-}
-#sideTabs .tab[aria-pressed="true"]{
-  background:var(--panel);
-  box-shadow: inset 0 0 0 1px var(--line), 0 10px 26px rgba(0,0,0,.30);
-}
-body.light #sideTabs .tab{ background:#fff; }
-
-/* Mobile: move tabs to bottom-right and lay out horizontally */
-@media (max-width:760px){
-  #sideTabs{ right:8px; top:auto; bottom:12px; transform:none; flex-direction:row; }
-}
-
-/* When a drawer is docked/pinned, don’t dim or block the page */
-#calendarDrawer.pinned .drawer-scrim,
-#namesDrawer.pinned .drawer-scrim{
-  opacity:0 !important; pointer-events:none !important; background:transparent !important;
-}
-
-/* (you already have this) nudge main content when any drawer is pinned */
-body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
-/* Random Names spacing */
-#namesDrawer #namesList{
-  display: flex !important;        /* override inline grid */
-  flex-direction: column;
-  gap: 14px !important;            /* was 6–8; tweak to taste (14–16 looks nice) */
-  padding: 6px 12px;               /* optional: a little inner padding */
-}
-
-#namesDrawer .name-pill{
-  display: block;
-  text-align: left;
-  padding: 10px 14px;              /* slightly taller pills */
-  line-height: 1.3;
-}
-
-/* Names list styling */
-#namesCard .bd{ padding:12px; }
-#namesList{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
-#namesList .name-item{
-  border:1px solid var(--line); background:var(--surface); border-radius:10px;
-  padding:8px 10px; cursor:pointer; user-select:none;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
-#namesList .name-item:hover{ filter:brightness(1.05); }
-
 
 /* =================== BASE =================== */
-*{box-sizing:border-box}
-html,body{height:100%; max-width:100%; overflow-x:hidden}
+*{ box-sizing:border-box; }
+html,body{ height:100%; max-width:100%; overflow-x:hidden; }
+html{ scrollbar-gutter:stable both-edges; }
+:root{ color-scheme: dark light; }
+body{ color-scheme: dark; }
+body.light{ color-scheme: light; }
+
 body{
-  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   background:
     radial-gradient(1200px 800px at 100% -10%, rgba(124,92,255,.16), transparent),
     var(--bg);
   color:var(--ink);
 }
-a{ color:#8ea3ff; text-decoration:none }
-a:hover{ text-decoration:underline }
+
+a{ color:#8ea3ff; text-decoration:none; }
+a:hover{ text-decoration:underline; }
 
 .wrap{
   width:100%;
   max-width:var(--page-max);
-  margin-left:auto; margin-right:auto;
-  padding-left:max(var(--page-pad), env(safe-area-inset-left));
-  padding-right:max(var(--page-pad), env(safe-area-inset-right));
-  padding-top:16px; padding-bottom:16px;
+  margin-inline:auto;
+  padding-inline:max(var(--page-pad), env(safe-area-inset-left), 12px);
+  padding-block:16px;
 }
-.grid{display:grid; gap:16px; grid-template-columns:1fr; align-items:start}
-.grid > *, .row > * { min-width:0; }
+.grid{ display:grid; gap:16px; grid-template-columns:1fr; align-items:start; }
+.grid > *, .row > *{ min-width:0; }
+
+.centered{ max-width:var(--content-width); margin-inline:auto; }
 
 /* =================== HEADER =================== */
 header{
   position:sticky; top:0; z-index:5;
   background:linear-gradient(180deg, rgba(15,17,23,.78), rgba(15,17,23,.58) 70%, rgba(15,17,23,0));
   border-bottom:1px solid var(--line);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
   padding-top:env(safe-area-inset-top);
 }
-header .wrap{ padding-top:8px; padding-bottom:8px; }
+header .wrap{ padding-block:8px; }
 body.light header{
   background:linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.78) 70%, rgba(255,255,255,0));
-  border-bottom:1px solid var(--line);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  box-shadow:none;
 }
-h1{font-size:20px; margin:4px 0 0; font-weight:800; line-height:1.1}
-.sub{color:var(--muted); font-size:13px}
+h1{ font-size:20px; margin:4px 0 0; font-weight:800; line-height:1.1; }
+.sub{ color:var(--muted); font-size:13px; }
 
 /* =================== CARDS / CONTROLS =================== */
-.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.25);} 
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--elev-2);
+}
 .card .hd{
   padding:12px 14px; border-bottom:1px solid var(--line);
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;  /* wraps on small screens */
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
 }
-.card .bd{padding:12px}
+.card .bd{ padding:12px; }
 
-label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
 input,select,textarea,button{
-  border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:9px 10px; outline:none; height:40px
+  border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink);
+  padding:9px 10px; outline:none; height:40px;
 }
-textarea{height:auto; min-height:72px; resize:vertical}
-input:focus,select:focus,textarea:focus{ border-color:#445; box-shadow:0 0 0 3px rgba(124,92,255,.15) }
-
-/* Light theme controls */
+textarea{ height:auto; min-height:72px; resize:vertical; }
+input:focus,select:focus,textarea:focus{
+  border-color:#445;
+  box-shadow:0 0 0 3px rgba(124,92,255,.15);
+}
 body.light input,
 body.light select,
 body.light textarea,
-body.light button:not(.primary):not(.ghost):not(.btn-danger):not(.toggle) {
-  background:#fff; color:var(--ink); border-color:var(--line);
+body.light button:not(.primary):not(.ghost):not(.btn-danger):not(.toggle){
+  background:#fff; border-color:var(--line); color:var(--ink);
 }
 
-/* Flash the Agenda date field when it’s changed from the calendar */
-@keyframes agendaDateGlow{
-  0%   { box-shadow: 0 0 0 0 rgba(124,92,255,.45), 0 0 0 6px rgba(124,92,255,.18); }
-  100% { box-shadow: 0 0 0 0 rgba(124,92,255,0); }
+/* Buttons */
+button{
+  cursor:pointer;
+  background:linear-gradient(180deg,#2c2f44,#1b2130);
+  border:1px solid #2b3346; color:var(--ink);
+  transition:transform .08s ease, filter .12s ease;
 }
-#agendaDate.glow{
-  animation: agendaDateGlow 900ms ease-out;
-  border-color:#6a4ff0;
-  background:linear-gradient(180deg, rgba(124,92,255,.12), rgba(124,92,255,.05)), var(--surface);
-}
-@media (prefers-reduced-motion: reduce){ #agendaDate.glow{ animation:none; } }
+button:hover{ filter:brightness(1.03); }
+button:active{ transform:translateY(1px); }
 
-button{cursor:pointer; background:linear-gradient(180deg,#2c2f44,#1b2130); border:1px solid #2b3346; color:var(--ink)}
-button.primary{ background:linear-gradient(180deg,var(--accent),#6a4ff0); border-color:#6a4ff0; color:#fff }
-button.ghost{ background:transparent }
+button.primary{
+  background:linear-gradient(180deg,var(--accent),#6a4ff0);
+  border-color:#6a4ff0; color:#fff;
+  box-shadow:0 8px 26px rgba(124,92,255,.3);
+}
+button.ghost{ background:transparent; }
 
 /* Icon buttons */
-.btn-icon{width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:10px; background:var(--chip); border:1px solid var(--line)}
-body.light .btn-icon{ background:#fff; border:1px solid var(--line) }
+.btn-icon{
+  width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;
+  padding:0; border-radius:10px; background:var(--chip); border:1px solid var(--line);
+}
+body.light .btn-icon{ background:#fff; }
 
-/* === Add Customer modal + fancy "+" === */
-body.modal-open{ overflow:hidden; }
 .add-btn{
   width:34px; height:34px; border-radius:999px;
   background:linear-gradient(180deg,var(--accent),#6a4ff0);
@@ -245,50 +158,41 @@ body.modal-open{ overflow:hidden; }
 .add-btn:hover{ filter:brightness(1.06); transform:translateY(-1px); }
 .add-btn:active{ transform:translateY(0); }
 
-/* Modal container + small popup */
-.modal{
-  position:fixed; inset:0; display:none;
-  align-items:center; justify-content:center;
-  padding:18px; background:rgba(0,0,0,.55);
-  backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
-  z-index:9998; overflow:auto;
-}
-.modal.open{ display:flex; }
-.modal .card{
-  width:min(920px, 100%);
-  max-height:88vh;             /* taller so actions are visible */
-  overflow:auto;               /* scroll inside if needed */
-  animation:pop .16s ease-out;
-}
-@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.985) } to{ opacity:1; transform:none } }
-/* Hide the Add/Edit section until JS moves it into the modal */
-#addCard{ display:none; }
+/* Form actions */
+.form-actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+.form-actions.is-end{ align-self:end; }
 
-/* Sticky footer for the Add/Edit form */
-#addCard .bd{ padding-bottom:74px; } /* room for sticky footer */
-.form-footer{
-  position:sticky; bottom:0; left:0; right:0;
-  display:flex; gap:8px; justify-content:flex-end; align-items:center;
-  padding:10px 12px;
-  margin:12px -12px -12px;        /* bleed to card edges */
-  background:linear-gradient(180deg, rgba(0,0,0,0), var(--panel) 30%);
-  border-top:1px solid var(--line);
-  z-index:1;
+/* Lead paste block */
+.lead-block{ display:block; margin-bottom:10px; }
+.lead-block.highlight{
+  padding:10px; border:1px dashed var(--accent); border-radius:12px;
+  background:linear-gradient(180deg, rgba(124,92,255,.09), rgba(124,92,255,.04)), var(--surface);
 }
+.lead-actions{ display:none; }
+@media (max-width:760px){ .lead-block{ display:block; } }
 
-/* Toolbar & pills */
-.toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-.space{flex:1}
+/* Toolbar & chips */
+.toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.space{ flex:1; }
 .toggle{
-  height:38px; padding:6px 12px; border-radius:999px; font-size:14px; border:1px solid #2b3346;
-  background:linear-gradient(180deg,#2c2f44,#1b2130); color:var(--ink); display:inline-flex; align-items:center; gap:8px;
+  height:38px; padding:6px 12px; border-radius:999px; font-size:14px;
+  border:1px solid #2b3346; background:linear-gradient(180deg,#2c2f44,#1b2130);
+  color:var(--ink); display:inline-flex; align-items:center; gap:8px;
 }
-body.light .toggle{ background:#fff; border-color:#d9e1f1 }
+body.light .toggle{ background:#fff; border-color:#d9e1f1; }
 
-.badge{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; background:var(--chip); border:1px solid var(--line); border-radius:999px; font-size:12px; color:#b6bfd6}
-.pill{
-  display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:11px; border:1px solid var(--line); background:var(--chip); color:#bfc7ff; white-space:nowrap;
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 8px; background:var(--chip); border:1px solid var(--line);
+  border-radius:999px; font-size:12px; color:#b6bfd6;
 }
+.pill{
+  display:inline-flex; align-items:center; gap:6px; padding:2px 8px;
+  border-radius:999px; font-size:11px; border:1px solid var(--line);
+  background:var(--chip); color:#bfc7ff; white-space:nowrap;
+}
+.pill a{ white-space:nowrap; }
+
 .copy-btn{
   margin-left:6px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;
   border-radius:6px; border:1px solid var(--line); background:var(--panel);
@@ -296,183 +200,181 @@ body.light .toggle{ background:#fff; border-color:#d9e1f1 }
 }
 .copy-btn:active{ transform:translateY(1px); }
 body.light .copy-btn{ background:#fff; }
-.pill a{ white-space:nowrap; }
 
-body.light .badge{ background:#eef2fb; color:#55607a }
-body.light .pill{ background:#f1f4ff; color:#1e2758 }
+body.light .badge{ background:#eef2fb; color:#55607a; }
+body.light .pill{ background:#f1f4ff; color:#1e2758; }
 
-/* Names tool: clicked pills appear muted but stay clickable */
-.name-pill.used{
-  opacity:.55;
-  filter:saturate(.6);
-  background:var(--chip);
-  border-color:var(--line);
-}
-
-
-/* Btn danger — soft “card-like” look, a bit bolder */
+/* Danger button */
 .btn-danger{
-  background: linear-gradient(180deg, rgba(220,80,80,.12), rgba(220,80,80,.07)) !important;
-  border:1.5px solid #a55c5c !important;
-  color:#ffbcbc !important;
-  box-shadow: inset 0 0 0 1px rgba(220,120,120,.15), 0 6px 20px rgba(220,80,80,.18) !important;
+  background:linear-gradient(180deg, rgba(220,80,80,.12), rgba(220,80,80,.07)) !important;
+  border:1.5px solid #a55c5c !important; color:#ffbcbc !important;
+  box-shadow:inset 0 0 0 1px rgba(220,120,120,.15), 0 6px 20px rgba(220,80,80,.18) !important;
 }
-.btn-danger:hover{ filter:brightness(1.03) }
-.btn-danger:active{ transform:translateY(1px) }
-.btn-danger:focus{ box-shadow:0 0 0 3px var(--danger-ring) !important }
-/* Make the specific “Wipe All” a rounded card chip */
+.btn-danger:hover{ filter:brightness(1.03); }
+.btn-danger:active{ transform:translateY(1px); }
+.btn-danger:focus{ box-shadow:0 0 0 3px var(--danger-ring) !important; }
 #wipeAll{ border-radius:14px; height:38px; padding:0 14px; }
 
-/* Subtle highlight for the paste block */
-.lead-block.highlight{
-  padding:10px; border:1px dashed var(--accent); border-radius:12px;
-  background: linear-gradient(180deg, rgba(124,92,255,.09), rgba(124,92,255,.04)), var(--surface);
+/* Names tool “used” state */
+.name-pill.used{ opacity:.55; filter:saturate(.6); background:var(--chip); border-color:var(--line); }
+
+/* Utility blocks */
+.slab{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px; }
+.flex-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+/* =================== MODALS =================== */
+body.modal-open{ overflow:hidden; }
+.modal{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  padding:18px; background:rgba(0,0,0,.55);
+  backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+  z-index:9998; overflow:auto;
 }
-.slab{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px }
-.flex-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+.modal.open{ display:flex; }
+.modal .card{
+  width:min(920px, 100%); max-height:88vh; overflow:auto;
+  animation:pop .16s ease-out;
+}
+#addCard{ display:none; } /* JS moves into modal */
+#addCard .bd{ padding-bottom:74px; }
+.form-footer{
+  position:sticky; bottom:0; inset-inline:0;
+  display:flex; gap:8px; justify-content:flex-end; align-items:center;
+  padding:10px 12px; margin:12px -12px -12px;
+  background:linear-gradient(180deg, rgba(0,0,0,0), var(--panel) 30%);
+  border-top:1px solid var(--line); z-index:1;
+}
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.985) } to{ opacity:1; transform:none } }
+@media (prefers-reduced-motion:reduce){ .modal .card{ animation:none; } }
 
-/* =================== LAYOUT HELPERS =================== */
-.row{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px}
-.row.single{grid-template-columns:1fr}
-.right{display:flex; gap:8px; justify-content:flex-end}
+/* =================== DRAWERS (Calendar & Names) =================== */
+/* Shared drawer shell */
+#calendarDrawer, #namesDrawer{
+  position:fixed; inset:0; pointer-events:none; z-index:9990;
+}
+#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim{
+  position:absolute; inset:0; background:rgba(0,0,0,.45);
+  opacity:0; transition:opacity .18s ease; pointer-events:none;
+}
+#calendarDrawer .drawer-panel, #namesDrawer .drawer-panel{
+  position:absolute; top:0; right:0; height:100%; width:min(420px,92vw);
+  background:var(--panel); border-left:1px solid var(--line);
+  box-shadow:var(--elev-3);
+  transform:translateX(100%); transition:transform .22s ease;
+  display:flex; flex-direction:column; gap:0; pointer-events:auto;
+}
+#calendarDrawer.open, #namesDrawer.open{ pointer-events:auto; }
+#calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
+#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform:none; }
 
-/* === Two-column Agenda + Calendar (desktop) === */
-/* EITHER delete it, OR change to a single column */
-.row.agenda-layout{ grid-template-columns: 1fr; gap:16px; align-items:start; }
+/* Pinned (docked): page stays fully usable; only panel is interactive */
+#calendarDrawer.open.pinned, #namesDrawer.open.pinned{ pointer-events:none; }
+#calendarDrawer.open.pinned .drawer-panel, #namesDrawer.open.pinned .drawer-panel{ pointer-events:auto; }
+#calendarDrawer.pinned .drawer-scrim, #namesDrawer.pinned .drawer-scrim{
+  opacity:0 !important; pointer-events:none !important; background:transparent !important;
+}
 
+/* Nudge main layout when pinned */
+body.drawer-pinned .wrap{ margin-right:min(420px,92vw); }
 
-/* Compact calendar look (small right rail) */
-#calendarCard .bd{ padding:12px; }
-#calendarGrid{ gap:4px; }
-.cal-cell{ min-height:56px; padding:6px; }
-.cal-badge{ margin-top:4px; font-size:10.5px; }
+/* Drawer cards fill */
+#calendarDrawer .card, #namesDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
+#calendarDrawer .card .bd, #namesDrawer .card .bd{ flex:1 1 auto; overflow:auto; }
 
-/* --- Add-Task modal: Client dropdown polish --- */
-#customTaskPop .row { grid-template-columns: 2fr 1fr; }     /* make Client wider than Type */
-#ctClient { min-width: 320px; }                              /* avoid cramped dropdown */
+/* Right-edge sticky tabs */
+#sideTabs{
+  position:fixed; right:8px; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:10px; z-index:10000; pointer-events:none;
+}
+#sideTabs .tab{
+  pointer-events:auto;
+  width:44px; height:44px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--chip); border:1px solid var(--line);
+  box-shadow:var(--elev-1); cursor:pointer;
+}
+#sideTabs .tab[aria-pressed="true"]{
+  background:var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line), 0 10px 26px rgba(0,0,0,.30);
+}
+body.light #sideTabs .tab{ background:#fff; }
 
-/* Consistent dropdown colors (Chrome/Edge/Firefox) */
-#ctClient option { background: var(--panel); color: var(--ink); }
-#ctClient option:hover,
-#ctClient option:checked { background: #2f3547; color: var(--ink); }
+/* Mobile tabs: bottom-right */
+@media (max-width:760px){
+  #sideTabs{ right:8px; top:auto; bottom:12px; transform:none; flex-direction:row; }
+}
 
-body.light #ctClient option { background: #fff; color: var(--ink); }
-body.light #ctClient option:hover,
-body.light #ctClient option:checked { background: #e9ecff; color: #1e2758; }
-
-/* Neutral focus for the segmented buttons (keeps things tidy) */
-
+/* Names list spacing (fix “too close”) */
+#namesCard .bd{ padding:12px; }
+#namesList{
+  list-style:none; padding:0; margin:0;
+  display:flex; flex-direction:column; gap:14px; /* was tight; now comfy */
+}
+#namesList .name-item{
+  border:1px solid var(--line); background:var(--surface); border-radius:10px;
+  padding:10px 12px; cursor:pointer; user-select:none;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+#namesList .name-item:hover{ filter:brightness(1.05); }
 
 /* =================== KPI =================== */
-.kpi{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
-.kpi .box{background:var(--card); border:1px solid #293149; border-radius:14px; padding:12px}
-body.light .kpi .box{ background:var(--card); border-color:var(--line) }
-.kpi .num{font-size:22px; font-weight:800}
+.kpi{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.kpi .box{ background:var(--card); border:1px solid #293149; border-radius:14px; padding:12px; }
+body.light .kpi .box{ background:var(--card); border-color:var(--line); }
+.kpi .num{ font-size:22px; font-weight:800; }
 
 /* =================== TABLE (+ mobile cards) =================== */
-.tbl{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed}
-.tbl th,.tbl td{padding:10px; border-bottom:1px solid var(--line); text-align:left; font-size:13px; vertical-align:middle; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.tbl th{color:#a8b0c4; font-weight:600; position:sticky; top:0; background:var(--panel)}
-/* === Fix row alignment & actions === */
-.tbl td {
-  vertical-align: middle;
-  padding: 8px 6px;
+.tbl{ width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; }
+.tbl th,.tbl td{
+  padding:10px; border-bottom:1px solid var(--line);
+  text-align:left; font-size:13px; vertical-align:middle; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
+.tbl th{ color:#a8b0c4; font-weight:600; position:sticky; top:0; background:var(--panel); }
+.tbl td{ padding:8px 6px; }
 
-
-
-/* Actions cell: keep borders aligned and make all buttons visible */
-.tbl td.actions {
-  display: table-cell;      /* stay a table cell so borders line up */
-  text-align: right;
-  vertical-align: middle;
-  white-space: nowrap;      /* keep buttons in one row */
-  padding: 10px 6px 10px 10px;
-  overflow: visible;        /* don't clip buttons */
-  text-overflow: clip;      /* override ellipsis from generic td rule */
-  min-width: 200px;         /* room for ~5 buttons (32px each + gaps + padding) */
+/* Actions cell */
+.tbl td.actions{
+  display:table-cell; text-align:right; vertical-align:middle; white-space:nowrap;
+  padding:10px 6px 10px 10px; overflow:visible; text-overflow:clip; min-width:200px;
 }
-/* Fix column width for table-layout: fixed */
-.tbl th:last-child { width: 200px; }
+.tbl th:last-child{ width:200px; }
 
-
-.note-preview{color:#9aa3bb; cursor:pointer; font-family:ui-monospace,Menlo,Consolas,monospace}
-.note-preview:hover{text-decoration:underline}
-/* Actions cell: aligned with table rows */
-
-/* Show ring only for keyboard focus */
-.seg > button:focus:not(:focus-visible) { outline: none; }
-.seg > button:focus-visible {
-  outline: 2px solid var(--line);
-  outline-offset: 2px;
-  border-radius: 8px;
-}
-
-/* Apply same ring to common buttons */
-.btn-icon:focus-visible,
-button.toggle:focus-visible,
-button.primary:focus-visible {
-  outline: 2px solid var(--line);
-  outline-offset: 2px;
-}
-
-/* High-contrast mode */
-@media (forced-colors: active){
-  .seg > button:focus-visible,
-  .btn-icon:focus-visible,
-  button.toggle:focus-visible,
-  button.primary:focus-visible {
-    outline: 1px solid CanvasText;
-    outline-offset: 2px;
-  }
-}
-
-.tbl td.actions .btn-icon{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:32px;
-  height:32px;
-  margin-left:4px;
-}
-.tbl td.actions .btn-icon:first-child{ margin-left:0; }
-/* Customers → Contact column */
-.contact-line{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  max-width:100%;
-}
+/* Contact column */
+.contact-line{ display:flex; align-items:center; gap:6px; max-width:100%; }
 .contact-line a.truncate{
-  flex:1 1 auto;
-  min-width:0;                /* enables ellipsis in flex rows */
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.contact-line .copy-btn{
-  flex:0 0 auto;              /* keep the button visible */
-}
+.contact-line .copy-btn{ flex:0 0 auto; }
 #clientsTbl td[data-label="Contact"] .contact-line + .contact-line{ margin-top:4px; }
-
-/* optional: give the column a floor */
 #clientsTbl td[data-label="Contact"]{ min-width:220px; }
 
+.note-preview{ color:#9aa3bb; cursor:pointer; font-family:ui-monospace,Menlo,Consolas,monospace; }
+.note-preview:hover{ text-decoration:underline; }
 
 /* =================== AGENDA =================== */
-.agenda-item{display:grid; grid-template-columns:24px 1fr auto; gap:10px; align-items:center; padding:8px 10px; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
-.agenda-item.done{opacity:.55}
-.group-hd{ display:flex; align-items:center; gap:8px; margin:12px 0 6px }
-.group-hd::before, .group-hd::after{ content:""; flex:1; height:1px; background:var(--line) }
-.group-hd .label{ font-size:12px; padding:2px 8px; border:1px solid var(--line); border-radius:999px; background:var(--chip); color:#bfc7ff }
-body.light .group-hd .label{ background:#f1f4ff; color:#1e2758 }
+.agenda-item{
+  display:grid; grid-template-columns:24px 1fr auto; gap:10px; align-items:center;
+  padding:8px 10px; border:1px solid var(--line); border-radius:12px; background:var(--surface);
+}
+.agenda-item.done{ opacity:.55; }
 
-.tiny{font-size:11px; color:var(--muted)}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px}
-.progress{height:12px; border-radius:999px; background:var(--chip); border:1px solid var(--line); overflow:hidden}
-.progress > span{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); width:0}
+.group-hd{ display:flex; align-items:center; gap:8px; margin:12px 0 6px; }
+.group-hd::before, .group-hd::after{ content:""; flex:1; height:1px; background:var(--line); }
+.group-hd .label{
+  font-size:12px; padding:2px 8px; border:1px solid var(--line);
+  border-radius:999px; background:var(--chip); color:#bfc7ff;
+}
+body.light .group-hd .label{ background:#f1f4ff; color:#1e2758; }
 
-/* === Inline notify row (bell editor) — horizontal controls ✨ === */
+.tiny{ font-size:11px; color:var(--muted); }
+.mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; }
+
+.progress{
+  height:12px; border-radius:999px; background:var(--chip); border:1px solid var(--line); overflow:hidden;
+}
+.progress > span{ display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); width:0; }
+
+/* Notify row (bell editor) */
 .notify-row{
   display:flex; align-items:center; gap:10px; margin:6px 0 0 34px;
   padding:8px; border:1px dashed var(--line); border-radius:10px; background:var(--surface);
@@ -480,98 +382,98 @@ body.light .group-hd .label{ background:#f1f4ff; color:#1e2758 }
 .notify-row input[type="time"]{ height:32px; }
 .notify-row button{ height:32px; }
 
+/* Agenda/Calendar layout */
+.row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.row.single{ grid-template-columns:1fr; }
+.row.agenda-layout{ grid-template-columns:1fr; gap:16px; align-items:start; }
+
+.flex-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.right{ display:flex; gap:8px; justify-content:flex-end; }
+
+/* Agenda date highlight on calendar sync */
+@keyframes agendaDateGlow{
+  0%{ box-shadow:0 0 0 0 rgba(124,92,255,.45), 0 0 0 6px rgba(124,92,255,.18); }
+  100%{ box-shadow:0 0 0 0 rgba(124,92,255,0); }
+}
+#agendaDate.glow{
+  animation:agendaDateGlow 900ms ease-out;
+  border-color:#6a4ff0;
+  background:linear-gradient(180deg, rgba(124,92,255,.12), rgba(124,92,255,.05)), var(--surface);
+}
+@media (prefers-reduced-motion:reduce){ #agendaDate.glow{ animation:none; } }
+
 /* =================== CALENDAR =================== */
-#calendarGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:6px }
-.cal-head{ font-weight:700; font-size:12px; opacity:.8; padding:4px 2px; text-align:center }
-.cal-cell{ border:1px solid var(--line); border-radius:8px; padding:8px; min-height:74px; background:var(--surface); cursor:pointer }
-.cal-cell .d{ font-weight:700; font-size:12px; opacity:.9 }
-.cal-badge{ display:inline-block; margin-top:6px; font-size:11px; padding:2px 6px; border:1px solid var(--line); border-radius:999px; color:#cfd5ff }
-.cal-cell.offday{ background: linear-gradient(0deg, rgba(220,80,80,.08), rgba(220,80,80,.08)), var(--surface); border-color: #3a2b2f; }
-.cal-cell.offday .d { color: #e2b3b3; }
+#calendarGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:6px; }
+.cal-head{ font-weight:700; font-size:12px; opacity:.8; padding:4px 2px; text-align:center; }
+.cal-cell{
+  border:1px solid var(--line); border-radius:8px; padding:8px; min-height:74px;
+  background:var(--surface); cursor:pointer;
+}
+.cal-cell .d{ font-weight:700; font-size:12px; opacity:.9; }
+.cal-badge{
+  display:inline-block; margin-top:6px; font-size:11px; padding:2px 6px;
+  border:1px solid var(--line); border-radius:999px; color:#cfd5ff;
+}
+.cal-cell.offday{
+  background:linear-gradient(0deg, rgba(220,80,80,.08), rgba(220,80,80,.08)), var(--surface);
+  border-color:#3a2b2f;
+}
+.cal-cell.offday .d{ color:#e2b3b3; }
+
 body.light .cal-cell{ background:#fff; border-color:var(--line); }
-body.light .cal-badge{ color:#4250d4; background:#eef2ff; border-color:#cfd6f8; font-weight:600 }
-body.light .cal-cell.offday{ background: linear-gradient(0deg, rgba(255,120,120,.15), rgba(255,120,120,.15)), #fff; border-color:#ffd7d7; }
+body.light .cal-badge{ color:#4250d4; background:#eef2ff; border-color:#cfd6f8; font-weight:600; }
+body.light .cal-cell.offday{ background:linear-gradient(0deg, rgba(255,120,120,.15), rgba(255,120,120,.15)), #fff; border-color:#ffd7d7; }
 body.light .cal-cell.offday .d{ color:#a23b3b; }
 
-.cal-hd{ display:flex; align-items:center; gap:10px }
-.cal-hd .space{ flex:1 }
-.cal-month{ display:flex; align-items:center; gap:8px }
+.cal-hd{ display:flex; align-items:center; gap:10px; }
+.cal-hd .space{ flex:1; }
+.cal-month{ display:flex; align-items:center; gap:8px; }
 #calTitle{ display:block; text-align:center; }
 
 .settings-btn{
-  height:32px; padding:6px 12px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; gap:6px; line-height:1;
+  height:32px; padding:6px 12px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px; line-height:1;
 }
 
-/* Settings panel: closed by default, slides open when .open is added */
+/* Calendar settings panel */
 #calSettings{
-  display:block;                 /* stays in flow to push grid when open */
-  overflow:hidden;
-  max-height:0;
-  opacity:0;
-  transform:translateY(-4px);
-  transition: max-height .28s ease, opacity .22s ease, transform .22s ease, margin .22s ease, padding .22s ease;
-  margin-top:10px;
-  margin-bottom:0;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:var(--surface);
-  padding:0;                     /* avoid jump while animating */
-  max-width:100%;
+  display:block; overflow:hidden;
+  max-height:0; opacity:0; transform:translateY(-4px);
+  transition:max-height .28s ease, opacity .22s ease, transform .22s ease, margin .22s ease, padding .22s ease;
+  margin-top:10px; margin-bottom:0;
+  border:1px solid var(--line); border-radius:12px; background:var(--surface);
+  padding:0; max-width:100%;
 }
 #calSettings.open{
-  max-height: 820px;             /* large enough for contents */
-  opacity:1;
-  transform:none;
-  margin-bottom:10px;
-  padding:16px;                  /* reveal inner padding when open */
+  max-height:820px; opacity:1; transform:none; margin-bottom:10px; padding:16px;
 }
-body.light #calSettings{ background:#fff }
+body.light #calSettings{ background:#fff; }
 
-/* Calendar settings layout */
 .wdays{
-  display:grid;
-  grid-template-columns:repeat(7, minmax(0, 1fr));
-  gap:10px;
-  margin-top:8px;
+  display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:10px; margin-top:8px;
 }
 .wdays .cell{
-  border:1px dashed var(--line);
-  border-radius:12px;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  min-height:72px;
+  border:1px dashed var(--line); border-radius:12px; padding:10px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:72px;
 }
 .wdays .cell input[type="checkbox"]{ width:24px; height:24px; accent-color:var(--accent); }
 .wdays .cell span{ font-size:12px; }
 
-/* >>> Date-specific overrides row (flex instead of grid) <<< */
-.ovr{
-  margin-top:14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
+.ovr{ margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 #calSettings .ovr input, #calSettings .ovr select{ height:34px; }
 #ovrDate{ min-width:170px; }
 #ovrType{ min-width:180px; }
 #addOverride{ height:34px; }
 
-/* override list smaller */
-.ovr-list{ margin-top:10px; padding-left:0; list-style:none }
+.ovr-list{ margin-top:10px; padding-left:0; list-style:none; }
 .ovr-list li{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px; padding:6px 8px; border:1px solid var(--line); border-radius:10px; background:var(--surface);
-  font-size:14px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:6px 8px; border:1px solid var(--line); border-radius:10px; background:var(--surface); font-size:14px;
 }
 .ovr-list li button{ height:32px; padding:0 10px; }
-body.light .ovr-list li{ background:#fff }
+body.light .ovr-list li{ background:#fff; }
 
-/* =================== POPOVER (Add Custom Task) — turned into modal ✨ =================== */
+/* =================== ADD CUSTOM TASK (Popover → Modal) =================== */
 .popover{
   background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;
   box-shadow:0 20px 60px rgba(0,0,0,.35); margin-top:10px;
@@ -582,158 +484,124 @@ body.light .ovr-list li{ background:#fff }
   z-index:9999; padding:18px;
 }
 #customTaskPop .sheet{
-  width:min(560px,92vw);
-  background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;
-  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  width:min(560px,92vw); background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:12px; box-shadow:0 20px 60px rgba(0,0,0,.35);
 }
+/* Client dropdown polish */
+#customTaskPop .row{ grid-template-columns:2fr 1fr; }
+#ctClient{ min-width:320px; }
+#ctClient option{ background:var(--panel); color:var(--ink); }
+#ctClient option:hover, #ctClient option:checked{ background:#2f3547; color:var(--ink); }
+body.light #ctClient option{ background:#fff; color:var(--ink); }
+body.light #ctClient option:hover, body.light #ctClient option:checked{ background:#e9ecff; color:#1e2758; }
 
 /* =================== TOAST =================== */
-#toaster{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:10px;z-index:9999}
-.toast{min-width:220px;max-width:380px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;
-       background:var(--panel);color:var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.28);font-size:13px;
-       display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-6px);transition:.18s ease-out}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{border-color:#2b9c6b} .toast.err{border-color:#b94444}
+#toaster{
+  position:fixed; top:14px; right:14px; display:flex; flex-direction:column; gap:10px; z-index:9999;
+}
+.toast{
+  min-width:220px; max-width:380px; padding:10px 12px; border:1px solid var(--line); border-radius:12px;
+  background:var(--panel); color:var(--ink); box-shadow:var(--elev-2); font-size:13px;
+  display:flex; align-items:center; gap:8px; opacity:0; transform:translateY(-6px); transition:.18s ease-out;
+}
+.toast.show{ opacity:1; transform:translateY(0); }
+.toast.ok{ border-color:#2b9c6b; }
+.toast.err{ border-color:#b94444; }
+
+/* =================== SEGMENTED CONTROLS =================== */
+.seg{
+  display:inline-flex; gap:0; background:var(--chip);
+  border:1px solid var(--line); border-radius:10px; padding:2px; overflow:hidden;
+}
+.seg > button{
+  background:transparent !important; border:0; color:var(--ink);
+  height:32px; padding:0 12px; border-radius:8px;
+}
+.seg > button.primary{
+  background:var(--panel) !important; border:0 !important;
+  box-shadow: inset 0 0 0 1px var(--line); color:var(--ink) !important;
+}
+
+.seg > button:focus:not(:focus-visible){ outline:none; }
+.seg > button:focus-visible{ outline:2px solid var(--line); outline-offset:2px; border-radius:8px; }
+.btn-icon:focus-visible, button.toggle:focus-visible, button.primary:focus-visible{
+  outline:2px solid var(--line); outline-offset:2px;
+}
+@media (forced-colors:active){
+  .seg > button.primary{ outline:1px solid CanvasText; outline-offset:2px; }
+  .seg > button:focus-visible,
+  .btn-icon:focus-visible, button.toggle:focus-visible, button.primary:focus-visible{
+    outline:1px solid CanvasText; outline-offset:2px;
+  }
+}
+
+/* =================== BULK REVIEW (Multi-lead paste) =================== */
+.bulk-list{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;
+}
+.bulk-item .top{ font-size:14px; margin-bottom:4px; }
+
+/* =================== SCROLLBARS =================== */
+*{ scrollbar-width:thin; scrollbar-color:var(--sb-thumb) var(--sb-track); }
+*::-webkit-scrollbar{ width:var(--sb-size); height:var(--sb-size); }
+*::-webkit-scrollbar-track{ background:var(--sb-track); }
+*::-webkit-scrollbar-thumb{
+  background:var(--sb-thumb); border-radius:var(--sb-radius);
+  background-clip:padding-box; border:3px solid transparent;
+}
+*::-webkit-scrollbar-thumb:hover{ background:var(--sb-thumb-hover); }
+*::-webkit-scrollbar-thumb:active{ background:var(--sb-thumb-active); }
+*::-webkit-scrollbar-corner{ background:transparent; }
+.customers-scroll{ overflow-x:hidden; }
+.customers-scroll::-webkit-scrollbar-track{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--sb-radius);
+}
+
+/* =================== ACCESSIBILITY & INERT FALLBACK =================== */
+[inert]{ pointer-events:none; user-select:none; -webkit-user-select:none; }
 
 /* =================== MOBILE POLISH =================== */
 @media (max-width:760px){
-  .tbl th:last-child { width: auto; }
-.tbl td.actions { min-width: 0; }
+  .wrap{ padding-block:12px; }
+  .row{ grid-template-columns:1fr !important; }
+  .kpi{ grid-template-columns:repeat(2,1fr); }
 
-  .wrap{padding-top:12px;padding-bottom:12px}
-  .row{grid-template-columns:1fr !important;}  /* ensure agenda/calendar stack */
-  .kpi{grid-template-columns:repeat(2,1fr)}
-  .tbl thead{display:none}
-  .tbl tr{display:block; background:var(--surface); border:1px solid var(--line); border-radius:12px; margin:10px 0}
-  .tbl td{display:flex; gap:10px; justify-content:space-between; align-items:center; white-space:normal}
-  .tbl td::before{content:attr(data-label); color:var(--muted); font-size:12px}
-.tbl td.actions { display:flex; justify-content:flex-start; gap:4px; }
+  .tbl thead{ display:none; }
+  .tbl tr{
+    display:block; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; margin:10px 0;
+  }
+  .tbl td{
+    display:flex; gap:10px; justify-content:space-between; align-items:center; white-space:normal;
+  }
+  .tbl td::before{ content:attr(data-label); color:var(--muted); font-size:12px; }
+  .tbl th:last-child{ width:auto; }
+  .tbl td.actions{ display:flex; justify-content:flex-start; gap:4px; min-width:0; }
 
-  header{ box-shadow:none; }
   .ovr{ flex-direction:column; align-items:stretch; }
-  /* Customers header layout */
+
+  /* Customers header input sizing */
   .card .hd > input#search{ flex:1 1 200px; min-width:0; }
   .card .hd > select#statusFilter{ flex:0 0 auto; }
 }
 
-/* =================== SCROLLBARS =================== */
-.customers-scroll { overflow-x: hidden; }
-html{ scrollbar-gutter: stable both-edges; }
-:root{ color-scheme: dark light; }
-:root{
-  --sb-size: 12px; --sb-radius: 10px;
-  --sb-thumb: #2f3547; --sb-thumb-hover: #3b4362; --sb-thumb-active:#4a568e;
-  --sb-track: transparent;
-}
-body.light{
-  --sb-thumb: #c1c9ee; --sb-thumb-hover: #aeb8ea; --sb-thumb-active:#97a4e6; --sb-track: #eef2ff;
-}
-*{ scrollbar-width: thin; scrollbar-color: var(--sb-thumb) var(--sb-track); }
-*::-webkit-scrollbar{ width: var(--sb-size); height: var(--sb-size); }
-*::-webkit-scrollbar-track{ background: var(--sb-track); }
-*::-webkit-scrollbar-thumb{
-  background: var(--sb-thumb); border-radius: var(--sb-radius);
-  background-clip: padding-box; border: 3px solid transparent;
-}
-*::-webkit-scrollbar-thumb:hover{  background: var(--sb-thumb-hover); }
-*::-webkit-scrollbar-thumb:active{ background: var(--sb-thumb-active); }
-*::-webkit-scrollbar-corner{ background: transparent; }
-.customers-scroll::-webkit-scrollbar-track{
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--sb-radius);
-}
-/* === Fix: light-theme checkboxes appear dark === */
-body { color-scheme: dark; }        /* default app theme */
-body.light { color-scheme: light; } /* override in light mode */
-/* Checkbox polish */
+/* =================== CALENDAR COMPACT (optional right rail) =================== */
+#calendarCard .bd{ padding:12px; }
+#calendarGrid{ gap:4px; }
+.cal-cell{ min-height:56px; padding:6px; }
+.cal-badge{ margin-top:4px; font-size:10.5px; }
+
+/* =================== MISC FIXES =================== */
+.group-hd .tiny{ margin-top:4px; }
+#sortWrap{ display:flex; align-items:center; gap:8px; }
+
+/* Agenda & general checkboxes */
 .agenda-item input[type="checkbox"], input[type="checkbox"]{
-  width: 18px; height: 18px; padding: 0; accent-color: var(--accent);
-}
-/* Sort group layout (label outside the box) */
-#sortWrap { display:flex; align-items:center; gap:8px; }
-
-
-
-/* Segmented control (shared by Show and Sort) */
-.seg{ display:inline-flex; gap:0; background:var(--chip); border:1px solid var(--line); border-radius:10px; padding:2px; overflow:hidden; }
-.seg > button{ background:transparent !important; border:0; color:var(--ink); height:32px; padding:0 12px; border-radius:8px; }
-.seg > button.primary{
-  background:var(--panel) !important;
-  border:0 !important;                        /* kill purple border */
-  box-shadow: inset 0 0 0 1px var(--line);
-  color:var(--ink) !important;
-}
-/* High-contrast (Windows forced-colors) */
-@media (forced-colors: active){
-  .seg > button.primary { outline: 1px solid CanvasText; outline-offset: 2px; }
+  width:18px; height:18px; padding:0; accent-color:var(--accent);
 }
 
-/* Keep outline for keyboard users; suppress only for mouse focus */
-.seg > button:focus:not(:focus-visible) { outline: none; }
-.seg > button:focus-visible {
-  outline: 2px solid var(--line);
-  outline-offset: 2px;
-  border-radius: 8px;
+/* Ensure page remains usable when drawers are pinned (no dim or block) */
+#calendarDrawer.pinned .drawer-scrim,
+#namesDrawer.pinned   .drawer-scrim{
+  opacity:0 !important; pointer-events:none !important; background:transparent !important;
 }
-.btn-icon:focus-visible,
-button.toggle:focus-visible,
-button.primary:focus-visible {
-  outline: 2px solid var(--line);
-  outline-offset: 2px;
-}
-
-
-/* High-contrast (Windows forced-colors) */
-@media (forced-colors: active){
-  .seg > button:focus-visible {
-    outline: 1px solid CanvasText;
-    outline-offset: 2px;
-  }
-}
-
-body.light .seg{ background:#f1f4ff; border-color:var(--line); }
-body.light .seg > button.primary{
-  background:#e9ecff !important;
-  box-shadow: inset 0 0 0 1px #cfd6f8;
-  color:#1e2758 !important;
-}
-/* Bulk review grid for multi-lead paste */
-.bulk-list{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
-  gap:12px;
-}
-.bulk-item .top{ font-size:14px; margin-bottom:4px; }
-
-:root { --content-width: 1040px; }
-
-/* Center the main cards (Customers + Agenda) to the same width */
-.centered {
-  max-width: var(--content-width);
-  margin-left: auto;
-  margin-right: auto;
-}
-/* Right-side drawer for the calendar */
-/* Basic inert shim: block clicks and selection even if inert isn’t supported */
-[inert] { pointer-events: none; user-select: none; -webkit-user-select: none; }
-/* Basic inert shim so clicks and selection are blocked even if inert isn’t supported */
-[inert] { pointer-events: none; user-select: none; -webkit-user-select: none; }
-
-/* Nudge content so it isn't covered while docked */
-body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
-
-/* Optional: tidy group header chips under the client name */
-.group-hd .tiny { margin-top: 4px; }
-/* Docked calendar: no scrim, page stays interactive */
-#calendarDrawer.pinned .drawer-scrim{
-  opacity: 0 !important;
-  pointer-events: none !important;
-  background: transparent !important;
-}
-
-/* (Optional) keep the panel itself interactive */
-#calendarDrawer.pinned .drawer-panel{
-  pointer-events: auto;
-}
-
