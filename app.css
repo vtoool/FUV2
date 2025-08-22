@@ -553,13 +553,39 @@ body.light input[type="checkbox"]:checked{
   position:absolute; inset:0; background:rgba(0,0,0,.45);
   opacity:0; transition:opacity .18s ease; pointer-events:none;
 }
+/* Drawer panel slides out to the LEFT of the rail */
 #calendarDrawer .drawer-panel, #namesDrawer .drawer-panel{
-  position:absolute; top:0; right:0; height:100%; width:min(420px, 92vw);
-  background:var(--panel); border-left:1px solid var(--line);
+  position:absolute; top:0; right: var(--rail-w); height:100%;
+  width: min(420px, 92vw);
+  background: var(--panel); border-left:1px solid var(--line);
   box-shadow: -10px 0 24px rgba(0,0,0,.18);
-  transform:translateX(100%); transition:transform .28s cubic-bezier(.2,.8,.2,1);
+  transform: translateX(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1);
   display:flex; flex-direction:column; gap:0; pointer-events:auto;
 }
+
+/* Scrim covers everything EXCEPT the rail */
+#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim{
+  position:absolute; top:0; left:0; bottom:0; right: var(--rail-w);
+  background: rgba(0,0,0,.45);
+  opacity:0; transition:opacity .18s ease; pointer-events:none;
+}
+
+/* Open states (unchanged) */
+#calendarDrawer.open, #namesDrawer.open{ pointer-events:auto; z-index: 10000; }
+#calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
+#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform:none; }
+
+/* When “pinned”, also reserve drawer width + rail on the page layout */
+body.drawer-pinned .wrap{
+  margin-right: calc(min(420px, 92vw) + var(--rail-w));
+}
+
+/* Slightly softer shadow in light mode (keep yours if you like) */
+body.light #calendarDrawer .drawer-panel,
+body.light #namesDrawer .drawer-panel{
+  box-shadow: -8px 0 20px rgba(15,23,42,.12);
+}
+
 /* Even lighter in light mode */
 body.light #calendarDrawer .drawer-panel,
 body.light #namesDrawer .drawer-panel{
@@ -579,30 +605,44 @@ body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 #calendarDrawer .card, #namesDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
 #calendarDrawer .card .bd, #namesDrawer .card .bd{overflow:auto; }
 
-/* Right edge sticky tabs */
-#sideTabs{
-  position:fixed; right:18px; top:50%; transform:translateY(-50%);
-  display:flex; flex-direction:column; gap:12px; z-index:10000; pointer-events:none;
+/* ==== Fixed tool rail (far right) ==== */
+#toolRail{
+  position: fixed;
+  right: 0; top: 0; bottom: 0;
+  width: var(--rail-w);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+  padding: 10px 8px;
+  z-index: 10001;            /* above scrim so it's always clickable */
+  pointer-events: none;      /* rail ignores clicks… */
 }
-#sideTabs .tab{
-  pointer-events:auto; width:46px; height:46px; border-radius:14px;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--chip); border:1px solid var(--line); box-shadow: 0 6px 14px rgba(0,0,0,.14); cursor:pointer;
+#toolRail .tool{
+  pointer-events: auto;      /* …buttons do get clicks */
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--chip);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-1);
+  cursor: pointer;
 }
-#sideTabs .tab[aria-pressed="true"]{
+#toolRail .tool[aria-pressed="true"]{
   background: color-mix(in oklab, var(--accent) 16%, var(--chip) 84%);
   box-shadow: 0 6px 14px rgba(0,0,0,.14);
 }
-body.light #sideTabs .tab{ 
-   background:#fff;
+body.light #toolRail .tool{
+  background:#fff;
   box-shadow: 0 6px 14px rgba(15,23,42,.10);
-
 }
 
-/* Mobile tabs at bottom-right */
+/* Mobile: turn the rail into a small horizontal bar */
 @media (max-width:760px){
-  #sideTabs{ right:18px; top:auto; bottom:14px; transform:none; flex-direction:row; }
+  #toolRail{
+    right: 12px; top: auto; bottom: 14px; height: auto; width: auto;
+    flex-direction: row; padding: 0;
+  }
 }
+
 
 /* =================== NAMES TOOL LIST =================== */
 #namesCard .bd{ padding:12px; }
