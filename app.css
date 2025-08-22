@@ -179,7 +179,7 @@ body.modal-open{ overflow:hidden; }
   background: color-mix(in oklab, var(--chip) 70%, #1a2236 30%);
   border:1px solid color-mix(in oklab, var(--line) 60%, #425272 40%);
   color:#eef3ff;
-  font-weight:600;
+  font-weight:400;
 }
 .pill a{ color:inherit; }    /* client name links inherit */
 
@@ -191,13 +191,23 @@ body.modal-open{ overflow:hidden; }
 .copy-btn:active{ transform:translateY(1px); }
 body.light .badge, body.light .copy-btn{ background:#fff; color:var(--ink) }
 body.light .pill{
-  background:#f2f5ff;              /* soft indigo surface */
+  background:#f2f5ff;
   border:1px solid #cfd6f8;
-  color:#1f2a56;                    /* darker text for contrast */
+  color:#1f2a56;
+  font-weight:400;                /* normal for Route/Pax/Lead, etc. */
 }
+
 
 /* Names tool: clicked pills appear muted but stay clickable */
 .name-pill.used{ opacity:.55; filter:saturate(.6); background:var(--chip); border-color:var(--line); }
+/* Client name pill only */
+.agenda-item .pill:first-of-type,
+.pill.client,
+.client-pill,
+.pill--client{
+  font-weight:600;                /* slightly bolder than the rest */
+}
+.agenda-item .pill:first-of-type a{ font-weight:inherit; }
 
 /* Btn danger */
 .btn-danger{
