@@ -255,6 +255,21 @@ body.light .kpi .box{ background:#fff; border-color:var(--line) }
   display: table-cell; text-align:right; white-space:nowrap; padding:12px 8px 12px 12px; overflow:visible; text-overflow:clip; min-width:220px;
 }
 .tbl th:last-child { width: 220px; }
+/* Wider Contact; tighter Status/Date/NextAction (desktop only) */
+@media (min-width: 761px){
+  /* Give Contact more room */
+  #clientsTbl td[data-label="Contact"]{ min-width: 360px; }   /* bump to 380–420px if you want even more */
+  #clientsTbl th:nth-child(2), #clientsTbl td:nth-child(2){ width:auto; }
+
+  /* Squeeze these columns */
+  #clientsTbl th:nth-child(3), #clientsTbl td:nth-child(3){ width: 120px; } /* Status */
+  #clientsTbl th:nth-child(4), #clientsTbl td:nth-child(4){ width: 120px; } /* Date Taken */
+  #clientsTbl th:nth-child(5), #clientsTbl td:nth-child(5){ width: 120px; } /* Next Action */
+
+  /* Keep Actions fixed (you already had this) */
+  #clientsTbl th:last-child{ width:220px; }
+  .tbl td.actions{ min-width:220px; }
+}
 
 .note-preview{color:#9aa3bb; cursor:pointer; font-family:ui-monospace,Menlo,Consolas,monospace}
 .note-preview:hover{text-decoration:underline}
@@ -592,21 +607,7 @@ body.light .client-pill{
   border-color: var(--pill-li-br) !important;
   color: var(--pill-li-fg) !important;
 }
-/* Wider Contact; tighter Status/Date/NextAction (desktop only) */
-@media (min-width: 761px){
-  /* Give Contact the space */
-  #clientsTbl td[data-label="Contact"]{ min-width: 360px; }   /* was 240px */
-  #clientsTbl th:nth-child(2), #clientsTbl td:nth-child(2){ width:auto; }
 
-  /* Squeeze these columns */
-  #clientsTbl th:nth-child(3), #clientsTbl td:nth-child(3){ width: 120px; } /* Status */
-  #clientsTbl th:nth-child(4), #clientsTbl td:nth-child(4){ width: 120px; } /* Date Taken */
-  #clientsTbl th:nth-child(5), #clientsTbl td:nth-child(5){ width: 120px; } /* Next Action */
-
-  /* Keep Actions fixed (you already had this) */
-  #clientsTbl th:last-child{ width:220px; }
-  .tbl td.actions{ min-width:220px; }
-}
 
 
 /* Keep links inside pills from turning blue */
