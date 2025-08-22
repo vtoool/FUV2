@@ -290,6 +290,16 @@ body.light .group-hd .label{ background:#fff; }
 .notify-row{ display:flex; align-items:center; gap:10px; margin:6px 0 0 38px; padding:10px; border:1px dashed var(--line); border-radius:12px; background:var(--surface); }
 .notify-row input[type="time"]{ height:34px; }
 .notify-row button{ height:34px; }
+/* Agenda group header name (when sorting By client) */
+body:not(.light) .group-hd .label{
+  color:#fff !important;
+  font-weight:700;
+  background:var(--chip);
+  border-color:var(--pill-dk-br);
+}
+
+/* If you also want stronger weight in light mode */
+body.light .group-hd .label{ font-weight:700; }
 
 /* =================== CALENDAR =================== */
 #calendarGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:8px }
@@ -553,12 +563,7 @@ body.light #sideTabs .tab{ background:#fff; }
 #addCard{ display:none; }
 
 /* Force the first chip in the notes row (the name) to be white in dark modee */
-body:not(.light) .note-row .slab .pill:first-of-type{
-  background:#fff !important;
-  border-color:#cfd6f8 !important;
-  color:#0f1f56 !important;
-  font-weight:600 !important;
-}
+
 /* === FIX: Client name pill ===
    Dark mode: same dark pill as others, WHITE text.
    Light mode: normal light pill.  */
