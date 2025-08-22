@@ -185,7 +185,30 @@ body.light .badge, body.light .pill, body.light .copy-btn{ background:#fff; colo
 .btn-danger:hover{ filter:brightness(1.03) }
 .btn-danger:active{ transform:translateY(1px) }
 .btn-danger:focus{ box-shadow:0 0 0 3px var(--danger-ring) !important }
-#wipeAll{ border-radius:16px; height:40px; padding:0 16px; }
+/* Quiet danger look for Wipe All — matches calendar off-day vibes */
+#wipeAll{
+  border-radius:16px;
+  height:40px;
+  padding:0 16px;
+}
+
+body.light #wipeAll{
+  background:linear-gradient(0deg, rgba(242,85,85,.10), rgba(242,85,85,.10)), #fff !important;
+  border:1px solid #ffd7d7 !important;
+  color:#a23b3b !important;
+  box-shadow:none !important;
+}
+body.light #wipeAll:hover{
+  background:linear-gradient(0deg, rgba(242,85,85,.14), rgba(242,85,85,.14)), #fff !important;
+}
+
+body:not(.light) #wipeAll{
+  background:linear-gradient(0deg, rgba(242,85,85,.12), rgba(242,85,85,.08)), var(--surface) !important;
+  border:1px solid #a55c5c !important;
+  color:#ffbcbc !important;
+  box-shadow:inset 0 0 0 1px rgba(220,120,120,.15) !important;
+}
+
 
 /* Lead paste block */
 .lead-block{ display:block; margin-bottom:10px; }
@@ -389,9 +412,14 @@ html{ scrollbar-gutter: stable both-edges; }
 }
 .seg > button.primary::before, .seg > button.primary::after{ content:none !important; }
 body.light .seg{ background:#fff; border-color:var(--line); }
+/* Light theme: active segmented button = higher contrast, dark text */
 body.light .seg > button.primary{
-  background: color-mix(in oklab, var(--accent) 22%, #fff 78%) !important; color:#fff !important;
+  background:#e9edff !important;           /* light indigo surface */
+  color:#1f2a56 !important;                 /* dark text for contrast */
+  box-shadow:inset 0 0 0 1px #cfd6f8;       /* crisp outline */
+  border:0;                                 /* keep edges clean */
 }
+
 
 /* Keyboard outlines */
 .seg > button:focus:not(:focus-visible) { outline: none; }
