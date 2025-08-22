@@ -495,7 +495,6 @@ body.light #ctClient option:hover, body.light #ctClient option:checked { backgro
 
 /* =================== SCROLLBARS =================== */
 .customers-scroll { overflow-x: hidden; }
-html{ scrollbar-gutter: stable; }  /* no extra strip on the opposite edge */
 *{ scrollbar-width: thin; scrollbar-color: var(--sb-thumb) var(--sb-track); }
 *::-webkit-scrollbar{ width: var(--sb-size); height: var(--sb-size); }
 *::-webkit-scrollbar-track{ background: var(--sb-track); }
