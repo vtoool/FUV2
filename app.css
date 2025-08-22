@@ -1,21 +1,21 @@
 /* =====================================================================
-   FOLLOW‑UP CRM — Clean, High‑Contrast, Simplified Theme (Full CSS)
-   - Dark default; crisp Light mode
-   - Preserves all original selectors/IDs/classes (no JS breakage)
+   FOLLOW‑UP CRM — Clean, High‑Contrast, Simplified Theme
+   - Dark by default, crisp Light mode
    - Clear segmented controls, consistent pills
    - Centered checkbox checkmark (iOS-safe)
+   - All original selectors preserved (no JS breakage)
    ===================================================================== */
 
 /* ---------------- TOKENS ---------------- */
 :root{
   /* Dark palette */
   --bg:#0d1117;          /* page */
-  --panel:#121723;       /* big cards */
-  --surface:#0f141c;     /* inputs/rows */
-  --chip:#141b26;        /* small pills */
-  --ink:#ecf1fa;         /* primary text */
-  --muted:#9aa6c5;       /* secondary text */
-  --line:#27354b;        /* hairline */
+  --panel:#131922;       /* big cards */
+  --surface:#0f141b;     /* inputs/rows */
+  --chip:#151c26;        /* small pills */
+  --ink:#e8edf7;         /* primary text */
+  --muted:#98a5c2;       /* secondary text */
+  --line:#27344a;        /* hairline */
 
   /* Accent */
   --accent:#6b7cff;      /* indigo */
@@ -23,7 +23,6 @@
 
   /* Danger */
   --danger:#f25555;
-  --danger-border:#bf3a3a;
   --danger-ring:rgba(242,85,85,.22);
 
   /* Layout */
@@ -37,9 +36,6 @@
   /* Scrollbars */
   --sb-size:12px; --sb-radius:10px;
   --sb-thumb:#2f3b56; --sb-thumb-hover:#3a4a74; --sb-thumb-active:#4a64a9; --sb-track:transparent;
-
-  /* Typography */
-  --h1:28px; --h2:18px; --body:14.5px;
 }
 
 /* Light palette — higher contrast, no dark chips */
@@ -68,7 +64,6 @@ html{ scrollbar-gutter:stable both-edges; }
 body{
   margin:0;
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  font-size:var(--body);
   background:var(--bg);
   color:var(--ink);
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
@@ -78,7 +73,8 @@ a{ color:#8ea3ff; text-decoration:none; }
 a:hover{ text-decoration:underline; }
 
 .wrap{
-  width:100%; max-width:var(--page-max);
+  width:100%;
+  max-width:var(--page-max);
   margin-inline:auto;
   padding-inline:max(var(--page-pad),env(safe-area-inset-left),12px);
   padding-block:16px;
@@ -91,13 +87,13 @@ header{
   position:sticky;top:0;z-index:5;
   background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));
   border-bottom:1px solid var(--line);
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
 }
 body.light header{
-  background:linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,0));
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0));
 }
 header .wrap{ padding-block:10px; }
-h1{font-size:var(--h1);line-height:1.1;margin:0 0 4px;font-weight:800}
+h1{font-size:28px;line-height:1.1;margin:0 0 4px;font-weight:800}
 .sub{color:var(--muted);font-size:13.5px}
 
 /* ---------------- CARDS & CONTROLS ---------------- */
@@ -133,7 +129,7 @@ button{
   cursor:pointer;border-radius:12px;
   background:linear-gradient(180deg,#20283a,#121a29);
   border:1px solid #2b3954;color:var(--ink);box-shadow:var(--sh-1);
-  transition:transform .12s ease, filter .12s ease, background .15s ease, color .15s ease;
+  transition:transform .12s ease, filter .12s ease;
 }
 button:hover{filter:brightness(1.05)}
 button:active{transform:translateY(1px)}
@@ -149,7 +145,6 @@ button.ghost{background:transparent;border-color:var(--line)}
 }
 body.light .btn-icon{background:#fff}
 
-/* Action bar */
 .form-actions{display:flex;gap:8px;justify-content:flex-end;align-items:center}
 .form-actions.is-end{align-self:end}
 
@@ -170,7 +165,279 @@ body.light .btn-icon{background:#fff}
   background:var(--chip);border:1px solid var(--line)
 }
 body.light .badge,body.light .pill{background:#fff}
-.pill a{ white-space:nowrap; }
+
+/* Copy chip */
 .copy-btn{
   margin-left:6px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;
-  border-radius:10px;border:1px solid var(--line);background
+  border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  font-size:12px;line-height:1;cursor:pointer;padding:0
+}
+
+/* Danger button */
+.btn-danger{
+  background:linear-gradient(180deg,#ff6c6c,#dd3e3e);
+  border-color:#c23a3a;color:#fff
+}
+.btn-danger:focus{box-shadow:0 0 0 3px var(--danger-ring)}
+#wipeAll{border-radius:16px;height:40px;padding:0 16px}
+
+/* ---------------- SEGMENTED CONTROLS ---------------- */
+.seg{
+  display:inline-flex;gap:6px;padding:4px;
+  background:var(--chip);border:1px solid var(--line);border-radius:14px
+}
+.seg>button{
+  background:transparent !important;border:0;color:var(--ink);
+  height:34px;padding:0 14px;border-radius:10px;transition:background .15s ease
+}
+.seg>button.primary{
+  background:color-mix(in oklab, var(--accent) 16%, var(--surface) 84%) !important;
+  color:#fff !important;box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent)
+}
+/* never run CTA sheen inside segments */
+.seg>button.primary::before,.seg>button.primary::after{content:none !important}
+body.light .seg{background:#fff}
+
+/* ---------------- KPI ---------------- */
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi .box{background:var(--chip);border:1px solid var(--line);border-radius:16px;padding:14px}
+body.light .kpi .box{background:#fff}
+.kpi .num{font-size:22px;font-weight:800}
+
+/* ---------------- TABLE ---------------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.tbl th,.tbl td{
+  padding:12px;border-bottom:1px solid var(--line);
+  text-align:left;font-size:13.5px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.tbl th{color:#a8b0c4;font-weight:700;position:sticky;top:0;background:var(--panel)}
+.tbl td.actions{
+  display:table-cell;text-align:right;white-space:nowrap;padding:12px 8px 12px 12px;min-width:220px
+}
+.tbl th:last-child{width:220px}
+
+.contact-line{display:flex;align-items:center;gap:8px;max-width:100%}
+.contact-line a.truncate{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-line .copy-btn{flex:0 0 auto}
+#clientsTbl td[data-label="Contact"] .contact-line + .contact-line{margin-top:6px}
+#clientsTbl td[data-label="Contact"]{min-width:240px}
+
+.note-preview{color:#9aa3bb;cursor:pointer;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.note-preview:hover{text-decoration:underline}
+
+/* ---------------- AGENDA ---------------- */
+.agenda-item{
+  display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;
+  padding:10px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line)
+}
+.agenda-item.done{opacity:.58}
+
+.group-hd{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+.group-hd::before,.group-hd::after{content:"";flex:1;height:1px;background:var(--line)}
+.group-hd .label{font-size:12.5px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--chip);color:#dfe6ff}
+body.light .group-hd .label{background:#fff;color:#243062}
+
+.tiny{font-size:11.5px;color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+
+.progress{height:12px;border-radius:999px;background:var(--chip);border:1px solid var(--line);overflow:hidden}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0}
+
+/* Inline notify editor */
+.notify-row{
+  display:flex;align-items:center;gap:10px;margin:6px 0 0 38px;
+  padding:10px;border:1px dashed var(--line);border-radius:12px;background:var(--surface)
+}
+.notify-row input[type="time"]{height:36px}
+.notify-row button{height:36px}
+
+/* ---------------- CALENDAR ---------------- */
+#calendarGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px}
+.cal-head{font-weight:700;font-size:12px;opacity:.85;padding:4px 2px;text-align:center}
+.cal-cell{
+  border:1px solid var(--line);border-radius:12px;padding:10px;min-height:76px;background:var(--surface);cursor:pointer
+}
+.cal-cell .d{font-weight:700;font-size:12px;opacity:.92}
+.cal-badge{display:inline-block;margin-top:8px;font-size:11.5px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:#dfe6ff;background:var(--chip)}
+body.light .cal-badge{background:#f6f8ff;color:#263066}
+.cal-cell.offday{background:linear-gradient(0deg, rgba(242,85,85,.10), rgba(242,85,85,.10)), var(--surface);border-color:#3c2c30}
+.cal-cell.offday .d{color:#eab7bb}
+body.light .cal-cell.offday{background:linear-gradient(0deg, rgba(255,120,120,.16), rgba(255,120,120,.16)), #fff;border-color:#ffd7d7}
+body.light .cal-cell.offday .d{color:#a23b3b}
+
+.cal-hd{display:flex;align-items:center;gap:10px}
+.cal-hd .space{flex:1}
+.cal-month{display:flex;align-items:center;gap:10px}
+#calTitle{display:block;text-align:center}
+.settings-btn{height:36px;padding:8px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+
+/* Calendar settings panel */
+#calSettings{
+  display:block;overflow:hidden;max-height:0;opacity:0;transform:translateY(-4px);
+  transition:max-height .28s ease, opacity .2s ease, transform .2s ease, margin .2s ease, padding .2s ease;
+  margin-top:12px;margin-bottom:0;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:0
+}
+#calSettings.open{max-height:840px;opacity:1;transform:none;margin-bottom:12px;padding:16px}
+.wdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;margin-top:8px}
+.wdays .cell{border:1px dashed var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:78px}
+.wdays .cell input[type="checkbox"]{width:20px;height:20px;accent-color:var(--accent)}
+.wdays .cell span{font-size:12.5px}
+.ovr{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#ovrDate{min-width:180px} #ovrType{min-width:190px} #addOverride{height:36px}
+.ovr-list{margin-top:10px;padding-left:0;list-style:none}
+.ovr-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:14px}
+.ovr-list li button{height:34px;padding:0 10px}
+
+/* ---------------- MODALS ---------------- */
+body.modal-open{overflow:hidden}
+.modal{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9998;overflow:auto
+}
+.modal.open{display:flex}
+.modal .card{width:min(920px,100%);max-height:88vh;overflow:auto;animation:pop .16s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+#addCard{display:none}
+#addCard .bd{padding-bottom:74px}
+.form-footer{
+  position:sticky;bottom:0;inset-inline:0;display:flex;gap:8px;justify-content:flex-end;align-items:center;
+  padding:12px 14px;margin:12px -12px -12px;background:linear-gradient(180deg, rgba(0,0,0,0), var(--panel) 30%);
+  border-top:1px solid var(--line)
+}
+
+/* ---------------- DRAWERS (Calendar & Names) ---------------- */
+#calendarDrawer,#namesDrawer{position:fixed;inset:0;pointer-events:none;z-index:9990}
+#calendarDrawer .drawer-scrim,#namesDrawer .drawer-scrim{
+  position:absolute;inset:0;background:rgba(0,0,0,.46);opacity:0;transition:opacity .18s ease;pointer-events:none
+}
+#calendarDrawer .drawer-panel,#namesDrawer .drawer-panel{
+  position:absolute;top:0;right:0;height:100%;width:min(420px,92vw);
+  background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--sh-2);
+  transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;pointer-events:auto
+}
+#calendarDrawer.open,#namesDrawer.open{pointer-events:auto}
+#calendarDrawer.open .drawer-scrim,#namesDrawer.open .drawer-scrim{opacity:1;pointer-events:auto}
+#calendarDrawer.open .drawer-panel,#namesDrawer.open .drawer-panel{transform:none}
+
+#calendarDrawer.open.pinned,#namesDrawer.open.pinned{pointer-events:none}
+#calendarDrawer.open.pinned .drawer-panel,#namesDrawer.open.pinned .drawer-panel{pointer-events:auto}
+#calendarDrawer.pinned .drawer-scrim,#namesDrawer.pinned .drawer-scrim{opacity:0 !important;pointer-events:none !important;background:transparent !important}
+body.drawer-pinned .wrap{margin-right:min(420px,92vw)}
+
+#calendarDrawer .card,#namesDrawer .card{border:0;border-radius:0;height:100%;display:flex;flex-direction:column}
+#calendarDrawer .card .bd,#namesDrawer .card .bd{flex:1 1 auto;overflow:auto}
+
+/* Right edge sticky tabs */
+#sideTabs{position:fixed;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:10000;pointer-events:none}
+#sideTabs .tab{
+  pointer-events:auto;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:var(--chip);border:1px solid var(--line);box-shadow:var(--sh-1);cursor:pointer
+}
+body.light #sideTabs .tab{background:#fff}
+@media (max-width:760px){#sideTabs{right:10px;top:auto;bottom:14px;transform:none;flex-direction:row}}
+
+/* ---------------- NAMES TOOL ---------------- */
+#namesCard .bd{padding:12px}
+#namesList{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+#namesList .name-item{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;cursor:pointer;user-select:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#namesList .name-item:hover{filter:brightness(1.05)}
+.name-pill.used{opacity:.55;filter:saturate(.6);background:var(--chip);border-color:var(--line)}
+
+/* ---------------- ADD CUSTOM TASK POPUP ---------------- */
+.popover{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--sh-2);margin-top:10px}
+#customTaskPop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:9999;padding:18px}
+#customTaskPop .sheet{width:min(560px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--sh-2)}
+#customTaskPop .row{grid-template-columns:2fr 1fr}
+#ctClient{min-width:320px}
+#ctClient option{background:var(--panel);color:var(--ink)}
+#ctClient option:hover,#ctClient option:checked{background:#2f3547;color:var(--ink)}
+body.light #ctClient option{background:#fff;color:var(--ink)}
+body.light #ctClient option:hover,body.light #ctClient option:checked{background:#e9ecff;color:#1e2758}
+
+/* ---------------- TOASTS ---------------- */
+#toaster{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:12px;z-index:9999}
+.toast{min-width:220px;max-width:380px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);box-shadow:var(--sh-2);font-size:13.5px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(-6px);transition:.18s ease-out}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:#2a9d6a}.toast.err{border-color:#b94444}
+
+/* ---------------- LAYOUT HELPERS ---------------- */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.row.single{grid-template-columns:1fr}
+.row.agenda-layout{grid-template-columns:1fr;gap:16px;align-items:start}
+.right{display:flex;gap:8px;justify-content:flex-end}
+.group-hd .tiny{margin-top:4px}
+#sortWrap{display:flex;align-items:center;gap:8px}
+
+/* Flash Agenda date when set from calendar */
+@keyframes agendaDateGlow{
+  0%{box-shadow:0 0 0 0 rgba(107,124,255,.45), 0 0 0 6px rgba(107,124,255,.20)}
+  100%{box-shadow:0 0 0 0 rgba(107,124,255,0)}
+}
+#agendaDate.glow{animation:agendaDateGlow 900ms ease-out;border-color:#6372f2;background:linear-gradient(180deg, rgba(107,124,255,.10), rgba(107,124,255,.04)), var(--surface)}
+@media (prefers-reduced-motion:reduce){#agendaDate.glow{animation:none}}
+
+/* ---------------- MOBILE ---------------- */
+@media (max-width:760px){
+  .wrap{padding-block:12px}
+  .row{grid-template-columns:1fr !important}
+  .kpi{grid-template-columns:repeat(2,1fr)}
+  .tbl thead{display:none}
+  .tbl tr{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:10px 0}
+  .tbl td{display:flex;gap:10px;justify-content:space-between;align-items:center;white-space:normal}
+  .tbl td::before{content:attr(data-label);color:var(--muted);font-size:12.5px}
+  .tbl th:last-child{width:auto}
+  .tbl td.actions{display:flex;justify-content:flex-start;gap:6px;min-width:0}
+  .ovr{flex-direction:column;align-items:stretch}
+  .card .hd>input#search{flex:1 1 200px;min-width:0}
+  .card .hd>select#statusFilter{flex:0 0 auto}
+}
+
+/* ---------------- SCROLLBARS ---------------- */
+*{scrollbar-width:thin;scrollbar-color:var(--sb-thumb) var(--sb-track)}
+*::-webkit-scrollbar{width:var(--sb-size);height:var(--sb-size)}
+*::-webkit-scrollbar-track{background:var(--sb-track)}
+*::-webkit-scrollbar-thumb{
+  background:var(--sb-thumb);border-radius:var(--sb-radius);
+  background-clip:padding-box;border:3px solid transparent
+}
+*::-webkit-scrollbar-thumb:hover{background:var(--sb-thumb-hover)}
+*::-webkit-scrollbar-thumb:active{background:var(--sb-thumb-active)}
+*::-webkit-scrollbar-corner{background:transparent}
+.customers-scroll{overflow-x:hidden}
+.customers-scroll::-webkit-scrollbar-track{background:var(--surface);border:1px solid var(--line);border-radius:var(--sb-radius)}
+
+/* ---------------- ACCESSIBILITY / INERT ---------------- */
+[inert]{pointer-events:none;user-select:none;-webkit-user-select:none}
+
+/* ---------------- CHECKBOX (centered, iOS-safe) ---------------- */
+/* 18x18 box; glyph perfectly centered using grid + mask. */
+input[type="checkbox"]{
+  appearance:none;-webkit-appearance:none;
+  width:18px;height:18px;border-radius:6px;
+  border:1px solid var(--line);background:var(--surface);
+  display:inline-grid;place-items:center;vertical-align:middle;line-height:1;
+  transition:background .14s ease,border-color .14s ease,box-shadow .14s ease;
+}
+input[type="checkbox"]:hover{box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent)}
+input[type="checkbox"]::before{
+  content:"";width:12px;height:12px;display:block;
+  background:#fff;
+  -webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 10"><path fill="black" d="M4.5 7.5L1.8 4.8 0.7 6l3.8 3.3L11.3 2.3 10.2 1z"/></svg>') center/contain no-repeat;
+          mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 10"><path fill="black" d="M4.5 7.5L1.8 4.8 0.7 6l3.8 3.3L11.3 2.3 10.2 1z"/></svg>') center/contain no-repeat;
+  transform:scale(0);transition:transform .14s ease; /* stays perfectly centered */
+}
+input[type="checkbox"]:checked{
+  background:color-mix(in oklab, var(--accent) 92%, black 6%);
+  border-color:color-mix(in oklab, var(--accent) 70%, black 10%);
+}
+input[type="checkbox"]:checked::before{transform:scale(1)}
+body.light input[type="checkbox"]{background:#fff;border-color:rgba(15,23,42,.22)}
+body.light input[type="checkbox"]:checked{
+  background:color-mix(in oklab, var(--accent) 94%, white 6%);
+  border-color:color-mix(in oklab, var(--accent) 70%, black 6%);
+}
+
+/* ---------------- MISC (kept from spec) ---------------- */
+.add-btn{width:36px;height:36px;border-radius:999px;background:linear-gradient(180deg,var(--accent),#5d6ef2);color:#fff;border:1px solid #5865f2;box-shadow:var(--sh-1);font-weight:900;line-height:1;padding:0}
+body.modal-open{overflow:hidden}
+#calendarDrawer.pinned .drawer-scrim,#namesDrawer.pinned .drawer-scrim{opacity:0 !important;pointer-events:none !important;background:transparent !important}
