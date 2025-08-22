@@ -286,7 +286,7 @@ body.light .kpi .box{ background:#fff; border-color:var(--line) }
 .agenda-item.done{opacity:.58}
 .group-hd{ display:flex; align-items:center; gap:8px; margin:12px 0 6px }
 .group-hd::before, .group-hd::after{ content:""; flex:1; height:1px; background:var(--line) }
-.group-hd .label{ font-size:12px; padding:4px 10px; border:1px solid var(--line); border-radius:999px; background:var(--chip); color:#1e2758 }
+.group-hd .label{ font-size:12px; padding:4px 10px; border:1px solid var(--line); border-radius:999px; background:var(--chip); color:#ffffff }
 body.light .group-hd .label{ background:#fff; }
 
 /* Meta */
