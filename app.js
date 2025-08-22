@@ -1265,7 +1265,6 @@ const nameText =
     const row = document.createElement('tr'); row.className='note-row'; row.setAttribute('data-for', id);
     const td = document.createElement('td'); td.colSpan = 6;
     const chips = [
-      nameText ? `<span class="pill client-pill">${escapeHtml(nameText)}</span>` : '',
       c.route ? `<span class="pill">Route: ${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates: ${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax: ${escapeHtml(String(c.pax))}</span>` : '',
