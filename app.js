@@ -489,6 +489,7 @@ function initNamesDrawer(){
   }
 
   const listEl = drawer.querySelector('#namesList');
+listEl.style.gap = '14px';
 
   // Pools + generator
 
