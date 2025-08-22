@@ -573,7 +573,7 @@ body.light .client-pill{
   color:#0f1f56;
   font-weight:600;
 }
-/* Force the first chip in the notes row (the name) to be white in dark mode */
+/* Force the first chip in the notes row (the name) to be white in dark modee */
 body:not(.light) .note-row .slab .pill:first-of-type{
   background:#fff !important;
   border-color:#cfd6f8 !important;
