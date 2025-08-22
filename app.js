@@ -1476,7 +1476,7 @@ function renderTask(t, opts = {}){
     <input type="checkbox" ${t.status==='done'?'checked':''} data-taskid="${t.id}"/>
     <div>
       <div><strong>${icon} ${escapeHtml(t.title)}</strong>
-        ${showClientPill && client ? `<span class="pill">${escapeHtml(client)}</span>` : ''}
+        ${showClientPill && client ? `<span class="pill client-pill">${escapeHtml(client)}</span>` : ''}
         ${contactHtml}
         ${chipsHtml}
       </div>
