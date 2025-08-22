@@ -490,6 +490,35 @@ function initNamesDrawer(){
 
   const listEl = drawer.querySelector('#namesList');
 listEl.style.gap = '14px';
+// Tool rail -> open corresponding drawer to the left of the rail
+const railButtons = document.querySelectorAll('#toolRail .tool');
+const drawers = ['calendarDrawer','namesDrawer']
+  .map(id => document.getElementById(id))
+  .filter(Boolean);
+
+function closeAllDrawers(){
+  drawers.forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('#toolRail .tool')
+    .forEach(b => b.setAttribute('aria-pressed','false'));
+}
+
+railButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const drawer = document.getElementById(targetId);
+    const willOpen = !drawer.classList.contains('open');
+
+    closeAllDrawers();
+    if (willOpen){
+      drawer.classList.add('open');
+      btn.setAttribute('aria-pressed','true');
+    }
+  });
+});
+
+// Click on scrim closes the active drawer
+document.querySelectorAll('#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim')
+  .forEach(s => s.addEventListener('click', closeAllDrawers));
 
   // Pools + generator
 
