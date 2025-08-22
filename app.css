@@ -1,7 +1,8 @@
 /* =====================================================================
    FOLLOW-UP CRM — Full CSS (High-Contrast + Simplified, Feature-Parity)
    - Dark default, crisp Light
-   - Segmented controls show clear active state (no shimmer bleed)
+   - Light-mode buttons are LIGHT (no dark bleed)
+   - Segmented controls show clear active state
    - Checkbox checkmark perfectly centered (iOS-safe)
    - All original selectors/IDs preserved
    ===================================================================== */
@@ -21,13 +22,12 @@
   --sh-1:0 6px 18px rgba(0,0,0,.20);
   --sh-2:0 12px 30px rgba(0,0,0,.28);
 
-  --sb-size: 12px; --sb-radius: 10px;
-  --sb-thumb: #2f3b56; --sb-thumb-hover: #3a4a74; --sb-thumb-active:#4a64a9;
-  --sb-track: transparent;
+  --sb-size:12px; --sb-radius:10px;
+  --sb-thumb:#2f3b56; --sb-thumb-hover:#3a4a74; --sb-thumb-active:#4a64a9;
+  --sb-track:transparent;
 
-  /* Checkbox global size */
-  --chk-size: 22px;   /* tweak this to scale all checkboxes */
-  --chk-radius: 8px;
+  /* Checkbox */
+  --chk-size:22px; --chk-radius:8px;
 }
 
 body.light{
@@ -35,6 +35,7 @@ body.light{
   --bg:#eef2f7; --panel:#ffffff; --card:#ffffff; --chip:#ffffff; --surface:#ffffff;
   --ink:#0e1420; --muted:#56637f; --line:rgba(15,23,42,.14);
   --accent:#6b7cff; --accent-2:#1dbf71;
+
   --danger:#e24b4b; --danger-border:#c64545; --danger-ring:rgba(226,75,75,.22);
 
   --sb-thumb:#c5cee7; --sb-thumb-hover:#b6c3ee; --sb-thumb-active:#9fb1ec; --sb-track:#eef3ff;
@@ -72,9 +73,7 @@ header{
   border-bottom:1px solid var(--line);
   backdrop-filter: blur(8px);
 }
-body.light header{
-  background:linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,0));
-}
+body.light header{ background:linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,0)); }
 header .wrap{ padding-block:10px; }
 h1{font-size:28px; margin:0 0 4px; font-weight:800; line-height:1.1}
 .sub{color:var(--muted); font-size:13.5px}
@@ -90,33 +89,50 @@ h1{font-size:28px; margin:0 0 4px; font-weight:800; line-height:1.1}
 label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
 input,select,textarea,button{
   border-radius:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
-  padding:10px 12px; outline:none; height:40px; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  padding:10px 12px; outline:none; height:40px; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
 }
 textarea{height:auto; min-height:72px; resize:vertical}
 input:focus,select:focus,textarea:focus{ border-color:color-mix(in oklab, var(--accent) 55%, white 0%); box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent) }
 body.light input, body.light select, body.light textarea{ background:#fff; color:var(--ink); border-color:var(--line); }
 
-/* Flash Agenda date when set from calendar */
-@keyframes agendaDateGlow{
-  0%   { box-shadow: 0 0 0 0 rgba(107,124,255,.45), 0 0 0 6px rgba(107,124,255,.20); }
-  100% { box-shadow: 0 0 0 0 rgba(107,124,255,0); }
+/* =================== BUTTONS =================== */
+/* Dark-mode default button */
+button{
+  cursor:pointer;
+  background:linear-gradient(180deg,#222a3c,#131a2a);
+  border:1px solid #2b3954; color:var(--ink);
+  box-shadow:var(--sh-1);
 }
-#agendaDate.glow{
-  animation: agendaDateGlow 900ms ease-out;
-  border-color:#6372f2;
-  background:linear-gradient(180deg, rgba(107,124,255,.10), rgba(107,124,255,.04)), var(--surface);
-}
-@media (prefers-reduced-motion: reduce){ #agendaDate.glow{ animation:none; } }
-
-/* Buttons */
-button{cursor:pointer; background:linear-gradient(180deg,#222a3c,#131a2a); border:1px solid #2b3954; color:var(--ink); box-shadow:var(--sh-1); }
 button:hover{ filter:brightness(1.05); }
 button:active{ transform:translateY(1px); }
-button.primary{ background:linear-gradient(180deg,var(--accent),#5d6ef2); border-color:color-mix(in oklab, var(--accent) 70%, black 10%); color:#fff }
-button.ghost{ background:transparent }
 
-.btn-icon{width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:12px; background:var(--chip); border:1px solid var(--line)}
-body.light .btn-icon{ background:#fff; border:1px solid var(--line) }
+/* Light-mode default button: **THIS** is the key fix */
+body.light button:not(.primary):not(.btn-danger):not(.ghost){
+  background:#fff;
+  border:1px solid var(--line);
+  color:var(--ink);
+  box-shadow:0 2px 8px rgba(15,23,42,.06);
+}
+
+/* Variants */
+button.primary{
+  background:linear-gradient(180deg,var(--accent),#5d6ef2);
+  border-color:color-mix(in oklab, var(--accent) 70%, black 10%); color:#fff;
+}
+button.ghost{ background:transparent; }
+
+.btn-icon{
+  width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; padding:0;
+  border-radius:12px; background:var(--chip); border:1px solid var(--line)
+}
+body.light .btn-icon{ background:#fff; }
+
+/* Chip-style toggle buttons (used across toolbar) */
+.toggle{
+  height:38px; padding:6px 12px; border-radius:999px; font-size:14px;
+  background:var(--chip); color:var(--ink); border:1px solid var(--line);
+}
+body.light .toggle{ background:#fff; }
 
 /* === Add Customer modal + plus button === */
 body.modal-open{ overflow:hidden; }
@@ -155,8 +171,7 @@ body.modal-open{ overflow:hidden; }
   font-size:12px; line-height:1; cursor:pointer; padding:0;
 }
 .copy-btn:active{ transform:translateY(1px); }
-body.light .badge, body.light .pill{ background:#fff; color:var(--ink) }
-body.light .copy-btn{ background:#fff; }
+body.light .badge, body.light .pill, body.light .copy-btn{ background:#fff; color:var(--ink) }
 
 /* Names tool: clicked pills appear muted but stay clickable */
 .name-pill.used{ opacity:.55; filter:saturate(.6); background:var(--chip); border-color:var(--line); }
@@ -165,8 +180,7 @@ body.light .copy-btn{ background:#fff; }
 .btn-danger{
   background: linear-gradient(180deg, #ff6e6e, #e14949) !important;
   border:1px solid var(--danger-border) !important;
-  color:#fff !important;
-  box-shadow: var(--sh-1) !important;
+  color:#fff !important; box-shadow:var(--sh-1) !important;
 }
 .btn-danger:hover{ filter:brightness(1.03) }
 .btn-danger:active{ transform:translateY(1px) }
@@ -228,9 +242,10 @@ body.light .kpi .box{ background:#fff; border-color:var(--line) }
 .agenda-item.done{opacity:.58}
 .group-hd{ display:flex; align-items:center; gap:8px; margin:12px 0 6px }
 .group-hd::before, .group-hd::after{ content:""; flex:1; height:1px; background:var(--line) }
-.group-hd .label{ font-size:12px; padding:4px 10px; border:1px solid var(--line); border-radius:999px; background:var(--chip); color:#dfe6ff }
-body.light .group-hd .label{ background:#fff; color:#1e2758 }
+.group-hd .label{ font-size:12px; padding:4px 10px; border:1px solid var(--line); border-radius:999px; background:var(--chip); color:#1e2758 }
+body.light .group-hd .label{ background:#fff; }
 
+/* Meta */
 .tiny{font-size:11.5px; color:var(--muted)}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px}
 .progress{height:12px; border-radius:999px; background:var(--chip); border:1px solid var(--line); overflow:hidden}
@@ -246,12 +261,9 @@ body.light .group-hd .label{ background:#fff; color:#1e2758 }
 .cal-head{ font-weight:700; font-size:12px; opacity:.85; padding:4px 2px; text-align:center }
 .cal-cell{ border:1px solid var(--line); border-radius:12px; padding:10px; min-height:76px; background:var(--surface); cursor:pointer }
 .cal-cell .d{ font-weight:700; font-size:12px; opacity:.92 }
-.cal-badge{ display:inline-block; margin-top:8px; font-size:11.5px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#dfe6ff; background:var(--chip) }
-.cal-cell.offday{ background: linear-gradient(0deg, rgba(242,85,85,.10), rgba(242,85,85,.10)), var(--surface); border-color: #3a2b2f; }
-.cal-cell.offday .d { color: #e2b3b3; }
-body.light .cal-badge{ color:#243062; background:#f7f9ff; border-color:#d7def4; font-weight:600 }
-body.light .cal-cell.offday{ background: linear-gradient(0deg, rgba(255,120,120,.15), rgba(255,120,120,.15)), #fff; border-color:#ffd7d7; }
-body.light .cal-cell.offday .d{ color:#a23b3b; }
+.cal-badge{ display:inline-block; margin-top:8px; font-size:11.5px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#243062; background:#f7f9ff }
+.cal-cell.offday{ background: linear-gradient(0deg, rgba(242,85,85,.10), rgba(242,85,85,.10)), var(--surface); border-color: #ffd7d7; }
+.cal-cell.offday .d { color: #a23b3b; }
 
 .cal-hd{ display:flex; align-items:center; gap:10px }
 .cal-hd .space{ flex:1 }
@@ -269,9 +281,7 @@ body.light .cal-cell.offday .d{ color:#a23b3b; }
   margin-top:10px; margin-bottom:0;
   border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:0;
 }
-#calSettings.open{
-  max-height: 820px; opacity:1; transform:none; margin-bottom:10px; padding:16px;
-}
+#calSettings.open{ max-height:820px; opacity:1; transform:none; margin-bottom:10px; padding:16px; }
 body.light #calSettings{ background:#fff }
 
 /* Calendar settings layout */
@@ -283,10 +293,7 @@ body.light #calSettings{ background:#fff }
   border:1px dashed var(--line); border-radius:12px; padding:12px;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:78px;
 }
-.wdays .cell input[type="checkbox"]{
-  /* use the shared checkbox, just scale it here */
-  --chk-size: 24px;
-}
+.wdays .cell input[type="checkbox"]{ --chk-size:24px; } /* scale only */
 .wdays .cell span{ font-size:12.5px; }
 
 /* Date-specific overrides row */
@@ -312,8 +319,7 @@ body.light .ovr-list li{ background:#fff }
 }
 #customTaskPop{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
-  z-index:9999; padding:18px;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(6px); z-index:9999; padding:18px;
 }
 #customTaskPop .sheet{
   width:min(560px,92vw); background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:var(--sh-2);
@@ -378,14 +384,13 @@ html{ scrollbar-gutter: stable both-edges; }
 .seg{ display:inline-flex; gap:6px; background:var(--chip); border:1px solid var(--line); border-radius:14px; padding:4px; overflow:hidden; }
 .seg > button{ background:transparent !important; border:0; color:var(--ink); height:34px; padding:0 14px; border-radius:10px; transition: background .15s ease, color .15s ease; }
 .seg > button.primary{
-  background: color-mix(in oklab, var(--accent) 18%, var(--surface) 82%) !important;
+  background: color-mix(in oklab, var(--accent) 20%, var(--surface) 80%) !important;
   color:#fff !important; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent);
 }
-.seg > button.primary::before,
-.seg > button.primary::after{ content:none !important; }
+.seg > button.primary::before, .seg > button.primary::after{ content:none !important; }
 body.light .seg{ background:#fff; border-color:var(--line); }
 body.light .seg > button.primary{
-  background: color-mix(in oklab, var(--accent) 20%, #fff 80%) !important; color:#fff !important;
+  background: color-mix(in oklab, var(--accent) 22%, #fff 78%) !important; color:#fff !important;
 }
 
 /* Keyboard outlines */
@@ -398,35 +403,20 @@ body.light .seg > button.primary{
   }
 }
 
-/* =================== CHECKBOX (square + perfectly centered ✓) =================== */
+/* =================== CHECKBOX (square + centered ✓) =================== */
 input[type="checkbox"]{
   appearance:none; -webkit-appearance:none;
-  width:var(--chk-size);
-  aspect-ratio:1/1;                 /* guarantees a square */
-  border-radius:var(--chk-radius);
-  border:1px solid var(--line);
-  background:var(--surface);
-
-  /* precise centering */
+  width:var(--chk-size); aspect-ratio:1/1; border-radius:var(--chk-radius);
+  border:1px solid var(--line); background:var(--surface);
   display:flex; align-items:center; justify-content:center;
   padding:0; margin:0; line-height:0; vertical-align:middle; box-sizing:border-box;
-
   transition:background .14s ease, border-color .14s ease, box-shadow .14s ease;
 }
 input[type="checkbox"]:hover{ box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent); }
 input[type="checkbox"]::before{
-  content:"";
-  width:calc(var(--chk-size) * .56);
-  aspect-ratio:1/1;
-  background:#fff;
-  transform:scale(0);
-  transition:transform .14s ease;
-  -webkit-mask:url('data:image/svg+xml;utf8,\
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10">\
-<path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center / contain;
-          mask:url('data:image/svg+xml;utf8,\
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10">\
-<path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center / contain;
+  content:""; width:calc(var(--chk-size)*.56); aspect-ratio:1/1; background:#fff; transform:scale(0); transition:transform .14s ease;
+  -webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10"><path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center/contain;
+          mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10"><path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center/contain;
 }
 input[type="checkbox"]:checked{
   background: color-mix(in oklab, var(--accent) 94%, black 6%);
@@ -440,9 +430,7 @@ body.light input[type="checkbox"]:checked{
 }
 
 /* =================== BULK REVIEW GRID (multi-lead paste) =================== */
-.bulk-list{
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;
-}
+.bulk-list{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; }
 .bulk-item .top{ font-size:14px; margin-bottom:4px; }
 
 /* =================== CENTERED WIDTH HELPER =================== */
@@ -470,7 +458,6 @@ body.light input[type="checkbox"]:checked{
 #calendarDrawer.open.pinned, #namesDrawer.open.pinned { pointer-events: none; }
 #calendarDrawer.open.pinned .drawer-panel, #namesDrawer.open.pinned .drawer-panel { pointer-events: auto; }
 #calendarDrawer.pinned .drawer-scrim, #namesDrawer.pinned .drawer-scrim { opacity: 0 !important; pointer-events: none !important; background: transparent !important; }
-#namesDrawer.pinned .drawer-scrim{ opacity:0 !important; pointer-events:none !important; background:transparent !important; }
 body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 
 /* Cards inside drawers */
@@ -485,10 +472,7 @@ body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 #sideTabs .tab{
   pointer-events:auto; width:46px; height:46px; border-radius:14px;
   display:flex; align-items:center; justify-content:center;
-  background:var(--chip);
-  border:1px solid var(--line);
-  box-shadow:var(--sh-1);
-  cursor:pointer;
+  background:var(--chip); border:1px solid var(--line); box-shadow:var(--sh-1); cursor:pointer;
 }
 #sideTabs .tab[aria-pressed="true"]{
   background: color-mix(in oklab, var(--accent) 16%, var(--chip) 84%);
