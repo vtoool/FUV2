@@ -221,15 +221,6 @@ body.light .badge, body.light .copy-btn{ background:#fff; color:var(--ink) }
   font-weight: 600;
 }
 
-/* Dark theme: force white pill for the Name pill only */
-body:not(.light) .agenda-item .pill:first-child,
-body:not(.light) .pill.client,
-body:not(.light) .pill--client,
-body:not(.light) .client-pill{
-  background: #ffffff !important;
-  border-color: #cfd6f8 !important;
-  color: #0f1f56 !important;         /* readable navy */
-}
 
 /* Light theme: keep it just a touch stronger (no change in look) */
 body.light .agenda-item .pill:first-child,
@@ -560,19 +551,7 @@ body.light #sideTabs .tab{ background:#fff; }
 }
 @keyframes pop{ from{ opacity:0; transform:translateY(8px) scale(.985) } to{ opacity:1; transform:none } }
 #addCard{ display:none; }
-/* Name pill: white in dark, crisp in light */
-body:not(.light) .client-pill{
-  background:#fff !important;
-  border-color:#cfd6f8 !important;
-  color:#0f1f56 !important;
-  font-weight:600;
-}
-body.light .client-pill{
-  background:#e9edff;
-  border-color:#cfd6f8;
-  color:#0f1f56;
-  font-weight:600;
-}
+
 /* Force the first chip in the notes row (the name) to be white in dark modee */
 body:not(.light) .note-row .slab .pill:first-of-type{
   background:#fff !important;
@@ -580,3 +559,36 @@ body:not(.light) .note-row .slab .pill:first-of-type{
   color:#0f1f56 !important;
   font-weight:600 !important;
 }
+/* === FIX: Client name pill ===
+   Dark mode: same dark pill as others, WHITE text.
+   Light mode: normal light pill.  */
+:root{
+  --client-dk-bg: var(--pill-dk-bg);
+  --client-dk-br: var(--pill-dk-br);
+  --client-dk-fg: #fff;                 /* pure white text */
+}
+
+.pill.client, .pill--client, .client-pill { font-weight:600; }
+
+/* Dark */
+body:not(.light) .agenda-item .pill:first-child,
+body:not(.light) .pill.client,
+body:not(.light) .pill--client,
+body:not(.light) .client-pill{
+  background: var(--client-dk-bg) !important;
+  border-color: var(--client-dk-br) !important;
+  color: var(--client-dk-fg) !important;
+}
+
+/* Light */
+body.light .agenda-item .pill:first-child,
+body.light .pill.client,
+body.light .pill--client,
+body.light .client-pill{
+  background: var(--pill-li-bg) !important;
+  border-color: var(--pill-li-br) !important;
+  color: var(--pill-li-fg) !important;
+}
+
+/* Keep links inside pills from turning blue */
+.pill a { color: inherit !important; }
