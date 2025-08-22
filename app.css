@@ -24,6 +24,10 @@
   --sb-size: 12px; --sb-radius: 10px;
   --sb-thumb: #2f3b56; --sb-thumb-hover: #3a4a74; --sb-thumb-active:#4a64a9;
   --sb-track: transparent;
+
+  /* Checkbox global size */
+  --chk-size: 22px;   /* tweak this to scale all checkboxes */
+  --chk-radius: 8px;
 }
 
 body.light{
@@ -132,7 +136,7 @@ body.modal-open{ overflow:hidden; }
   position:sticky; bottom:0; left:0; right:0;
   display:flex; gap:8px; justify-content:flex-end; align-items:center;
   padding:12px 14px;
-  margin:12px -12px -12px;        /* bleed to card edges */
+  margin:12px -12px -12px;
   background:linear-gradient(180deg, rgba(0,0,0,0), var(--panel) 30%);
   border-top:1px solid var(--line);
   z-index:1;
@@ -169,7 +173,7 @@ body.light .copy-btn{ background:#fff; }
 .btn-danger:focus{ box-shadow:0 0 0 3px var(--danger-ring) !important }
 #wipeAll{ border-radius:16px; height:40px; padding:0 16px; }
 
-/* Subtle highlight for the paste block */
+/* Lead paste block */
 .lead-block{ display:block; margin-bottom:10px; }
 .lead-actions{ display:none; }
 .lead-block.highlight{
@@ -279,7 +283,10 @@ body.light #calSettings{ background:#fff }
   border:1px dashed var(--line); border-radius:12px; padding:12px;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:78px;
 }
-.wdays .cell input[type="checkbox"]{ width:20px; height:20px; accent-color:var(--accent); }
+.wdays .cell input[type="checkbox"]{
+  /* use the shared checkbox, just scale it here */
+  --chk-size: 24px;
+}
 .wdays .cell span{ font-size:12.5px; }
 
 /* Date-specific overrides row */
@@ -371,12 +378,11 @@ html{ scrollbar-gutter: stable both-edges; }
 .seg{ display:inline-flex; gap:6px; background:var(--chip); border:1px solid var(--line); border-radius:14px; padding:4px; overflow:hidden; }
 .seg > button{ background:transparent !important; border:0; color:var(--ink); height:34px; padding:0 14px; border-radius:10px; transition: background .15s ease, color .15s ease; }
 .seg > button.primary{
-  /* Clear active pill; no shimmer bleed */
   background: color-mix(in oklab, var(--accent) 18%, var(--surface) 82%) !important;
   color:#fff !important; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent);
 }
 .seg > button.primary::before,
-.seg > button.primary::after{ content:none !important; } /* kill external CTA effects */
+.seg > button.primary::after{ content:none !important; }
 body.light .seg{ background:#fff; border-color:var(--line); }
 body.light .seg > button.primary{
   background: color-mix(in oklab, var(--accent) 20%, #fff 80%) !important; color:#fff !important;
@@ -392,20 +398,35 @@ body.light .seg > button.primary{
   }
 }
 
-/* =================== CHECKBOX (centered, iOS-safe) =================== */
+/* =================== CHECKBOX (square + perfectly centered ✓) =================== */
 input[type="checkbox"]{
   appearance:none; -webkit-appearance:none;
-  width:18px; height:18px; border-radius:6px;
-  border:1px solid var(--line); background:var(--surface);
-  display:inline-grid; place-items:center; vertical-align:middle; line-height:1;
+  width:var(--chk-size);
+  aspect-ratio:1/1;                 /* guarantees a square */
+  border-radius:var(--chk-radius);
+  border:1px solid var(--line);
+  background:var(--surface);
+
+  /* precise centering */
+  display:flex; align-items:center; justify-content:center;
+  padding:0; margin:0; line-height:0; vertical-align:middle; box-sizing:border-box;
+
   transition:background .14s ease, border-color .14s ease, box-shadow .14s ease;
 }
 input[type="checkbox"]:hover{ box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent); }
 input[type="checkbox"]::before{
-  content:""; width:12px; height:12px; display:block; background:#fff;
-  -webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 10"><path d="M4.5 7.5L1.8 4.8 0.7 6l3.8 3.3L11.3 2.3 10.2 1z" fill="black"/></svg>') center/contain no-repeat;
-          mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 10"><path d="M4.5 7.5L1.8 4.8 0.7 6l3.8 3.3L11.3 2.3 10.2 1z" fill="black"/></svg>') center/contain no-repeat;
-  transform:scale(0); transition:transform .14s ease;
+  content:"";
+  width:calc(var(--chk-size) * .56);
+  aspect-ratio:1/1;
+  background:#fff;
+  transform:scale(0);
+  transition:transform .14s ease;
+  -webkit-mask:url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10">\
+<path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center / contain;
+          mask:url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 10">\
+<path d="M5 8L1.8 4.8 0.7 6 5 9.3 13.3 1 12.2 0z" fill="black"/></svg>') no-repeat center / contain;
 }
 input[type="checkbox"]:checked{
   background: color-mix(in oklab, var(--accent) 94%, black 6%);
@@ -503,5 +524,4 @@ body.light #sideTabs .tab{ background:#fff; }
   width:min(920px, 100%); max-height:88vh; overflow:auto; animation:pop .16s ease-out;
 }
 @keyframes pop{ from{ opacity:0; transform:translateY(8px) scale(.985) } to{ opacity:1; transform:none } }
-/* Hide the Add/Edit section until JS moves it into the modal */
 #addCard{ display:none; }
