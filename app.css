@@ -143,6 +143,33 @@ button.primary{
   background:linear-gradient(180deg,var(--accent),#5d6ef2);
   border-color:color-mix(in oklab, var(--accent) 70%, black 10%); color:#fff;
 }
+/* Danger button (used by “Wipe All”) */
+.btn-danger{
+  /* dark mode: strong red button with white text */
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--danger) 86%, #6a0b0b 14%),
+    color-mix(in oklab, var(--danger) 72%, #120404 28%)
+  );
+  border-color: var(--danger-border);
+  color:#fff;
+  box-shadow: var(--sh-1);
+}
+.btn-danger:hover{ filter:brightness(1.05); }
+.btn-danger:active{ transform:translateY(1px); }
+.btn-danger:focus-visible{ outline: 2px solid var(--danger-ring); outline-offset: 2px; }
+
+/* Light mode: match calendar “off day” look */
+body.light .btn-danger{
+  background:
+    linear-gradient(0deg, rgba(242,85,85,.10), rgba(242,85,85,.10)),
+    #fff;
+  border-color: #ffd7d7;   /* same as calendar off-day border */
+  color:#a23b3b;           /* same red text tone as calendar numbers */
+  box-shadow:0 2px 8px rgba(15,23,42,.06);
+}
+body.light .btn-danger:hover{ filter:brightness(1.03); }
+
 button.ghost{ background:transparent; }
 
 .btn-icon{
