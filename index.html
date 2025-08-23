@@ -97,6 +97,15 @@
 
           <div class="row">
             <div>
+              <label>Home city</label>
+              <input id="home" list="homeList" placeholder="LAX" />
+              <datalist id="homeList"></datalist>
+            </div>
+            <div></div>
+          </div>
+
+          <div class="row">
+            <div>
               <label>Lead ID</label>
               <input id="leadId" inputmode="numeric" pattern="\d*" placeholder="55471" />
             </div>
@@ -247,7 +256,8 @@
               <div class="row">
                 <div>
                   <label>Client</label>
-                  <select id="ctClient"></select>
+                  <input id="ctClient" list="ctClientList" placeholder="Search client…" />
+                  <datalist id="ctClientList"></datalist>
                 </div>
                 <div>
                   <label>Type</label>
