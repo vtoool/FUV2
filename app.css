@@ -151,7 +151,7 @@ body.light input, body.light select, body.light textarea{ background:#fff; color
 #calendarGrid > .cal-cell{min-width:0; box-sizing:border-box;}
 .cal-cell{position:relative;}
 /* keep the “Nr of tasks” pill from changing cell width */
-.cal-badge{position:absolute; top:6px; right:6px}
+.cal-cell .cal-badge{position:absolute; top:24px; right:6px}
 
 /* === 2) If the calendar overlaps, give main content enough right margin === */
 :root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
