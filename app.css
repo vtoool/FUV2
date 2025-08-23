@@ -286,8 +286,7 @@ body.modal-open{ overflow:hidden; }
 .pill a{ color:inherit; font-weight:inherit; }  /* no blue links inside pills */
 .client-pill, .cust-link{
   cursor:pointer;
-  text-decoration:underline;
-  text-underline-offset:2px;
+  text-decoration:none;
 }
 
 /* Hover effect for clickable pills */
@@ -778,7 +777,7 @@ body.light #toolRail .tool{
   flex-direction:column;
 
   overflow:auto;
-  padding-bottom:60px;
+  padding-bottom:110px;
 }
 #moreModal .more-actions{
   position:sticky;
@@ -788,6 +787,7 @@ body.light #toolRail .tool{
   padding-top:10px;
   padding-bottom:10px;
   border-top:1px solid var(--line);
+  z-index:1;
 }
 @keyframes pop{ from{ opacity:0; transform:translateY(8px) scale(.985) } to{ opacity:1; transform:none } }
 #addCard{ display:none; }
@@ -828,6 +828,12 @@ body.light .client-pill{
 /* Keep links inside pills from turning blue */
 .pill a { color: inherit !important; }
 
+/* underline CRM lead IDs */
+.lead-id{
+  text-decoration: underline;
+  text-underline-offset:2px;
+}
+
 
 /* ========== Random Names: gray-out after click (still clickable) ========== */
 #namesList .name-pill{
@@ -859,6 +865,14 @@ body.light .client-pill{
 body.light #namesList .name-pill.used{
   opacity: .65;
   filter: grayscale(40%);
+}
+
+/* manual follow-up row layout */
+.manual-row .slab{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
 }
 /* When a drawer overlaps, shrink the main app width and reserve space to the right */
 body.drawer-overlap #app {

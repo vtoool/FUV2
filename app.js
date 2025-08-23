@@ -234,8 +234,7 @@ function inferDestination(route){
 // IATA → IANA timezone map is loaded separately (see iata-tz.js)
 function tzFromRoute(route){
   const first = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean)[0];
-  return window.IATA_TZ?.[first] || Intl.DateTimeFormat().resolvedOptions().timeZone;
-
+  return window.IATA_TZ?.[first] || '';
 }
 
 function clientTz(c){
@@ -1187,7 +1186,7 @@ function crmLeadUrl(id){
 function leadChipHtml(id){
   const url = crmLeadUrl(id);
   return url
-    ? `<span class="pill">Lead:&nbsp;<a class="mono" href="${url}" target="_blank" rel="noopener">${escapeHtml(String(id))}</a></span>`
+    ? `<span class="pill">Lead:&nbsp;<a class="mono lead-id" href="${url}" target="_blank" rel="noopener">${escapeHtml(String(id))}</a></span>`
     : '';
 }
 
@@ -1536,7 +1535,7 @@ $('#clientsTbl')?.addEventListener('click', e=>{
         <input type="text" id="manualNotes_${id}" placeholder="Optional notes" style="min-width:220px" />
         <span>Creates: 2 Calls, 1 SMS, 1 Email.</span>
         <span class="space"></span>
-        <button class="primary" data-act="manual-apply" data-id="${id}">Schedule</button>
+        <button class="primary" data-act="manual-apply" data-id="${id}">Add</button>
         <button data-act="manual-cancel" data-id="${id}">Cancel</button>
       </div>`;
     row.appendChild(td); tr.after(row);
