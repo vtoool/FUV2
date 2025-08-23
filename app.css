@@ -815,11 +815,14 @@ body.light #namesList .name-pill.used{
 /* When a drawer overlaps, shrink the main app width and reserve space to the right */
 body.drawer-overlap #app {
   width: calc(100% - var(--drawerW));
-  margin-right: var(--drawerW);
+  max-width: var(--page-max);
+  margin-left: var(--drawerPad);
+  margin-right: calc(var(--drawerW) + var(--drawerPad));
 }
 @media (max-width: 900px){
   body.drawer-overlap #app {
     width: 100%;
+    margin-left: 0;
     margin-right: 0;
   }
 }
