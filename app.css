@@ -820,4 +820,8 @@ body.light #namesList .name-pill.used{
   filter: grayscale(40%);
 }
 
+body.drawer-overlap .centered { margin-right: var(--drawerW); }
+@media (max-width: 900px){
+  body.drawer-overlap .centered { margin-right: 0; }
+}
 
