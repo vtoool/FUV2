@@ -2450,6 +2450,7 @@ if (clientForm) {
       $('#ctNotify').disabled = !$('#ctTime').value;
 
       pop.style.display = 'flex';   // overlay
+      document.body.classList.add('modal-open');
       // ✨ Keyboard: Esc closes, Enter saves (except in Notes)
       pop._keydown = (e)=>{
         if(e.key==='Escape'){ e.preventDefault(); closeCustomTaskPopover(); }
@@ -2480,6 +2481,7 @@ if (clientForm) {
     if(pop._keydown){ document.removeEventListener('keydown', pop._keydown); pop._keydown=null; }
     if(pop._backdrop){ pop.removeEventListener('click', pop._backdrop); pop._backdrop=null; }
     pop.style.display = 'none';
+    document.body.classList.remove('modal-open');
   }
   function saveCustomTaskFromPopover(){
     const clientId = $('#ctClient').value || '';
