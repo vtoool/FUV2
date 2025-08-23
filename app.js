@@ -58,7 +58,7 @@ function setBodyPinned(){
   const tabNames = document.getElementById('tabNames');
   if (tabCal)   tabCal.setAttribute('aria-pressed', String(calPinned));
   if (tabNames) tabNames.setAttribute('aria-pressed', String(namesPinned));
- 
+ afterLayout();
 }
 // Detect whether the open calendar drawer visually overlaps Customers or Agenda
 function findCustomersCard(){
@@ -73,30 +73,32 @@ function rectsOverlap(a,b){
   if (!a || !b) return false;
   return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
 }
+
+// 2) treat PINNED drawer as always needing space
 function updateDrawerOverlap(){
-  // measure whichever drawer is currently open
-  const panel = document.querySelector(
-    '#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel'
-  );
-  const agenda    = document.getElementById('actionsCard');
+  const drawer = document.getElementById('calendarDrawer');
+  const panel  = drawer?.querySelector('.drawer-panel');
+  const open   = drawer && drawer.classList.contains('open');
+  const pinned = drawer && drawer.classList.contains('pinned');
+  const agenda = document.getElementById('actionsCard');
   const customers = findCustomersCard();
 
-  if (!panel){
-    document.body.classList.remove('drawer-overlap');
-    return;
+  if (!open || !panel){
+ document.body.classList.remove('drawer-overlap');
+document.body.style.removeProperty('--drawerW');
+return;
+
   }
 
-  // Always keep --drawerW fresh so CSS can reserve space when pinned
   const pr = panel.getBoundingClientRect();
-  document.body.style.setProperty('--drawerW', Math.round(pr.width) + 'px');
-
-  // (Optional) keep your overlap flag for other styling, but it no longer
-  // controls the margin — that now keys off .drawer-pinned in CSS.
-  const needsSpace =
+  const needsSpace = pinned ||
     rectsOverlap(pr, agenda?.getBoundingClientRect()) ||
     rectsOverlap(pr, customers?.getBoundingClientRect());
+
   document.body.classList.toggle('drawer-overlap', !!needsSpace);
+  if (needsSpace) document.body.style.setProperty('--drawerW', pr.width + 'px');
 }
+
 
 // call this instead of plain updateDrawerOverlap() whenever drawers toggle
 function afterLayout(){
@@ -106,7 +108,7 @@ function afterLayout(){
 }
 
 // keep the existing resize hook
-window.addEventListener('resize', updateDrawerOverlap);
+window.addEventListener('resize', afterLayout);
 
 // make transitions/animations also refresh the measurement
 ['calendarDrawer','namesDrawer'].forEach(id=>{
@@ -120,8 +122,6 @@ window.addEventListener('load', updateDrawerOverlap);
 document.fonts?.ready?.then?.(updateDrawerOverlap);
 
 
-// call this whenever drawers open/close or the viewport changes
-window.addEventListener('resize', () => updateDrawerOverlap());
 
   const storeKey  = 'followup_crm_v21';
   const THEME_KEY = 'followup_crm_theme';
@@ -562,24 +562,27 @@ const drawers = ['calendarDrawer','namesDrawer']
   .filter(Boolean);
 
 function closeAllDrawers(){
-  drawers.forEach(d => d.classList.remove('open'));
+  drawers.forEach(d => d.classList.remove('open','pinned'));
   document.querySelectorAll('#toolRail .tool')
     .forEach(b => b.setAttribute('aria-pressed','false'));
+  setBodyPinned(); afterLayout();
 }
 
-railButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const targetId = btn.dataset.target;
-    const drawer = document.getElementById(targetId);
-    const willOpen = !drawer.classList.contains('open');
 
-    closeAllDrawers();
-    if (willOpen){
-      drawer.classList.add('open');
-      btn.setAttribute('aria-pressed','true');
-    }
-  });
+railButtons.forEach(btn => {
+btn.addEventListener('click', () => {
+  const targetId = btn.dataset.target;
+  const drawer = document.getElementById(targetId);
+  const willOpen = !drawer.classList.contains('open');
+
+  closeAllDrawers();
+  if (willOpen){
+    drawer.classList.add('open','pinned');
+    btn.setAttribute('aria-pressed','true');
+  }
+  setBodyPinned(); afterLayout();
 });
+
 
 // Click on scrim closes the active drawer
 document.querySelectorAll('#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim')
@@ -589,22 +592,7 @@ document.querySelectorAll('#calendarDrawer .drawer-scrim, #namesDrawer .drawer-s
 
   const UC = s => String(s||'').toUpperCase();
 
-function randomNames(n = 9){
-  const out = [];
-  const seen = new Set();
-  let guard = 0;
-  while (out.length < n && guard < 5000){
-    const f = FIRST[Math.floor(Math.random() * FIRST.length)];
-    const l = LAST[Math.floor(Math.random() * LAST.length)];
-    const key = `${l}/${String(f).toUpperCase()}`;
-    if (!seen.has(key)){
-      seen.add(key);
-      out.push(`-${key}`);
-    }
-    guard++;
-  }
-  return out;
-}
+
 
  function renderNamesList(names){
   if (!listEl) return;
@@ -2629,8 +2617,8 @@ function bootstrap(){
   initNamesDrawer();
   initSideTabs(); 
 initMorePanel();
-
-
+afterLayout();
+centerMainCards();
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
 if (searchEl){
