@@ -296,17 +296,15 @@ body.light .badge, body.light .copy-btn{ background:#fff; color:var(--ink) }
 .pill { font-weight: 400; }
 
 /* Make only the Name pill bolder */
-.agenda-item .pill:first-child,
-.pill.client, .pill--client, .client-pill {
+  .pill.client, .pill--client, .client-pill {
   font-weight: 600;
 }
 
 
 /* Light theme: keep it just a touch stronger (no change in look) */
-body.light .agenda-item .pill:first-child,
-body.light .pill.client,
-body.light .pill--client,
-body.light .client-pill{
+  body.light .pill.client,
+  body.light .pill--client,
+  body.light .client-pill{
   background: #e9edff;
   border-color: #cfd6f8;
   color: #0f1f56;
@@ -760,7 +758,6 @@ body.light #toolRail .tool{
 .pill.client, .pill--client, .client-pill { font-weight:600; }
 
 /* Dark */
-body:not(.light) .agenda-item .pill:first-child,
 body:not(.light) .pill.client,
 body:not(.light) .pill--client,
 body:not(.light) .client-pill{
@@ -770,7 +767,6 @@ body:not(.light) .client-pill{
 }
 
 /* Light */
-body.light .agenda-item .pill:first-child,
 body.light .pill.client,
 body.light .pill--client,
 body.light .client-pill{
