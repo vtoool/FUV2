@@ -430,12 +430,14 @@ function initCalendarDrawer(){
     (cal.querySelector('.bd') || cal).appendChild(calSettings);
   }
 
-  // Header close button
-  document.getElementById('calDrawerClose')?.addEventListener('click', ()=>{
-    drawer.classList.remove('open','pinned');
-    document.getElementById('openCal')?.setAttribute('aria-expanded','false');
-    setBodyPinned();
-  });
+ // Header close button
+const calToolBtn = document.querySelector('#toolRail .tool[data-target="calendarDrawer"]');
+document.getElementById('calDrawerClose')?.addEventListener('click', ()=>{
+  drawer.classList.remove('open','pinned');
+  calToolBtn?.setAttribute('aria-pressed','false');   // keep rail in sync
+  setBodyPinned();
+});
+
 
   // Scrim closes only when NOT pinned
   drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
@@ -572,13 +574,14 @@ function renderNames(){
   // Expose to side-tab so it can refresh on open
   drawer.renderNames = renderNames;
 
-  // Top buttons
-  drawer.querySelector('#namesRefresh')?.addEventListener('click', renderNames);
-  drawer.querySelector('#namesClose')?.addEventListener('click', ()=>{
-    drawer.classList.remove('open','pinned');
-    document.getElementById('openNames')?.setAttribute('aria-expanded','false');
-    setBodyPinned();
-  });
+// Top buttons
+const namesToolBtn = document.querySelector('#toolRail .tool[data-target="namesDrawer"]');
+drawer.querySelector('#namesClose')?.addEventListener('click', ()=>{
+  drawer.classList.remove('open','pinned');
+  namesToolBtn?.setAttribute('aria-pressed','false'); // keep rail in sync
+  setBodyPinned();
+});
+
 
   // Scrim closes only when NOT pinned
   drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
