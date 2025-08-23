@@ -577,62 +577,65 @@ body.light input[type="checkbox"]:checked{
 .centered { max-width: var(--content-width); margin-inline: auto; }
 
 /* =================== DRAWERS (Calendar + Names) =================== */
-#calendarDrawer, #namesDrawer{ position:fixed; inset:0; pointer-events:none; z-index:9990; }
-#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim{
-  position:absolute; inset:0; background:rgba(0,0,0,.45);
-  opacity:0; transition:opacity .18s ease; pointer-events:none;
+/* Variables (put these in your first :root if you prefer keeping vars together) */
+:root{
+  --header-h: 72px;          /* exact sticky header height */
+  --cal-drawer-w: 360px;     /* calendar panel width */
+  --names-drawer-w: 220px;   /* names panel width */
 }
-/* Drawer panel slides out to the LEFT of the rail */
+
+/* Containers live BELOW the sticky header and never block the page */
+#calendarDrawer, #namesDrawer{
+  position: fixed;
+  left: 0; right: 0; top: var(--header-h); bottom: 0;   /* start under header */
+  pointer-events: none;                                  /* page stays usable */
+  z-index: 9900;                                         /* below header */
+}
+
+/* Panels are interactive, slide in from the right */
 #calendarDrawer .drawer-panel, #namesDrawer .drawer-panel{
-  position:absolute; top:0; right: var(--rail-w); height:100%;
-  width: min(var(--cal-drawer-w), 92vw);
-  background: var(--panel); border-left:1px solid var(--line);
+  position: absolute;
+  top: 0; bottom: 0; right: var(--rail-w);
+  width: min(var(--cal-drawer-w), 92vw);                 /* calendar width */
+  background: var(--panel);
+  border-left: 1px solid var(--line);
   box-shadow: -10px 0 24px rgba(0,0,0,.18);
-  transform: translateX(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1);
-  display:flex; flex-direction:column; gap:0; pointer-events:auto;
+  transform: translateX(100%);
+  transition: transform .28s cubic-bezier(.2,.8,.2,1);
+  display: flex; flex-direction: column;
+  pointer-events: auto;                                  /* panel clickable */
 }
+#namesDrawer .drawer-panel{ width: min(var(--names-drawer-w), 92vw); }
 
-/* Scrim covers everything EXCEPT the rail */
+/* Scrim never darkens or blocks clicks */
 #calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim{
-  position:absolute; top:0; left:0; bottom:0; right: var(--rail-w);
-  background: rgba(0,0,0,.45);
-  opacity:0; transition:opacity .18s ease; pointer-events:none;
+  position: absolute; inset: 0;
+  opacity: 0; background: transparent; pointer-events: none;
 }
 
-/* Open states (unchanged) */
-#calendarDrawer.open, #namesDrawer.open{ pointer-events:none; z-index:10000; }
-#calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{
-  opacity:0; pointer-events:none; background:transparent;
-}
-#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform:none; }
+/* Open: just slide in the panel */
+#calendarDrawer.open .drawer-panel,
+#namesDrawer.open .drawer-panel{ transform: none; }
 
-/* When “pinned”, also reserve drawer width + rail on the page layout */
-body.drawer-pinned .wrap{
+/* Drawer card internals */
+#calendarDrawer .card, #namesDrawer .card{
+  border: 0; border-radius: 0; height: 100%;
+  display: flex; flex-direction: column;
+}
+#calendarDrawer .card .bd, #namesDrawer .card .bd{ overflow: auto; }
+
+/* Pinned layout: reserve only the open drawer + rail */
+body.drawer-cal-pinned   .wrap{
   margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w));
 }
-
-
-/* Slightly softer shadow in light mode (keep yours if you like) */
-body.light #calendarDrawer .drawer-panel,
-body.light #namesDrawer .drawer-panel{
-  box-shadow: -8px 0 20px rgba(15,23,42,.12);
+body.drawer-names-pinned .wrap{
+  margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w));
 }
 
-/* Even lighter in light mode */
-body.light #calendarDrawer .drawer-panel,
-body.light #namesDrawer .drawer-panel{
-  box-shadow: -8px 0 20px rgba(15,23,42,.12);
-}
-
-
-/* Docked/pinned */
-#calendarDrawer.open.pinned, #namesDrawer.open.pinned { pointer-events: none; }
-#calendarDrawer.open.pinned .drawer-panel, #namesDrawer.open.pinned .drawer-panel { pointer-events: auto; }
-#calendarDrawer.pinned .drawer-scrim, #namesDrawer.pinned .drawer-scrim { opacity: 0 !important; pointer-events: none !important; background: transparent !important; }
-
-/* Cards inside drawers */
-#calendarDrawer .card, #namesDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
-#calendarDrawer .card .bd, #namesDrawer .card .bd{overflow:auto; }
+/* Stacking: header over drawers/rail; modals over everything */
+header{ z-index: 10050 !important; }
+#toolRail{ z-index: 10000 !important; top: calc(var(--header-h) + 6px); }
+.modal{ z-index: 11000 !important; }
 
 /* ==== Fixed tool rail (far right) ==== */
 #toolRail{
