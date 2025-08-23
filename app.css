@@ -501,11 +501,11 @@ body.light .ovr-list li{ background:#fff }
 }
 /* Client wider than Type */
 #customTaskPop .row { grid-template-columns: 2fr 1fr; }
-#ctClient { min-width: 320px; }
-#ctClient option { background: var(--panel); color: var(--ink); }
-#ctClient option:hover, #ctClient option:checked { background: #2f3547; color: var(--ink); }
-body.light #ctClient option { background: #fff; color: var(--ink); }
-body.light #ctClient option:hover, body.light #ctClient option:checked { background: #e9ecff; color: #1e2758; }
+#ctClient { width: 100%; }
+#ctClientList option { background: var(--panel); color: var(--ink); }
+#ctClientList option:hover, #ctClientList option:checked { background: #2f3547; color: var(--ink); }
+body.light #ctClientList option { background: #fff; color: var(--ink); }
+body.light #ctClientList option:hover, body.light #ctClientList option:checked { background: #e9ecff; color: #1e2758; }
 
 /* =================== TOAST =================== */
 #toaster{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:12px;z-index:11000;pointer-events:none}
