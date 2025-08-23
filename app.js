@@ -213,6 +213,26 @@ function inferDestination(route){
   return IATA_CITY[last] || last || 'your destination';
 }
 
+// IATA → IANA timezone map is loaded separately (see iata-tz.js)
+function tzFromRoute(route){
+  const first = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean)[0];
+  return window.IATA_TZ?.[first] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+function formatTimeInTz(tz){
+  return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12:false, timeZone: tz }).format(new Date());
+}
+
+function updateLocalTimes(){
+  const now = new Date();
+  $$('.local-time').forEach(el=>{
+    const tz = el.getAttribute('data-tz');
+    if(!tz) return;
+    el.textContent = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12:false, timeZone: tz }).format(now);
+  });
+}
+setInterval(updateLocalTimes, 1000);
+
 // Very lightweight template (match your screenshot; tweak copy as you like)
 function computeEmailContent(t, c){
   const { name:agentName, phone:agentPhone, emailLocal } = agentVars();
@@ -1285,13 +1305,14 @@ const contactHtml = `
   </div>`;
 
 
-tr.innerHTML = `
+  tr.innerHTML = `
   <td data-label="Name">
     <strong>${escapeHtml(c.name)}</strong>
     <div class="tiny mono note-preview" data-act="note" data-id="${c.id}" title="Click to expand notes">
       ${c.notes ? escapeHtml(truncate(c.notes)) : ''}
     </div>
     ${c.leadId ? `<div class="tiny">${leadChipHtml(c.leadId)}</div>` : ''}
+    ${c.route ? `<div class="tiny"><span class="pill">Local:&nbsp;<span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span></div>` : ''}
   </td>
   <td data-label="Contact" class="tiny">${contactHtml}</td>
   <td data-label="Status"><span class="badge">${c.status}</span></td>
@@ -1310,6 +1331,7 @@ tr.innerHTML = `
 
   renderAgenda();
   updateProgress();
+  updateLocalTimes();
   try{ buildClientOptionsForPopover(); }catch(_){}
 }
 
@@ -1331,10 +1353,12 @@ const nameText =
       c.route ? `<span class="pill">Route: ${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates: ${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax: ${escapeHtml(String(c.pax))}</span>` : '',
+      c.route ? `<span class="pill">Local: <span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span>` : '',
 c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean).join(' ');
     td.innerHTML = `<div class="tiny slab">${chips || ''}<div>${escapeHtml(c.notes || 'No notes yet.')}</div></div>`;
     row.appendChild(td); tr.after(row);
+    updateLocalTimes();
   }
 
 $('#clientsTbl')?.addEventListener('click', e=>{
@@ -1487,7 +1511,8 @@ function matchesShow(t){
       c.route ? `<span class="pill">Route:&nbsp;${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates:&nbsp;${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax:&nbsp;${escapeHtml(String(c.pax))}</span>` : '',
-c.leadId ? leadChipHtml(c.leadId) : ''
+      c.route ? `<span class="pill">Local:&nbsp;<span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span>` : '',
+      c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean);
     return chips.join(' ');
   }
@@ -1617,10 +1642,11 @@ const items = state.tasks
   .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
   .sort(sortTasksForMode);
     cont.innerHTML = '';
-    if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); return; }
+    if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); updateLocalTimes(); return; }
     if (sortMode === 'client') renderGroupedByClient(cont, items);
     else items.forEach(t=>cont.appendChild(renderTask(t)));
     updateProgress();
+    updateLocalTimes();
   }
 
   function buildAgendaRange(from, to){
@@ -1638,6 +1664,7 @@ const items = state.tasks
       else items.forEach(t=>cont.appendChild(renderTask(t)));
     }
     updateProgress();
+    updateLocalTimes();
   }
 
 function updateProgress(){
