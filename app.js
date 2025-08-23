@@ -273,7 +273,7 @@ function tzAbbr(tz){
 
 function updateLocalTimes(){
   const now = new Date();
-  const blink = Math.floor(now.getTime() / 3000) % 2 === 0;
+  const blink = Math.floor(now.getTime() / 1000) % 2 === 0;
   $$('.local-time').forEach(el=>{
     const tz = el.getAttribute('data-tz');
     if(!tz) return;
@@ -1364,7 +1364,7 @@ const contactHtml = `
 
   tr.innerHTML = `
   <td data-label="Name">
-    <strong>${escapeHtml(c.name)}</strong>
+    <span class="pill client-pill cust-link" data-name="${escapeHtml(c.name)}">${escapeHtml(c.name)}</span>
     <div class="tiny mono note-preview" data-act="note" data-id="${c.id}" title="Click to expand notes">
       ${c.notes ? escapeHtml(truncate(c.notes)) : ''}
     </div>
@@ -1420,6 +1420,18 @@ const nameText =
   }
 
 $('#clientsTbl')?.addEventListener('click', e=>{
+  const link = e.target.closest('.cust-link');
+  if (link){
+    const name = link.getAttribute('data-name') || link.textContent.trim();
+    const af = document.getElementById('agendaFilter');
+    if (af){
+      af.value = name;
+      af.dispatchEvent(new Event('input'));
+      af.scrollIntoView({ behavior:'smooth', block:'center' });
+      af.focus();
+    }
+    return;
+  }
   // Toggle notes when clicking the inline preview
   const preview = e.target.closest('.note-preview');
   if (preview){
@@ -2601,6 +2613,18 @@ if (clientForm) {
   });
 
   $('#agenda')?.addEventListener('click', (e)=>{
+  const cp = e.target.closest('.client-pill');
+  if (cp){
+    const name = cp.textContent.trim();
+    const search = document.getElementById('search');
+    if (search){
+      search.value = name;
+      search.dispatchEvent(new Event('input'));
+      search.scrollIntoView({ behavior:'smooth', block:'center' });
+      search.focus();
+    }
+    return;
+  }
   const del = e.target.closest('[data-del]');
   if (del){
     const id = del.getAttribute('data-del');
