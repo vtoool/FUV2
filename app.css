@@ -155,13 +155,7 @@ body.light input, body.light select, body.light textarea{ background:#fff; color
 
 /* === 2) If the calendar overlaps, give main content enough right margin === */
 :root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
-/* NEW: always reserve space when a drawer is pinned (desktop) */
-@media (min-width: 761px){
-  body.drawer-pinned #app{
-    margin-right: calc(var(--drawerW, 380px) + 12px);
-    transition: margin-right .2s ease;
-  }
-}
+/* Margin is now applied only when overlap is detected via JS (body.drawer-overlap) */
 
 
 /* =================== BUTTONS =================== */
