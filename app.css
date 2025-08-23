@@ -110,6 +110,24 @@ h1{font-size:28px; margin:0 0 4px; font-weight:800; line-height:1.1}
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
 }
 .card .bd{padding:14px 16px 16px}
+/* Drawer headers: keep one row and push action buttons to top-right */
+#calendarDrawer .card .hd,
+#namesDrawer .card .hd{
+  flex-wrap: nowrap;                 /* stop wrapping */
+  align-items: center;
+}
+
+/* First header button slides to the right; others sit next to it */
+#calendarDrawer .card .hd > .btn-icon:first-of-type,
+#namesDrawer   .card .hd > .btn-icon:first-of-type{
+  margin-left: auto;                 /* pushes buttons to right */
+}
+
+/* Make sure buttons don't stretch */
+#calendarDrawer .card .hd > .btn-icon,
+#namesDrawer   .card .hd > .btn-icon{
+  flex: 0 0 auto;
+}
 
 label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
 /* exclude checkboxes from the generic input styling */
