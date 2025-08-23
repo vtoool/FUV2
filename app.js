@@ -51,6 +51,8 @@ function setBodyPinned(){
   const namesPinned = !!document.querySelector('#namesDrawer.open.pinned');
   document.body.classList.toggle('drawer-pinned', calPinned || namesPinned);
 
+    document.body.classList.toggle('drawer-cal-pinned',   calPinned);
+  document.body.classList.toggle('drawer-names-pinned', namesPinned);
   // Sync right-edge tab states if present
   const tabCal   = document.getElementById('tabCal');
   const tabNames = document.getElementById('tabNames');
