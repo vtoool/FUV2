@@ -713,7 +713,7 @@ body.light .client-pill{
    /* ====== Drawer widths (desktop-only) ====== */
 :root{
   --cal-drawer-w: 420px;   /* keep calendar as-is */
-  --names-drawer-w: 280px; /* 👈 narrower names panel (< half of content) */
+  --names-drawer-w: 220px; /* 👈 narrower names panel (< half of content) */
 }
 
 @media (min-width: 761px){
