@@ -62,7 +62,7 @@ body.light{
   --client-li-br:#c3cef9;
   --client-li-fg:#0f1f56;
 }
-
+ --header-h: 72px;
 /* =================== BASE =================== */
 *{box-sizing:border-box}
 html,body{height:100%; max-width:100%; overflow-x:hidden}
@@ -639,14 +639,20 @@ body.light #namesDrawer .drawer-panel{
 /* ==== Fixed tool rail (far right) ==== */
 #toolRail{
   position: fixed;
-  right: 0; top: 0; bottom: 0;
+  right: 0;
+  top: calc(var(--header-h) + 6px);      /* start below sticky header */
+  bottom: 0;
+  height: calc(100vh - var(--header-h) - 6px);  /* fit remaining viewport */
   width: var(--rail-w);
   display: flex; flex-direction: column;
   align-items: center; gap: 12px;
   padding: 10px 8px;
-  z-index: 10001;            /* above scrim so it's always clickable */
-  pointer-events: none;      /* rail ignores clicks… */
+  z-index: 10000;                         /* stays under header */
+  pointer-events: none;                   /* rail ignores clicks… */
 }
+/* …buttons still clickable… */
+#toolRail .tool{ pointer-events:auto; }
+
 #toolRail .tool{
   pointer-events: auto;      /* …buttons do get clicks */
   width: 46px; height: 46px;
@@ -669,10 +675,16 @@ body.light #toolRail .tool{
 /* Mobile: turn the rail into a small horizontal bar */
 @media (max-width:760px){
   #toolRail{
-    right: 12px; top: auto; bottom: 14px; height: auto; width: auto;
-    flex-direction: row; padding: 0;
+    right: 12px;
+    top: auto;                            /* reset top for bottom bar */
+    bottom: 14px;
+    height: auto;
+    width: auto;
+    flex-direction: row;
+    padding: 0;
   }
 }
+
 
 
 /* =================== NAMES TOOL LIST =================== */
