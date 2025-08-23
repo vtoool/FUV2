@@ -239,7 +239,17 @@ function tzFromRoute(route){
 }
 
 function formatTimeInTz(tz){
-  return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12:false, timeZone: tz }).format(new Date());
+  return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', hour12:false, timeZone: tz }).format(new Date());
+}
+
+function tzAbbr(tz){
+  try{
+    return new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName:'short' })
+      .formatToParts(new Date())
+      .find(p=>p.type==='timeZoneName').value;
+  }catch(_){
+    return tz;
+  }
 }
 
 function updateLocalTimes(){
@@ -247,7 +257,11 @@ function updateLocalTimes(){
   $$('.local-time').forEach(el=>{
     const tz = el.getAttribute('data-tz');
     if(!tz) return;
-    el.textContent = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12:false, timeZone: tz }).format(now);
+    const formatter = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', hour12:false, timeZone: tz });
+    el.textContent = formatter.format(now);
+    const hour = Number(new Intl.DateTimeFormat([], { hour: 'numeric', hour12:false, timeZone: tz }).format(now));
+    el.classList.toggle('lt-red', hour < 9 || hour >= 21);
+    el.classList.toggle('lt-green', hour >= 9 && hour < 21);
   });
 }
 setInterval(updateLocalTimes, 1000);
@@ -1332,7 +1346,7 @@ const contactHtml = `
       ${c.notes ? escapeHtml(truncate(c.notes)) : ''}
     </div>
     ${c.leadId ? `<div class="tiny">${leadChipHtml(c.leadId)}</div>` : ''}
-    ${c.route ? `<div class="tiny"><span class="pill">Local:&nbsp;<span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span></div>` : ''}
+
   </td>
   <td data-label="Contact" class="tiny">${contactHtml}</td>
   <td data-label="Status"><span class="badge">${c.status}</span></td>
@@ -1369,12 +1383,13 @@ const nameText =
 
     const row = document.createElement('tr'); row.className='note-row'; row.setAttribute('data-for', id);
     const td = document.createElement('td'); td.colSpan = 6;
+    const tz = c.route ? tzFromRoute(c.route) : '';
     const chips = [
       c.route ? `<span class="pill">Route: ${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates: ${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax: ${escapeHtml(String(c.pax))}</span>` : '',
-      c.route ? `<span class="pill">Local: <span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span>` : '',
-c.leadId ? leadChipHtml(c.leadId) : ''
+      c.route ? `<span class="pill">Local (${tzAbbr(tz)}): <span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>` : '',
+      c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean).join(' ');
     td.innerHTML = `<div class="tiny slab">${chips || ''}<div>${escapeHtml(c.notes || 'No notes yet.')}</div></div>`;
     row.appendChild(td); tr.after(row);
@@ -1531,7 +1546,6 @@ function matchesShow(t){
       c.route ? `<span class="pill">Route:&nbsp;${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates:&nbsp;${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax:&nbsp;${escapeHtml(String(c.pax))}</span>` : '',
-      c.route ? `<span class="pill">Local:&nbsp;<span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span>` : '',
       c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean);
     return chips.join(' ');
@@ -1545,11 +1559,11 @@ function renderTask(t, opts = {}){
 
   const icon = { call:'📞', callvm:'📞🗣️', voicemail:'🗣️', sms:'💬', email:'✉️', custom:'📝' }[t.type] || '•';
   const client = clientDisplayName(t);
+  const c = t.clientId ? clientById(t.clientId) || {} : {};
 
   // Contact pill per task type (phone for call/sms, email for email)
   let contactHtml = '';
   if (t.clientId){
-    const c = clientById(t.clientId) || {};
     if ((t.type==='call' || t.type==='callvm') && c.phone){
       const href = phoneHref(c.phone);
       contactHtml = `<span class="pill"><a class="mono" href="${href}">${escapeHtml(c.phone)}</a><button class="copy-btn" data-copy="${escapeHtml(c.phone)}" data-what="phone" title="Copy phone" aria-label="Copy phone">⧉</button></span>`;
@@ -1574,6 +1588,12 @@ function renderTask(t, opts = {}){
 
   }
 
+  let localTimeHtml = '';
+  if (c.route){
+    const tz = tzFromRoute(c.route);
+    localTimeHtml = `<span class="pill"><span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>`;
+  }
+
   const src = t.source==='custom' ? ' (custom)' : (t.source==='manual' ? ' (manual)' : '');
   const notesHtml = t.notes ? `<div class="tiny">📝 ${escapeHtml(t.notes)}</div>` : '';
   const chipsHtml = showDetailChips ? detailsChipsFor(t) : '';
@@ -1583,7 +1603,7 @@ function renderTask(t, opts = {}){
     <input type="checkbox" ${t.status==='done'?'checked':''} data-taskid="${t.id}"/>
     <div>
       <div><strong>${icon} ${escapeHtml(t.title)}</strong>
-${showClientPill && client ? `<span class="pill client-pill">${escapeHtml(client)}</span>` : ''}
+${showClientPill && client ? `<span class="pill client-pill">${escapeHtml(client)}</span>` : ''} ${localTimeHtml}
         ${contactHtml}
         ${chipsHtml}
       </div>

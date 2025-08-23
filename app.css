@@ -823,8 +823,12 @@ body.drawer-overlap #app {
 @media (max-width: 900px){
   body.drawer-overlap #app {
     width: 100%;
-    margin-left: 0;
-    margin-right: 0;
+  margin-left: 0;
+  margin-right: 0;
   }
 }
 /* Default state: centered via .wrap margin */
+
+/* Local time colouring */
+.local-time.lt-red{ color: var(--danger); }
+.local-time.lt-green{ color: var(--accent-2); }
