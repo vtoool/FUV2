@@ -709,3 +709,20 @@ body.light .client-pill{
 
 /* Keep links inside pills from turning blue */
 .pill a { color: inherit !important; }
+
+   /* ====== Drawer widths (desktop-only) ====== */
+:root{
+  --cal-drawer-w: 420px;   /* keep calendar as-is */
+  --names-drawer-w: 280px; /* 👈 narrower names panel (< half of content) */
+}
+
+@media (min-width: 761px){
+  /* Use separate widths per drawer (do not touch shared scrim or rail) */
+  #calendarDrawer .drawer-panel{ width: min(var(--cal-drawer-w), 92vw); }
+  #namesDrawer   .drawer-panel{ width: min(var(--names-drawer-w), 92vw); }
+
+  /* When pinned, reserve only the width of the specific drawer + rail */
+  body.drawer-cal-pinned   .wrap{ margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w)); }
+  body.drawer-names-pinned .wrap{ margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w)); }
+}
+
