@@ -600,14 +600,17 @@ body.light input[type="checkbox"]:checked{
 }
 
 /* Open states (unchanged) */
-#calendarDrawer.open, #namesDrawer.open{ pointer-events:auto; z-index: 10000; }
-#calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
+#calendarDrawer.open, #namesDrawer.open{ pointer-events:none; z-index:10000; }
+#calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{
+  opacity:0; pointer-events:none; background:transparent;
+}
 #calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform:none; }
 
 /* When “pinned”, also reserve drawer width + rail on the page layout */
 body.drawer-pinned .wrap{
-  margin-right: calc(min(420px, 92vw) + var(--rail-w));
+  margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w));
 }
+
 
 /* Slightly softer shadow in light mode (keep yours if you like) */
 body.light #calendarDrawer .drawer-panel,
@@ -628,7 +631,6 @@ body.light #namesDrawer .drawer-panel{
 #calendarDrawer.open.pinned, #namesDrawer.open.pinned { pointer-events: none; }
 #calendarDrawer.open.pinned .drawer-panel, #namesDrawer.open.pinned .drawer-panel { pointer-events: auto; }
 #calendarDrawer.pinned .drawer-scrim, #namesDrawer.pinned .drawer-scrim { opacity: 0 !important; pointer-events: none !important; background: transparent !important; }
-body.drawer-pinned .wrap { margin-right: min(420px, 92vw); }
 
 /* Cards inside drawers */
 #calendarDrawer .card, #namesDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
@@ -779,3 +781,27 @@ body.light #namesList .name-pill.used{
   filter: grayscale(40%);
 }
 
+/* === Calendar drawer: non-modal, narrower, proper stacking === */
+
+/* 1) Make calendar narrower (override the old 420px var) */
+:root{ --cal-drawer-w: 360px; } /* tweak to taste (340–380 works well) */
+
+/* 2) Non-modal behaviour: page stays clickable/scrollable when calendar is open */
+#calendarDrawer{ pointer-events: none; z-index: 9900; }             /* below header */
+#calendarDrawer.open{ pointer-events: none; }                       /* keep container click-through */
+#calendarDrawer .drawer-panel{ pointer-events: auto; }              /* the panel itself is interactive */
+#calendarDrawer .drawer-scrim{
+  opacity: 0 !important;
+  background: transparent !important;
+  pointer-events: none !important;                                  /* no click block */
+}
+
+/* 3) Header above drawers & rail; below modals */
+header{ z-index: 10050 !important; }                                /* on top of calendar + rail */
+#toolRail{ z-index: 10000 !important; }                             /* under header */
+.modal{ z-index: 11000 !important; }                                /* modals remain highest */
+
+/* 4) If you pin the calendar, reserve exactly the calendar width + rail */
+body.drawer-pinned .wrap{
+  margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w)) !important;
+}
