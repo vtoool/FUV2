@@ -579,7 +579,7 @@ body.light input[type="checkbox"]:checked{
 /* =================== DRAWERS (Calendar + Names) =================== */
 /* Variables (put these in your first :root if you prefer keeping vars together) */
 :root{
-  --header-h: 72px;          /* exact sticky header height */
+       /* exact sticky header height */
   --cal-drawer-w: 360px;     /* calendar panel width */
   --names-drawer-w: 220px;   /* names panel width */
 }
@@ -754,21 +754,7 @@ body.light .client-pill{
 /* Keep links inside pills from turning blue */
 .pill a { color: inherit !important; }
 
-   /* ====== Drawer widths (desktop-only) ====== */
-:root{
-  --cal-drawer-w: 420px;   /* keep calendar as-is */
-  --names-drawer-w: 220px; /* 👈 narrower names panel (< half of content) */
-}
 
-@media (min-width: 761px){
-  /* Use separate widths per drawer (do not touch shared scrim or rail) */
-  #calendarDrawer .drawer-panel{ width: min(var(--cal-drawer-w), 92vw); }
-  #namesDrawer   .drawer-panel{ width: min(var(--names-drawer-w), 92vw); }
-
-  /* When pinned, reserve only the width of the specific drawer + rail */
-  body.drawer-cal-pinned   .wrap{ margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w)); }
-  body.drawer-names-pinned .wrap{ margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w)); }
-}
 /* ========== Random Names: gray-out after click (still clickable) ========== */
 #namesList .name-pill{
   cursor: pointer;                /* make it feel clickable */
@@ -794,27 +780,4 @@ body.light #namesList .name-pill.used{
   filter: grayscale(40%);
 }
 
-/* === Calendar drawer: non-modal, narrower, proper stacking === */
 
-/* 1) Make calendar narrower (override the old 420px var) */
-:root{ --cal-drawer-w: 360px; } /* tweak to taste (340–380 works well) */
-
-/* 2) Non-modal behaviour: page stays clickable/scrollable when calendar is open */
-#calendarDrawer{ pointer-events: none; z-index: 9900; }             /* below header */
-#calendarDrawer.open{ pointer-events: none; }                       /* keep container click-through */
-#calendarDrawer .drawer-panel{ pointer-events: auto; }              /* the panel itself is interactive */
-#calendarDrawer .drawer-scrim{
-  opacity: 0 !important;
-  background: transparent !important;
-  pointer-events: none !important;                                  /* no click block */
-}
-
-/* 3) Header above drawers & rail; below modals */
-header{ z-index: 10050 !important; }                                /* on top of calendar + rail */
-#toolRail{ z-index: 10000 !important; }                             /* under header */
-.modal{ z-index: 11000 !important; }                                /* modals remain highest */
-
-/* 4) If you pin the calendar, reserve exactly the calendar width + rail */
-body.drawer-pinned .wrap{
-  margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w)) !important;
-}
