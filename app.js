@@ -79,9 +79,18 @@ function updateDrawerOverlap(){
     .getPropertyValue('--rail-w')) || 0;
   const space = panel.getBoundingClientRect().width + railW;
 
-  // figure out how much horizontal room is left for the main content
+  // if the drawer fits entirely in the right margin, keep the app centered
   const pageMax = parseFloat(getComputedStyle(document.documentElement)
     .getPropertyValue('--page-max')) || 0;
+  const sideMargin = (window.innerWidth - pageMax) / 2;
+  if (sideMargin >= space){
+    document.body.classList.remove('drawer-overlap');
+    document.body.style.removeProperty('--drawerW');
+    document.body.style.removeProperty('--drawerPad');
+    return;
+  }
+
+  // otherwise reserve space so the drawer doesn't cover the main content
   const avail = window.innerWidth - space;          // space left after drawer
   const content = Math.min(avail, pageMax);         // actual content width
   const pad = Math.max((avail - content) / 2, 0);   // leftover space to center
