@@ -493,10 +493,11 @@ body.light .ovr-list li{ background:#fff }
 }
 #customTaskPop{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.55); backdrop-filter:blur(6px); z-index:9999; padding:18px;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(6px); z-index:11000; padding:18px;
 }
 #customTaskPop .sheet{
   width:min(560px,92vw); background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:var(--sh-2);
+  animation:pop .16s ease-out;
 }
 /* Client wider than Type */
 #customTaskPop .row { grid-template-columns: 2fr 1fr; }
