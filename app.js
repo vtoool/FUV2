@@ -416,9 +416,9 @@ function computeSmsText(t, client){
   function truncate(s, n=90){ if(!s) return ''; return s.length>n ? s.slice(0,n-1)+'…' : s; }
 
   // Copy helper + tiny copy buttons
-  function copyTextToClipboard(text, what='value'){
+  function copyTextToClipboard(text, what='value', silent=false){
     if(!text) return;
-    const done = () => toast(`Copied ${what}`, 'ok', 900);
+    const done = () => { if(!silent) toast(`Copied ${what}`, 'ok', 900); };
     try{
       if (navigator.clipboard && navigator.clipboard.writeText){
         navigator.clipboard.writeText(text).then(done).catch(()=>{
@@ -662,10 +662,17 @@ btn.addEventListener('click', () => {
     btn.textContent = n;
     btn.title = 'Click to copy';
     btn.addEventListener('click', () => {
-      copyTextToClipboard(n, 'name'); // you already have this helper
-      btn.classList.add('used');      // gray it out (but keep it usable)
+      copyTextToClipboard(n, 'name', true);
+      const original = n;
+      btn.classList.remove('used');
+      btn.textContent = '✔ Copied name';
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.add('used');
+      }, 500);
     });
-listEl.appendChild(btn);  });
+    listEl.appendChild(btn);
+  });
 }
 function renderNames(){
  const uniqFirst = [...new Set(FIRST.map(s => s.trim()))];
@@ -1430,7 +1437,7 @@ $('#clientsTbl')?.addEventListener('click', e=>{
       af.value = name;
       af.dispatchEvent(new Event('input'));
       af.scrollIntoView({ behavior:'smooth', block:'center' });
-      af.focus();
+      setTimeout(() => af.focus(), 300);
     }
     return;
   }
@@ -1905,7 +1912,7 @@ function initMorePanel(){
           </div>
         </div>
 
-        <div class="right" style="margin-top:10px">
+        <div class="right more-actions">
           <button type="button" class="ghost" id="moreReset">Reset to defaults</button>
           <button type="button" id="moreCancel" class="ghost">Cancel</button>
           <button type="button" id="moreSave" class="primary">Save</button>
@@ -2623,7 +2630,7 @@ if (clientForm) {
       search.value = name;
       search.dispatchEvent(new Event('input'));
       search.scrollIntoView({ behavior:'smooth', block:'center' });
-      search.focus();
+      setTimeout(() => search.focus(), 300);
     }
     return;
   }
