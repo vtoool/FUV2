@@ -403,36 +403,33 @@ body.light #calSettings{ background:#fff }
 .wdays .cell input[type="checkbox"]{ --chk-size:24px; } /* scale only */
 .wdays .cell span{ font-size:12.5px; }
 
-/* Overrides row — 3-up, stop Type from stretching */
+/* === Overrides row — 3-up, date grows; type + button are content-sized === */
 .ovr{
   margin-top:14px;
   display:grid;
-  /* date grows, type is content-sized, button is content-sized */
-  grid-template-columns: minmax(140px,1fr) auto auto;
+  grid-template-columns: minmax(140px,1fr) max-content max-content;
   align-items:end;
   gap:10px;
 }
 
-/* Inputs in the row */
 #calSettings .ovr input,
 #calSettings .ovr select{ height:34px; }
 
-/* Date can stretch; Type should not */
-#ovrDate{ min-width:0; }                 /* allow narrow drawers */
+/* Date can shrink; Type stays to its content */
+#ovrDate{ min-width:0; }
 #ovrType{
   min-width:0;
-  width:max-content;                     /* shrink-to-content (“Off”, “Working day”, etc.) */
-  max-width:190px;                       /* cap in case of long locale strings */
-  white-space:nowrap;                    /* don’t wrap “Working day” */
-  justify-self:start;                    /* prevent grid auto-stretch */
+  white-space:nowrap;
+  width:auto;              /* force content width in case something set 100% */
+  justify-self:start;
 }
 
-/* Add override button stays tight on the right */
+/* “Add override” stays visible on the right */
 #addOverride{
   height:34px;
   justify-self:end;
   white-space:nowrap;
-  z-index:1;                             /* sits above any focus ring glow */
+  z-index:1;               /* above any focus ring glow */
 }
 
 /* Stack only on very small phones */
@@ -440,13 +437,6 @@ body.light #calSettings{ background:#fff }
   .ovr{ grid-template-columns:1fr; }
   #addOverride{ grid-column:1 / -1; justify-self:end; }
 }
-
-
-
-#calSettings .ovr input, #calSettings .ovr select{ height:34px; }
-#ovrDate{ min-width:180px; }
-#ovrType{ min-width:190px; }
-#addOverride{ height:34px; }
 
 /* override list */
 .ovr-list{ margin-top:10px; padding-left:0; list-style:none }
