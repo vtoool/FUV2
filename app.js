@@ -499,9 +499,10 @@ const drawers = ['calendarDrawer','namesDrawer']
   .filter(Boolean);
 
 function closeAllDrawers(){
-  drawers.forEach(d => d.classList.remove('open'));
+  drawers.forEach(d => d.classList.remove('open','pinned')); // <-- remove both
   document.querySelectorAll('#toolRail .tool')
     .forEach(b => b.setAttribute('aria-pressed','false'));
+  setBodyPinned(); // keep body margin in sync
 }
 
 railButtons.forEach(btn => {
@@ -512,8 +513,9 @@ railButtons.forEach(btn => {
 
     closeAllDrawers();
     if (willOpen){
-      drawer.classList.add('open');
+      drawer.classList.add('open','pinned');                // <-- add 'pinned'
       btn.setAttribute('aria-pressed','true');
+      setBodyPinned();                                      // <-- sync body offset
     }
   });
 });
