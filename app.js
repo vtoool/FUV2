@@ -213,42 +213,11 @@ function inferDestination(route){
   return IATA_CITY[last] || last || 'your destination';
 }
 
-// Basic IATA → IANA timezone map (extend as needed)
-const IATA_TZ = {
-  // USA
-  NYC:'America/New_York', JFK:'America/New_York', EWR:'America/New_York', LGA:'America/New_York',
-  BOS:'America/New_York', MIA:'America/New_York', ATL:'America/New_York',
-  ORD:'America/Chicago', MDW:'America/Chicago', DFW:'America/Chicago', DAL:'America/Chicago',
-  DEN:'America/Denver', PHX:'America/Phoenix',
-  LAX:'America/Los_Angeles', SFO:'America/Los_Angeles', SAN:'America/Los_Angeles', SEA:'America/Los_Angeles', PDX:'America/Los_Angeles',
-  HNL:'Pacific/Honolulu',
-  // Canada
-  YYZ:'America/Toronto', YVR:'America/Vancouver', YUL:'America/Toronto',
-  // Europe
-  LHR:'Europe/London', LGW:'Europe/London', MAN:'Europe/London',
-  PAR:'Europe/Paris', CDG:'Europe/Paris', ORY:'Europe/Paris',
-  AMS:'Europe/Amsterdam', FRA:'Europe/Berlin', MUC:'Europe/Berlin', BER:'Europe/Berlin',
-  MAD:'Europe/Madrid', BCN:'Europe/Madrid',
-  FCO:'Europe/Rome', MXP:'Europe/Rome', ROM:'Europe/Rome',
-  ATH:'Europe/Athens', ZRH:'Europe/Zurich', VIE:'Europe/Vienna', DUB:'Europe/Dublin',
-  // Asia / Middle East
-  DXB:'Asia/Dubai', AUH:'Asia/Dubai', DOH:'Asia/Qatar',
-  DEL:'Asia/Kolkata', BOM:'Asia/Kolkata', MAA:'Asia/Kolkata',
-  HKG:'Asia/Hong_Kong', NRT:'Asia/Tokyo', HND:'Asia/Tokyo', TYO:'Asia/Tokyo',
-  ICN:'Asia/Seoul', SEL:'Asia/Seoul',
-  PVG:'Asia/Shanghai', SHA:'Asia/Shanghai', PEK:'Asia/Shanghai',
-  SIN:'Asia/Singapore', BKK:'Asia/Bangkok',
-  // Oceania
-  SYD:'Australia/Sydney', MEL:'Australia/Melbourne', AKL:'Pacific/Auckland',
-  // Africa & LatAm
-  JNB:'Africa/Johannesburg', CPT:'Africa/Johannesburg', CAI:'Africa/Cairo',
-  GRU:'America/Sao_Paulo', SAO:'America/Sao_Paulo', EZE:'America/Argentina/Buenos_Aires',
-  MEX:'America/Mexico_City', CUN:'America/Cancun', BOG:'America/Bogota', LIM:'America/Lima'
-};
-
+// IATA → IANA timezone map is loaded separately (see iata-tz.js)
 function tzFromRoute(route){
   const first = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean)[0];
-  return IATA_TZ[first] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return window.IATA_TZ?.[first] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 }
 
 function formatTimeInTz(tz){
@@ -264,6 +233,7 @@ function updateLocalTimes(){
   });
 }
 setInterval(updateLocalTimes, 1000);
+
 
 // Very lightweight template (match your screenshot; tweak copy as you like)
 function computeEmailContent(t, c){
