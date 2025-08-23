@@ -69,12 +69,7 @@ function findCustomersCard(){
   }
   return null;
 }
-function rectsOverlap(a,b){
-  if (!a || !b) return false;
-  return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
-}
-
-// 2) treat PINNED drawer as always needing space
+// Measure the open drawer and add right margin only if it overlaps content
 function updateDrawerOverlap(){
   const drawer = ['calendarDrawer','namesDrawer']
     .map(id => document.getElementById(id))

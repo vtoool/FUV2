@@ -657,13 +657,7 @@ body.light input[type="checkbox"]:checked{
 }
 #calendarDrawer .card .bd, #namesDrawer .card .bd{ overflow: auto; }
 
-/* Pinned layout: reserve only the open drawer + rail */
-body.drawer-cal-pinned   #app{
-  margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w));
-}
-body.drawer-names-pinned #app{
-  margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w));
-}
+/* (Removed pinned layout spacing; margin is only added on overlap) */
 
 /* Stacking: header over drawers/rail; modals over everything */
 header{ z-index: 10050 !important; }
@@ -816,5 +810,4 @@ body.drawer-overlap #app { margin-right: var(--drawerW); }
 @media (max-width: 900px){
   body.drawer-overlap #app { margin-right: 0; }
 }
-
-#app { margin-right: 0; }
+/* Default state: centered via .wrap margin */
