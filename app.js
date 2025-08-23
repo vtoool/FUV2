@@ -238,6 +238,25 @@ function tzFromRoute(route){
 
 }
 
+function clientTz(c){
+  if(c?.home){
+    return window.IATA_TZ?.[c.home] || tzFromRoute(c.home);
+  }
+  if(c?.route){
+    return tzFromRoute(c.route);
+  }
+  return '';
+}
+
+function buildHomeList(){
+  const list = document.getElementById('homeList');
+  if(!list) return;
+  if(list.options.length) return; // populate once
+  const codes = Object.keys(window.IATA_TZ || {}).sort();
+  const frag = codes.map(code=>`<option value="${code}"></option>`).join('');
+  list.innerHTML = frag;
+}
+
 function formatTimeInTz(tz){
   return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', hour12:false, timeZone: tz }).format(new Date());
 }
@@ -254,11 +273,14 @@ function tzAbbr(tz){
 
 function updateLocalTimes(){
   const now = new Date();
+  const blink = Math.floor(now.getTime() / 3000) % 2 === 0;
   $$('.local-time').forEach(el=>{
     const tz = el.getAttribute('data-tz');
     if(!tz) return;
     const formatter = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', hour12:false, timeZone: tz });
-    el.textContent = formatter.format(now);
+    let time = formatter.format(now);
+    if(!blink) time = time.replace(':', ' ');
+    el.textContent = time;
     const hour = Number(new Intl.DateTimeFormat([], { hour: 'numeric', hour12:false, timeZone: tz }).format(now));
     el.classList.toggle('lt-red', hour < 9 || hour >= 21);
     el.classList.toggle('lt-green', hour >= 9 && hour < 21);
@@ -1020,6 +1042,7 @@ ${p.leadId ? ` ${leadChipHtml(p.leadId)}` : ''}
         startDate: start,
         reachedStart: (status==='reached') ? start : null,
         route: (p.route||'').trim(),
+        home: '',
         dates: (p.dates||'').trim(),
         pax:   (p.pax||'').trim(),
         leadId:(p.leadId||'').trim(),
@@ -1383,12 +1406,12 @@ const nameText =
 
     const row = document.createElement('tr'); row.className='note-row'; row.setAttribute('data-for', id);
     const td = document.createElement('td'); td.colSpan = 6;
-    const tz = c.route ? tzFromRoute(c.route) : '';
+    const tz = clientTz(c);
     const chips = [
       c.route ? `<span class="pill">Route: ${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates: ${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax: ${escapeHtml(String(c.pax))}</span>` : '',
-      c.route ? `<span class="pill">Local (${tzAbbr(tz)}): <span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>` : '',
+      tz ? `<span class="pill">Local (${tzAbbr(tz)}): <span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>` : '',
       c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean).join(' ');
     td.innerHTML = `<div class="tiny slab">${chips || ''}<div>${escapeHtml(c.notes || 'No notes yet.')}</div></div>`;
@@ -1441,6 +1464,7 @@ $('#clientsTbl')?.addEventListener('click', e=>{
     $('#status').value     = c.status;
     $('#startDate').value  = c.startDate || '';
     $('#route').value      = c.route || '';
+    $('#home').value       = c.home  || '';
     $('#dates').value      = c.dates || '';
     $('#pax').value        = c.pax   || '';
     $('#leadId').value     = c.leadId|| '';
@@ -1589,8 +1613,8 @@ function renderTask(t, opts = {}){
   }
 
   let localTimeHtml = '';
-  if (c.route && showClientPill){
-    const tz = tzFromRoute(c.route);
+  const tz = clientTz(c);
+  if (tz && showClientPill){
     localTimeHtml = `<span class="pill"><span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>`;
   }
 
@@ -1665,8 +1689,8 @@ function renderGroupedByClient(container, items){
       gh.className = 'group-hd';
       const c = t.clientId ? clientById(t.clientId) || {} : {};
       let localTimeHtml = '';
-      if (c.route){
-        const tz = tzFromRoute(c.route);
+      const tz = clientTz(c);
+      if (tz){
         localTimeHtml = `<span class="pill"><span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>`;
       }
       const chipsOnce = detailsChipsFor(t); // uses the task's client
@@ -2374,6 +2398,7 @@ $('#addOverride')?.addEventListener('click', ()=>{
       startDate,
       reachedStart: exists ? exists.reachedStart : (status === 'reached' ? startDate : null),
       route: ($('#route').value||'').trim(),
+      home:  ($('#home').value||'').trim().toUpperCase(),
       dates: ($('#dates').value||'').trim(),
       pax:   ($('#pax').value||'').trim(),
       leadId: ($('#leadId').value||'').trim(),
@@ -2460,16 +2485,17 @@ if (clientForm) {
   /* ===== Add Custom Task modal ===== */
   function titleDefaultFor(type){ return ({call:'Call', callvm:'Call + Voicemail', sms:'SMS', email:'Email'}[type] || ''); }
   function buildClientOptionsForPopover(){
-    const sel = $('#ctClient');
-    if(!sel) return;
-    const keep = sel.value || '';
-    sel.innerHTML = '<option value="">Select a client…</option>';
+    const list = $('#ctClientList');
+    if(!list) return;
+    const input = $('#ctClient');
+    const keep = input?.value || '';
+    list.innerHTML = '';
     const opts = [...state.clients].sort((a,b)=>(b.startDate || '').localeCompare(a.startDate || ''));
     opts.forEach(c=>{
       const label = c.email ? `${c.name} — ${c.email}` : (c.phone ? `${c.name} — ${c.phone}` : c.name);
-      sel.insertAdjacentHTML('beforeend', `<option value="${c.id}">${escapeHtml(label)}</option>`);
+      list.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(label)}" data-id="${c.id}"></option>`);
     });
-    sel.value = keep;
+    if(input) input.value = keep;
   }
   function openCustomTaskPopover(){
     buildClientOptionsForPopover();
@@ -2517,7 +2543,9 @@ if (clientForm) {
     document.body.classList.remove('modal-open');
   }
   function saveCustomTaskFromPopover(){
-    const clientId = $('#ctClient').value || '';
+    const label = ($('#ctClient').value || '').trim();
+    const opt = Array.from($('#ctClientList')?.options || []).find(o=>o.value===label);
+    const clientId = opt?.dataset.id || '';
     const c = clientId ? clientById(clientId) : null;
 
     const type  = $('#ctType').value || 'custom';
@@ -2659,6 +2687,7 @@ function centerMainCards(){
   /* ========= Bootstrap ========= */
 function bootstrap(){
   initAddModal();
+  buildHomeList();
   refresh();
   buildCalendar();
   mountSortGroupLabel();
