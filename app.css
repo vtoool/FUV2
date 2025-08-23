@@ -142,6 +142,24 @@ input:not([type="checkbox"]), select, textarea, button{
 textarea{height:auto; min-height:72px; resize:vertical}
 input:focus,select:focus,textarea:focus{ border-color:color-mix(in oklab, var(--accent) 55%, white 0%); box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent) }
 body.light input, body.light select, body.light textarea{ background:#fff; color:var(--ink); border-color:var(--line); }
+/* === 1) Keep calendar days equal width === */
+#calendarGrid{
+  display:grid;               /* force a 7-column grid */
+  grid-template-columns:repeat(7,minmax(0,1fr));
+}
+#calendarGrid > .cal-head,
+#calendarGrid > .cal-cell{min-width:0; box-sizing:border-box;}
+.cal-cell{position:relative;}
+/* keep the “Nr of tasks” pill from changing cell width */
+.cal-badge{position:absolute; top:6px; right:6px}
+
+/* === 2) If the calendar overlaps, give main content enough right margin === */
+:root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
+body.drawer-overlap main.wrap,
+body.drawer-overlap .wrap.grid{         /* shifts Customers + Agenda left just enough */
+  margin-right: calc(var(--drawerW) + 12px);
+  transition: margin-right .2s ease;
+}
 
 /* =================== BUTTONS =================== */
 button{
