@@ -247,8 +247,11 @@
               <div class="row">
                 <div>
                   <label>Client</label>
-                  <input id="ctClient" list="ctClientList" placeholder="Search client…" />
-                  <datalist id="ctClientList"></datalist>
+                  <div class="ct-client">
+                    <input id="ctClientSearch" placeholder="Search client…" autocomplete="off" />
+                    <div id="ctClientDropdown" style="display:none"></div>
+                    <input type="hidden" id="ctClient" />
+                  </div>
                 </div>
                 <div>
                   <label>Type</label>

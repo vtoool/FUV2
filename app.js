@@ -2434,27 +2434,56 @@ if (clientForm) {
   
   /* ===== Add Custom Task modal ===== */
   function titleDefaultFor(type){ return ({call:'Call', callvm:'Call + Voicemail', sms:'SMS', email:'Email'}[type] || ''); }
+  let ctClientOpts = [];
   function buildClientOptionsForPopover(){
-    const list = $('#ctClientList');
-    const input = $('#ctClient');
-    if(!list || !input) return;
-    const keep = input.dataset.clientId || '';
-    list.innerHTML = '';
-    // ✨ Default = None / no client
-    list.insertAdjacentHTML('beforeend', `<option data-id="" value="None — no client"></option>`);
-    const opts = [...state.clients].sort((a,b)=>(b.startDate || '').localeCompare(a.startDate || ''));
-    opts.forEach(c=>{
-      const label = c.email ? `${c.name} — ${c.email}` : (c.phone ? `${c.name} — ${c.phone}` : c.name);
-      list.insertAdjacentHTML('beforeend', `<option data-id="${c.id}" value="${escapeHtml(label)}"></option>`);
-    });
-    if (keep){
-      const match = [...list.options].find(o=>o.dataset.id===keep);
-      if (match) input.value = match.value;
-    } else {
-      input.value = '';
-    }
-    input.dataset.clientId = keep;
+    const keep = $('#ctClient').value || '';
+    ctClientOpts = [...state.clients]
+      .sort((a,b)=>(b.startDate || '').localeCompare(a.startDate || ''))
+      .map(c=>({
+        id: c.id,
+        label: c.email ? `${c.name} — ${c.email}` : (c.phone ? `${c.name} — ${c.phone}` : c.name)
+      }));
+    const match = ctClientOpts.find(o=>o.id===keep);
+    $('#ctClientSearch').value = match ? match.label : '';
   }
+
+  function filterCtClientDropdown(q){
+    const dd = $('#ctClientDropdown');
+    if(!dd) return;
+    dd.innerHTML = '';
+    const query = String(q||'').trim().toLowerCase();
+    if(!query){ dd.style.display='none'; return; }
+    const matches = ctClientOpts.filter(o=>o.label.toLowerCase().includes(query)).slice(0,25);
+    matches.forEach(o=>{
+      const div = document.createElement('div');
+      div.textContent = o.label;
+      div.addEventListener('mousedown', e=>{ e.preventDefault(); selectCtClient(o); });
+      dd.appendChild(div);
+    });
+    dd.style.display = matches.length ? 'block' : 'none';
+  }
+  function selectCtClient(opt){
+    $('#ctClient').value = opt.id;
+    $('#ctClientSearch').value = opt.label;
+    $('#ctClientDropdown').style.display = 'none';
+  }
+  $('#ctClientSearch')?.addEventListener('input', e=>{
+    $('#ctClient').value = '';
+    filterCtClientDropdown(e.target.value);
+  });
+  $('#ctClientSearch')?.addEventListener('focus', e=>{
+    filterCtClientDropdown(e.target.value);
+  });
+  $('#ctClientSearch')?.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){
+      const first = $('#ctClientDropdown')?.firstElementChild;
+      if(first){ e.preventDefault(); first.dispatchEvent(new MouseEvent('mousedown')); }
+    }
+  });
+  document.addEventListener('click', e=>{
+    const box = document.querySelector('.ct-client');
+    if(box && !box.contains(e.target)) $('#ctClientDropdown').style.display='none';
+  });
   function openCustomTaskPopover(){
     buildClientOptionsForPopover();
     const pop = document.getElementById('customTaskPop'); if(!pop) return;
@@ -2484,11 +2513,10 @@ if (clientForm) {
     }
   }
   function clearCustomTaskForm(){
-    ['ctClient','ctType','ctTitle','ctDate','ctTime','ctNotes'].forEach(id=>{
+    ['ctClient','ctClientSearch','ctType','ctTitle','ctDate','ctTime','ctNotes'].forEach(id=>{
       const el = $('#'+id); if(!el) return;
       if (id==='ctType') el.value='call'; else el.value='';
     });
-    $('#ctClient').dataset.clientId = '';
     $('#ctImportant').checked = false;
     $('#ctNotify').checked = false; $('#ctNotify').disabled = true;
   }
@@ -2502,7 +2530,7 @@ if (clientForm) {
     document.body.classList.remove('modal-open');
   }
   function saveCustomTaskFromPopover(){
-    const clientId = $('#ctClient').dataset.clientId || '';
+    const clientId = $('#ctClient').value || '';
     const c = clientId ? clientById(clientId) : null;
 
     const type  = $('#ctType').value || 'custom';
@@ -2539,12 +2567,6 @@ if (clientForm) {
     const cur = ($('#ctTitle').value||'').trim();
     const titleDefaults = ['Call','Call + Voicemail','SMS','Email'];
     if (!cur || titleDefaults.includes(cur)) $('#ctTitle').value = titleDefaultFor($('#ctType').value);
-  });
-  $('#ctClient')?.addEventListener('input', ()=>{
-    const list = $('#ctClientList');
-    const val = $('#ctClient').value;
-    const match = list ? [...list.options].find(o=>o.value===val) : null;
-    $('#ctClient').dataset.clientId = match ? (match.dataset.id || '') : '';
   });
   $('#ctTime')?.addEventListener('input', ()=>{
     const has = !!$('#ctTime').value;
