@@ -58,7 +58,7 @@ function setBodyPinned(){
   const tabNames = document.getElementById('tabNames');
   if (tabCal)   tabCal.setAttribute('aria-pressed', String(calPinned));
   if (tabNames) tabNames.setAttribute('aria-pressed', String(namesPinned));
-  updateDrawerOverlap();
+ 
 }
 // Detect whether the open calendar drawer visually overlaps Customers or Agenda
 function findCustomersCard(){
@@ -74,19 +74,51 @@ function rectsOverlap(a,b){
   return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
 }
 function updateDrawerOverlap(){
-  const drawer = document.getElementById('calendarDrawer');
-  const panel  = drawer?.querySelector('.drawer-panel');
-  const open   = drawer && drawer.classList.contains('open');
-  const agenda = document.getElementById('actionsCard');
+  // measure whichever drawer is currently open
+  const panel = document.querySelector(
+    '#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel'
+  );
+  const agenda    = document.getElementById('actionsCard');
   const customers = findCustomersCard();
-  if (!open || !panel){ document.body.classList.remove('drawer-overlap'); return; }
+
+  if (!panel){
+    document.body.classList.remove('drawer-overlap');
+    return;
+  }
+
+  // Always keep --drawerW fresh so CSS can reserve space when pinned
   const pr = panel.getBoundingClientRect();
+  document.body.style.setProperty('--drawerW', Math.round(pr.width) + 'px');
+
+  // (Optional) keep your overlap flag for other styling, but it no longer
+  // controls the margin — that now keys off .drawer-pinned in CSS.
   const needsSpace =
     rectsOverlap(pr, agenda?.getBoundingClientRect()) ||
     rectsOverlap(pr, customers?.getBoundingClientRect());
   document.body.classList.toggle('drawer-overlap', !!needsSpace);
-  if (needsSpace){ document.body.style.setProperty('--drawerW', pr.width + 'px'); }
 }
+
+// call this instead of plain updateDrawerOverlap() whenever drawers toggle
+function afterLayout(){
+  updateDrawerOverlap();                     // now
+  requestAnimationFrame(updateDrawerOverlap);// next frame
+  setTimeout(updateDrawerOverlap, 220);      // after transition
+}
+
+// keep the existing resize hook
+window.addEventListener('resize', updateDrawerOverlap);
+
+// make transitions/animations also refresh the measurement
+['calendarDrawer','namesDrawer'].forEach(id=>{
+  const d = document.getElementById(id);
+  d?.addEventListener('transitionend', updateDrawerOverlap);
+  d?.addEventListener('animationend', updateDrawerOverlap);
+});
+
+// also refresh on load / after fonts settle
+window.addEventListener('load', updateDrawerOverlap);
+document.fonts?.ready?.then?.(updateDrawerOverlap);
+
 
 // call this whenever drawers open/close or the viewport changes
 window.addEventListener('resize', () => updateDrawerOverlap());
@@ -467,7 +499,7 @@ function initCalendarDrawer(){
   document.getElementById('calDrawerClose')?.addEventListener('click', ()=>{
     drawer.classList.remove('open','pinned');
     document.getElementById('openCal')?.setAttribute('aria-expanded','false');
-    setBodyPinned();
+    setBodyPinned(); afterLayout();
   });
 
   // Scrim closes only when NOT pinned
@@ -475,8 +507,7 @@ function initCalendarDrawer(){
     if (!drawer.classList.contains('pinned')){
       drawer.classList.remove('open');
       document.getElementById('openCal')?.setAttribute('aria-expanded','false');
-      setBodyPinned();
-      updateDrawerOverlap(); 
+setBodyPinned(); afterLayout();
     }
   });
 
@@ -493,8 +524,7 @@ function initCalendarDrawer(){
         drawer.classList.remove('open','pinned');
       }
       openBtn.setAttribute('aria-expanded', String(opening));
-      setBodyPinned();
-      updateDrawerOverlap();  
+setBodyPinned(); afterLayout(); 
     });
   }
 }
@@ -612,7 +642,7 @@ function renderNames(){
   drawer.querySelector('#namesClose')?.addEventListener('click', ()=>{
     drawer.classList.remove('open','pinned');
     document.getElementById('openNames')?.setAttribute('aria-expanded','false');
-    setBodyPinned();
+    setBodyPinned(); afterLayout();
   });
 
   // Scrim closes only when NOT pinned
@@ -620,7 +650,7 @@ function renderNames(){
     if (!drawer.classList.contains('pinned')){
       drawer.classList.remove('open');
       document.getElementById('openNames')?.setAttribute('aria-expanded','false');
-      setBodyPinned();
+      setBodyPinned(); afterLayout();
     }
   });
 
@@ -638,7 +668,7 @@ function renderNames(){
         drawer.classList.remove('open','pinned');
       }
       openBtn.setAttribute('aria-expanded', String(opening));
-      setBodyPinned();
+      setBodyPinned(); afterLayout();
     });
   }
 
@@ -659,7 +689,7 @@ function initSideTabs(){
     } else {
       calDrawer.classList.remove('open','pinned');
     }
-    setBodyPinned();
+    setBodyPinned(); afterLayout();
   });
 
   namesTab?.addEventListener('click', ()=>{
@@ -671,11 +701,11 @@ function initSideTabs(){
     } else {
       namesDrawer.classList.remove('open','pinned');
     }
-    setBodyPinned();
+    setBodyPinned(); afterLayout();
   });
 
   // Keep tab states in sync if drawers are opened via toolbar buttons
-  const obs = new MutationObserver(setBodyPinned);
+  const obs = new MutationObserver(()=>{ setBodyPinned(); afterLayout(); });
   calDrawer   && obs.observe(calDrawer,   { attributes:true, attributeFilter:['class'] });
   namesDrawer && obs.observe(namesDrawer, { attributes:true, attributeFilter:['class'] });
 }
