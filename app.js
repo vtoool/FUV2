@@ -430,14 +430,12 @@ function initCalendarDrawer(){
     (cal.querySelector('.bd') || cal).appendChild(calSettings);
   }
 
- // Header close button
-const calToolBtn = document.querySelector('#toolRail .tool[data-target="calendarDrawer"]');
-document.getElementById('calDrawerClose')?.addEventListener('click', ()=>{
-  drawer.classList.remove('open','pinned');
-  calToolBtn?.setAttribute('aria-pressed','false');   // keep rail in sync
-  setBodyPinned();
-});
-
+  // Header close button
+  document.getElementById('calDrawerClose')?.addEventListener('click', ()=>{
+    drawer.classList.remove('open','pinned');
+    document.getElementById('openCal')?.setAttribute('aria-expanded','false');
+    setBodyPinned();
+  });
 
   // Scrim closes only when NOT pinned
   drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
@@ -499,10 +497,9 @@ const drawers = ['calendarDrawer','namesDrawer']
   .filter(Boolean);
 
 function closeAllDrawers(){
-  drawers.forEach(d => d.classList.remove('open','pinned')); // <-- remove both
+  drawers.forEach(d => d.classList.remove('open'));
   document.querySelectorAll('#toolRail .tool')
     .forEach(b => b.setAttribute('aria-pressed','false'));
-  setBodyPinned(); // keep body margin in sync
 }
 
 railButtons.forEach(btn => {
@@ -513,9 +510,8 @@ railButtons.forEach(btn => {
 
     closeAllDrawers();
     if (willOpen){
-      drawer.classList.add('open','pinned');                // <-- add 'pinned'
+      drawer.classList.add('open');
       btn.setAttribute('aria-pressed','true');
-      setBodyPinned();                                      // <-- sync body offset
     }
   });
 });
@@ -576,14 +572,13 @@ function renderNames(){
   // Expose to side-tab so it can refresh on open
   drawer.renderNames = renderNames;
 
-// Top buttons
-const namesToolBtn = document.querySelector('#toolRail .tool[data-target="namesDrawer"]');
-drawer.querySelector('#namesClose')?.addEventListener('click', ()=>{
-  drawer.classList.remove('open','pinned');
-  namesToolBtn?.setAttribute('aria-pressed','false'); // keep rail in sync
-  setBodyPinned();
-});
-
+  // Top buttons
+  drawer.querySelector('#namesRefresh')?.addEventListener('click', renderNames);
+  drawer.querySelector('#namesClose')?.addEventListener('click', ()=>{
+    drawer.classList.remove('open','pinned');
+    document.getElementById('openNames')?.setAttribute('aria-expanded','false');
+    setBodyPinned();
+  });
 
   // Scrim closes only when NOT pinned
   drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
