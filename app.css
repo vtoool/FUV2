@@ -549,24 +549,9 @@ body.light input[type="checkbox"]:checked{
 .centered { max-width: var(--content-width); margin-inline: auto; }
 
 /* =================== DRAWERS (Calendar + Names) =================== */
-#calendarDrawer, #namesDrawer{ position:fixed; inset:0; pointer-events:none; z-index:9990; }
-#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim{
-  position:absolute; inset:0; background:rgba(0,0,0,.45);
-  opacity:0; transition:opacity .18s ease; pointer-events:none;
-}
-/* Drawer panel slides out to the LEFT of the rail */
-/* Calendar stays wide */
-#calendarDrawer .drawer-panel{
-  position:absolute; top:0; right: var(--rail-w); height:100%;
-  width: min(420px, 92vw);
-  /* keep the rest (background, shadow, transform, etc.) */
-}
-
-/* Names drawer ≈ a bit less than half the old width */
-#namesDrawer .drawer-panel{
-  position:absolute; top:0; right: var(--rail-w); height:100%;
-  width: min(200px, 92vw);  /* was 420px */
-  /* keep the rest (background, shadow, transform, etc.) */
+#calendarDrawer, #namesDrawer{
+  position: fixed; inset: 0; z-index: 9990;
+  pointer-events: none; /* disabled until .open */
 }
 
 /* Scrim covers everything EXCEPT the rail */
@@ -576,78 +561,48 @@ body.light input[type="checkbox"]:checked{
   opacity:0; transition:opacity .18s ease; pointer-events:none;
 }
 
-/* Open states (unchanged) */
-#calendarDrawer.open, #namesDrawer.open{ pointer-events:auto; z-index: 10000; }
+/* Panels — hidden off-screen by default */
+#calendarDrawer .drawer-panel, #namesDrawer .drawer-panel{
+  position:absolute; top:0; right: var(--rail-w); height:100%;
+  max-width:92vw;
+  background: var(--panel);
+  border-left:1px solid var(--line);
+  box-shadow: -12px 0 28px rgba(0,0,0,.26);
+  transform: translateX(100%);           /* <-- hidden by default */
+  transition: transform .22s ease;
+}
+
+/* Widths */
+#calendarDrawer .drawer-panel{ width:420px; }
+#namesDrawer .drawer-panel{ width:200px; }  /* narrowed names tool */
+
+/* Open state */
+#calendarDrawer.open, #namesDrawer.open{ pointer-events:auto; z-index:10000; }
+#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform: translateX(0); }
 #calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
-#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform:none; }
 
-/* When “pinned”, also reserve drawer width + rail on the page layout */
-body.drawer-pinned .wrap{
-  margin-right: calc(min(420px, 92vw) + var(--rail-w));
+/* Pinned (docked) – keep clickable; just hide the scrim */
+#calendarDrawer.open.pinned, #namesDrawer.open.pinned{ pointer-events:auto; }
+#calendarDrawer.pinned .drawer-scrim, #namesDrawer.pinned .drawer-scrim{
+  opacity:0 !important; pointer-events:none !important; background: transparent !important;
 }
 
-/* Slightly softer shadow in light mode (keep yours if you like) */
-body.light #calendarDrawer .drawer-panel,
-body.light #namesDrawer .drawer-panel{
-  box-shadow: -8px 0 20px rgba(15,23,42,.12);
-}
-
-/* Even lighter in light mode */
-body.light #calendarDrawer .drawer-panel,
-body.light #namesDrawer .drawer-panel{
-  box-shadow: -8px 0 20px rgba(15,23,42,.12);
-}
-#calendarDrawer.open, #namesDrawer.open{ pointer-events:auto; }
-#calendarDrawer.open .drawer-scrim, #namesDrawer.open .drawer-scrim{ opacity:1; pointer-events:auto; }
-#calendarDrawer.open .drawer-panel, #namesDrawer.open .drawer-panel{ transform:none; }
-
-/* Docked/pinned */
-#calendarDrawer.open.pinned, #namesDrawer.open.pinned { pointer-events: none; }
-#calendarDrawer.open.pinned .drawer-panel, #namesDrawer.open.pinned .drawer-panel { pointer-events: auto; }
-#calendarDrawer.pinned .drawer-scrim, #namesDrawer.pinned .drawer-scrim { opacity: 0 !important; pointer-events: none !important; background: transparent !important; }
+/* When pinned, reserve only the active drawer's width */
+body.drawer-pinned .wrap{ margin-right: calc(var(--drawer-reserved, 420px) + var(--rail-w)); }
+#calendarDrawer.pinned{ --drawer-reserved: 420px; }
+#namesDrawer.pinned{ --drawer-reserved: 200px; }
 
 /* Cards inside drawers */
 #calendarDrawer .card, #namesDrawer .card{ border:0; border-radius:0; height:100%; display:flex; flex-direction:column; }
-#calendarDrawer .card .bd, #namesDrawer .card .bd{overflow:auto; }
+#calendarDrawer .card .bd, #namesDrawer .card .bd{ overflow:auto; }
 
-/* ==== Fixed tool rail (far right) ==== */
-#toolRail{
-  position: fixed;
-  right: 0; top: 0; bottom: 0;
-  width: var(--rail-w);
-  display: flex; flex-direction: column;
-  align-items: center; gap: 12px;
-  padding: 10px 8px;
-  z-index: 10001;            /* above scrim so it's always clickable */
-  pointer-events: none;      /* rail ignores clicks… */
-}
-#toolRail .tool{
-  pointer-events: auto;      /* …buttons do get clicks */
-  width: 46px; height: 46px;
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--chip);
-  border: 1px solid var(--line);
-  box-shadow: var(--sh-1);
-  cursor: pointer;
-}
-#toolRail .tool[aria-pressed="true"]{
-  background: color-mix(in oklab, var(--accent) 16%, var(--chip) 84%);
-  box-shadow: 0 6px 14px rgba(0,0,0,.14);
-}
-body.light #toolRail .tool{
-  background:#fff;
-  box-shadow: 0 6px 14px rgba(15,23,42,.10);
-}
+/* Light-mode shadow */
+body.light #calendarDrawer .drawer-panel,
+body.light #namesDrawer .drawer-panel{ box-shadow: -8px 0 20px rgba(15,23,42,.12); }
 
-/* Mobile: turn the rail into a small horizontal bar */
-@media (max-width:760px){
-  #toolRail{
-    right: 12px; top: auto; bottom: 14px; height: auto; width: auto;
-    flex-direction: row; padding: 0;
-  }
-}
-
+/* Names list pills */
+#namesList .name-pill{ width:100%; }
+#namesList .name-pill.used{ opacity:.45; filter:saturate(0); }
 
 /* =================== NAMES TOOL LIST =================== */
 #namesCard .bd{ padding:12px; }
