@@ -70,6 +70,7 @@ function updateDrawerOverlap(){
   if (!panel){
     document.body.classList.remove('drawer-overlap');
     document.body.style.removeProperty('--drawerW');
+    document.body.style.removeProperty('--drawerPad');
     return;
   }
 
@@ -78,8 +79,16 @@ function updateDrawerOverlap(){
     .getPropertyValue('--rail-w')) || 0;
   const space = panel.getBoundingClientRect().width + railW;
 
+  // figure out how much horizontal room is left for the main content
+  const pageMax = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--page-max')) || 0;
+  const avail = window.innerWidth - space;          // space left after drawer
+  const content = Math.min(avail, pageMax);         // actual content width
+  const pad = Math.max((avail - content) / 2, 0);   // leftover space to center
+
   document.body.classList.add('drawer-overlap');
   document.body.style.setProperty('--drawerW', space + 'px');
+  document.body.style.setProperty('--drawerPad', pad + 'px');
 }
 
 
