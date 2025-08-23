@@ -725,4 +725,28 @@ body.light .client-pill{
   body.drawer-cal-pinned   .wrap{ margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w)); }
   body.drawer-names-pinned .wrap{ margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w)); }
 }
+/* ========== Random Names: gray-out after click (still clickable) ========== */
+#namesList .name-pill{
+  cursor: pointer;                /* make it feel clickable */
+  min-height: 32px;
+}
+
+/* clicked/used state — dim + desaturate, but keep it active */
+#namesList .name-pill.used{
+  color: var(--muted);
+  opacity: .70;
+  filter: grayscale(60%);
+}
+
+/* keep a clear keyboard focus outline for accessibility */
+#namesList .name-pill:focus-visible{
+  outline: 2px solid var(--line);
+  outline-offset: 2px;
+}
+
+/* (optional) slightly lighter on light theme */
+body.light #namesList .name-pill.used{
+  opacity: .65;
+  filter: grayscale(40%);
+}
 
