@@ -1958,6 +1958,7 @@ if (viewTodayEl) {
     setAgendaMode('today');
     if (agendaDateEl) agendaDateEl.value = '';
     renderAgenda();
+    buildCalendar();
   });
 }
 
@@ -1979,6 +1980,8 @@ if (agendaDateEl) {
     renderAgenda = ()=> buildAgenda(currentAgendaDate);
     setAgendaMode(null);
     renderAgenda();
+    buildCalendar();
+    flashAgendaDate();
   });
 }
 
@@ -2145,26 +2148,27 @@ function notifyTask(t){
     for(let d=1; d<=daysInMonth; d++){
       const dt  = new Date(year, month, d);
       const ymd = fmt(dt);
-const items = state.tasks.filter(
-  t => t.date === ymd && matchesFilter(t) && matchesShow(t)
-);
+      const items = state.tasks.filter(
+        t => t.date === ymd && matchesFilter(t) && matchesShow(t)
+      );
       const cell = document.createElement('div');
-      cell.className='cal-cell'; if(!isWorkingDay(dt)) cell.classList.add('offday');
+      cell.className='cal-cell';
+      if(!isWorkingDay(dt)) cell.classList.add('offday');
+      if(fmt(currentAgendaDate || today()) === ymd) cell.classList.add('selected');
       cell.innerHTML = `<div class="d">${d}</div>` + (items.length ? `<div class="cal-badge">${items.length}</div>` : '');
-cell.addEventListener('click', ()=>{
-  const ad = $('#agendaDate');
-  if (ad){
-    ad.value = ymd;
-    ad.dispatchEvent(new Event('change'));
-    flashAgendaDate();
-  }
-  const target = document.getElementById('actionsCard');
-  if (target?.scrollIntoView){
-    target.scrollIntoView({ behavior:'smooth', block:'start' });
-  } else if (target){
-    window.scrollTo({ top: target.offsetTop - 70, behavior:'smooth' });
-  }
-});
+      cell.addEventListener('click', ()=>{
+        const ad = $('#agendaDate');
+        if (ad){
+          ad.value = ymd;
+          ad.dispatchEvent(new Event('change'));
+        }
+        const target = document.getElementById('actionsCard');
+        if (target?.scrollIntoView){
+          target.scrollIntoView({ behavior:'smooth', block:'start' });
+        } else if (target){
+          window.scrollTo({ top: target.offsetTop - 70, behavior:'smooth' });
+        }
+      });
 
       grid.appendChild(cell);
     }
