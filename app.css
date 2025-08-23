@@ -155,11 +155,15 @@ body.light input, body.light select, body.light textarea{ background:#fff; color
 
 /* === 2) If the calendar overlaps, give main content enough right margin === */
 :root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
-body.drawer-overlap main.wrap,
-body.drawer-overlap .wrap.grid{         /* shifts Customers + Agenda left just enough */
-  margin-right: calc(var(--drawerW) + 12px);
-  transition: margin-right .2s ease;
+/* NEW: always reserve space when a drawer is pinned (desktop) */
+@media (min-width: 761px){
+  body.drawer-pinned main.wrap,
+  body.drawer-pinned .wrap.grid{
+    margin-right: calc(var(--drawerW, 380px) + 12px);
+    transition: margin-right .2s ease;
+  }
 }
+
 
 /* =================== BUTTONS =================== */
 button{
