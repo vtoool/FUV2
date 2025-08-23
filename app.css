@@ -153,15 +153,9 @@ body.light input, body.light select, body.light textarea{ background:#fff; color
 /* keep the “Nr of tasks” pill from changing cell width */
 .cal-badge{position:absolute; top:6px; right:6px}
 
-/* === 2) If the calendar overlaps, give main content enough right margin === */
-:root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
-/* NEW: always reserve space when a drawer is pinned (desktop) */
-@media (min-width: 761px){
-  body.drawer-pinned #app{
-    margin-right: calc(var(--drawerW, 380px) + 12px);
-    transition: margin-right .2s ease;
-  }
-}
+/* === 2) If a drawer overlaps, shift the main content left just enough === */
+:root{ --drawerW: 380px; }              /* fallback; JS will set the real offset */
+/* Translation is applied only when overlap is detected via JS (body.drawer-overlap) */
 
 
 /* =================== BUTTONS =================== */
@@ -663,13 +657,7 @@ body.light input[type="checkbox"]:checked{
 }
 #calendarDrawer .card .bd, #namesDrawer .card .bd{ overflow: auto; }
 
-/* Pinned layout: reserve only the open drawer + rail */
-body.drawer-cal-pinned   #app{
-  margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w));
-}
-body.drawer-names-pinned #app{
-  margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w));
-}
+/* (Removed pinned layout spacing; margin is only added on overlap) */
 
 /* Stacking: header over drawers/rail; modals over everything */
 header{ z-index: 10050 !important; }
@@ -818,9 +806,8 @@ body.light #namesList .name-pill.used{
   opacity: .65;
   filter: grayscale(40%);
 }
-body.drawer-overlap #app { margin-right: var(--drawerW); }
+body.drawer-overlap #app { transform: translateX(calc(-1 * var(--drawerW))); }
 @media (max-width: 900px){
-  body.drawer-overlap #app { margin-right: 0; }
+  body.drawer-overlap #app { transform: none; }
 }
-
-#app { margin-right: 0; }
+/* Default state: centered via .wrap margin */
