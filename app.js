@@ -213,6 +213,58 @@ function inferDestination(route){
   return IATA_CITY[last] || last || 'your destination';
 }
 
+// Basic IATA → IANA timezone map (extend as needed)
+const IATA_TZ = {
+  // USA
+  NYC:'America/New_York', JFK:'America/New_York', EWR:'America/New_York', LGA:'America/New_York',
+  BOS:'America/New_York', MIA:'America/New_York', ATL:'America/New_York',
+  ORD:'America/Chicago', MDW:'America/Chicago', DFW:'America/Chicago', DAL:'America/Chicago',
+  DEN:'America/Denver', PHX:'America/Phoenix',
+  LAX:'America/Los_Angeles', SFO:'America/Los_Angeles', SAN:'America/Los_Angeles', SEA:'America/Los_Angeles', PDX:'America/Los_Angeles',
+  HNL:'Pacific/Honolulu',
+  // Canada
+  YYZ:'America/Toronto', YVR:'America/Vancouver', YUL:'America/Toronto',
+  // Europe
+  LHR:'Europe/London', LGW:'Europe/London', MAN:'Europe/London',
+  PAR:'Europe/Paris', CDG:'Europe/Paris', ORY:'Europe/Paris',
+  AMS:'Europe/Amsterdam', FRA:'Europe/Berlin', MUC:'Europe/Berlin', BER:'Europe/Berlin',
+  MAD:'Europe/Madrid', BCN:'Europe/Madrid',
+  FCO:'Europe/Rome', MXP:'Europe/Rome', ROM:'Europe/Rome',
+  ATH:'Europe/Athens', ZRH:'Europe/Zurich', VIE:'Europe/Vienna', DUB:'Europe/Dublin',
+  // Asia / Middle East
+  DXB:'Asia/Dubai', AUH:'Asia/Dubai', DOH:'Asia/Qatar',
+  DEL:'Asia/Kolkata', BOM:'Asia/Kolkata', MAA:'Asia/Kolkata',
+  HKG:'Asia/Hong_Kong', NRT:'Asia/Tokyo', HND:'Asia/Tokyo', TYO:'Asia/Tokyo',
+  ICN:'Asia/Seoul', SEL:'Asia/Seoul',
+  PVG:'Asia/Shanghai', SHA:'Asia/Shanghai', PEK:'Asia/Shanghai',
+  SIN:'Asia/Singapore', BKK:'Asia/Bangkok',
+  // Oceania
+  SYD:'Australia/Sydney', MEL:'Australia/Melbourne', AKL:'Pacific/Auckland',
+  // Africa & LatAm
+  JNB:'Africa/Johannesburg', CPT:'Africa/Johannesburg', CAI:'Africa/Cairo',
+  GRU:'America/Sao_Paulo', SAO:'America/Sao_Paulo', EZE:'America/Argentina/Buenos_Aires',
+  MEX:'America/Mexico_City', CUN:'America/Cancun', BOG:'America/Bogota', LIM:'America/Lima'
+};
+
+function tzFromRoute(route){
+  const first = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean)[0];
+  return IATA_TZ[first] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+function formatTimeInTz(tz){
+  return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12:false, timeZone: tz }).format(new Date());
+}
+
+function updateLocalTimes(){
+  const now = new Date();
+  $$('.local-time').forEach(el=>{
+    const tz = el.getAttribute('data-tz');
+    if(!tz) return;
+    el.textContent = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12:false, timeZone: tz }).format(now);
+  });
+}
+setInterval(updateLocalTimes, 1000);
+
 // Very lightweight template (match your screenshot; tweak copy as you like)
 function computeEmailContent(t, c){
   const { name:agentName, phone:agentPhone, emailLocal } = agentVars();
@@ -1285,13 +1337,14 @@ const contactHtml = `
   </div>`;
 
 
-tr.innerHTML = `
+  tr.innerHTML = `
   <td data-label="Name">
     <strong>${escapeHtml(c.name)}</strong>
     <div class="tiny mono note-preview" data-act="note" data-id="${c.id}" title="Click to expand notes">
       ${c.notes ? escapeHtml(truncate(c.notes)) : ''}
     </div>
     ${c.leadId ? `<div class="tiny">${leadChipHtml(c.leadId)}</div>` : ''}
+    ${c.route ? `<div class="tiny"><span class="pill">Local:&nbsp;<span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span></div>` : ''}
   </td>
   <td data-label="Contact" class="tiny">${contactHtml}</td>
   <td data-label="Status"><span class="badge">${c.status}</span></td>
@@ -1310,6 +1363,7 @@ tr.innerHTML = `
 
   renderAgenda();
   updateProgress();
+  updateLocalTimes();
   try{ buildClientOptionsForPopover(); }catch(_){}
 }
 
@@ -1331,10 +1385,12 @@ const nameText =
       c.route ? `<span class="pill">Route: ${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates: ${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax: ${escapeHtml(String(c.pax))}</span>` : '',
+      c.route ? `<span class="pill">Local: <span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span>` : '',
 c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean).join(' ');
     td.innerHTML = `<div class="tiny slab">${chips || ''}<div>${escapeHtml(c.notes || 'No notes yet.')}</div></div>`;
     row.appendChild(td); tr.after(row);
+    updateLocalTimes();
   }
 
 $('#clientsTbl')?.addEventListener('click', e=>{
@@ -1487,7 +1543,8 @@ function matchesShow(t){
       c.route ? `<span class="pill">Route:&nbsp;${escapeHtml(c.route)}</span>` : '',
       c.dates ? `<span class="pill">Dates:&nbsp;${escapeHtml(c.dates)}</span>` : '',
       c.pax   ? `<span class="pill">Pax:&nbsp;${escapeHtml(String(c.pax))}</span>` : '',
-c.leadId ? leadChipHtml(c.leadId) : ''
+      c.route ? `<span class="pill">Local:&nbsp;<span class="mono local-time" data-tz="${tzFromRoute(c.route)}">${formatTimeInTz(tzFromRoute(c.route))}</span></span>` : '',
+      c.leadId ? leadChipHtml(c.leadId) : ''
     ].filter(Boolean);
     return chips.join(' ');
   }
@@ -1617,10 +1674,11 @@ const items = state.tasks
   .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
   .sort(sortTasksForMode);
     cont.innerHTML = '';
-    if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); return; }
+    if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); updateLocalTimes(); return; }
     if (sortMode === 'client') renderGroupedByClient(cont, items);
     else items.forEach(t=>cont.appendChild(renderTask(t)));
     updateProgress();
+    updateLocalTimes();
   }
 
   function buildAgendaRange(from, to){
@@ -1638,6 +1696,7 @@ const items = state.tasks
       else items.forEach(t=>cont.appendChild(renderTask(t)));
     }
     updateProgress();
+    updateLocalTimes();
   }
 
 function updateProgress(){
