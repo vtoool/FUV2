@@ -79,27 +79,32 @@ function updateDrawerOverlap(){
   const drawer = ['calendarDrawer','namesDrawer']
     .map(id => document.getElementById(id))
     .find(d => d && d.classList.contains('open'));
-
-  const panel   = drawer?.querySelector('.drawer-panel');
-  const open    = !!drawer && drawer.classList.contains('open');
-  const pinned  = !!drawer && drawer.classList.contains('pinned');
-  const agenda  = document.getElementById('actionsCard');
+  const panel = drawer?.querySelector('.drawer-panel');
+  const agenda = document.getElementById('actionsCard');
   const customers = findCustomersCard();
 
-  if (!open || !panel){
+  if (!panel){
     document.body.classList.remove('drawer-overlap');
     document.body.style.removeProperty('--drawerW');
     return;
   }
 
   const pr = panel.getBoundingClientRect();
-  const needsSpace = pinned ||
-    rectsOverlap(pr, agenda?.getBoundingClientRect()) ||
-    rectsOverlap(pr, customers?.getBoundingClientRect());
+  const ar = agenda?.getBoundingClientRect();
+  const cr = customers?.getBoundingClientRect();
 
-  document.body.classList.toggle('drawer-overlap', !!needsSpace);
-  if (needsSpace) document.body.style.setProperty('--drawerW', pr.width + 'px');
+  // how far the drawer intrudes into the main content
+  const rightEdge = Math.max(ar?.right || 0, cr?.right || 0);
+  const overlapX  = Math.max(0, rightEdge - pr.left);
+
+  const GUTTER = 16; // tweak to taste
+  const space  = overlapX ? Math.min(pr.width, overlapX + GUTTER) : 0;
+
+  document.body.classList.toggle('drawer-overlap', space > 0);
+  if (space > 0) document.body.style.setProperty('--drawerW', space + 'px');
+  else document.body.style.removeProperty('--drawerW');
 }
+
 
 
 
