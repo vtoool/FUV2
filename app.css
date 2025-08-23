@@ -279,6 +279,19 @@ body.modal-open{ overflow:hidden; }
 .pill a{ color:inherit; font-weight:inherit; }  /* no blue links inside pills */
 .client-pill, .cust-link{ cursor:pointer; }
 
+/* Hover effect for clickable pills */
+.client-pill:hover,
+.cust-link:hover,
+#namesList .name-pill:hover{
+  filter:brightness(1.08);
+}
+
+body.light .client-pill:hover,
+body.light .cust-link:hover,
+body.light #namesList .name-pill:hover{
+  filter:brightness(.95);
+}
+
 /* Light pills */
 body.light .pill{ background:var(--pill-li-bg); border:1px solid var(--pill-li-br); color:var(--pill-li-fg); font-weight:400; }
 
