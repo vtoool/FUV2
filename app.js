@@ -398,10 +398,20 @@ async function copyRichEmailAndOpenGmail(to, subject, html, text){
 // Pick template for an agenda task (Unreached Day N)
 function computeSmsText(t, client){
   let tpl = '';
-  const m = /Unreached\s+Day\s+(\d)/i.exec(t?.label||'');
-  if (t?.type==='sms' && m){
-    const day = Number(m[1]);
-    tpl = (state.settings.smsTemplates?.unreached||{})[day] || '';
+  if (t?.type === 'sms'){
+    let m = /Unreached\s+Day\s+(\d)/i.exec(t?.label||'');
+    if (m){
+      const day = Number(m[1]);
+      tpl = (state.settings.smsTemplates?.unreached||{})[day] || '';
+    } else {
+      m = /Phase\s+1\s+\(Day\s+(\d)\/3\)/i.exec(t?.label||'');
+      if (m){
+        const day = Number(m[1]);
+        tpl = (state.settings.smsTemplates?.reached||{})[day] || '';
+      } else if (/Phase\s+[2-6]/i.test(t?.label||'')){
+        tpl = (state.settings.smsTemplates?.reached||{})[2] || '';
+      }
+    }
   }
   return fillSmsTemplate(tpl, client);
 }
@@ -461,6 +471,11 @@ const DEFAULT_SMS_TEMPLATES = {
     3: `Hello, FIRSTNAME. I am trying to get in touch with you about your flight booking request. Please contact me at your convenience by phone, text or email, I am available pretty much 24/7. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
     4: `Hello, FIRSTNAME. Is there any update on the plans for your trip? Please let me know whenever it is convenient for you. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
     5: `Hello, FIRSTNAME. I would like to kindly ask you to let me know your current plans for the flight you were going to book. Thank you and have a wonderful day.  - (agent) @ Business Tickets`,
+  },
+  reached: {
+    1: `Hello, FIRSTNAME. I will be your personal travel agent. My email address is (agent name)@business-tickets.com. My direct line is (agent phone number). I look forward to assisting you. - (agent) @ Business Tickets`,
+    2: `Hello, FIRSTNAME. I am trying to get in touch with you about your flight booking request. Please contact me at your convenience by phone, text or email, I am available pretty much 24/7. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
+    3: `Hello, FIRSTNAME. Is there any update on the plans for your trip? Please let me know whenever it is convenient for you. Thank you and have a wonderful day. - (agent) @ Business Tickets`,
   }
 };
 
@@ -801,6 +816,10 @@ if (!s.settings.smsTemplates) s.settings.smsTemplates = JSON.parse(JSON.stringif
 s.settings.smsTemplates.unreached = {
   ...DEFAULT_SMS_TEMPLATES.unreached,
   ...(s.settings.smsTemplates.unreached || {})
+};
+s.settings.smsTemplates.reached = {
+  ...DEFAULT_SMS_TEMPLATES.reached,
+  ...(s.settings.smsTemplates.reached || {})
 };
 
       return s;
@@ -1888,6 +1907,13 @@ function initMorePanel(){
           </div>
         </div>
 
+        <div class="slab" style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="tiny mono">Notifications:</span>
+          <button type="button" id="enableNotifs" class="tiny" title="Enable desktop notifications">🔔 Enable</button>
+          <button type="button" id="testNotif" class="tiny" title="Send a test notification">Test</button>
+          <span id="notifStatus" class="pill">Status: Not enabled</span>
+        </div>
+
         <div class="slab" style="margin-top:10px">
           <h4>Unreached SMS templates (editable)</h4>
           <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
@@ -1922,9 +1948,33 @@ function initMorePanel(){
             </div>
           </div>
         </div>
+
+        <div class="slab" style="margin-top:10px">
+          <h4>Reached SMS templates (editable)</h4>
+          <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
+          <div class="row single" style="margin-top:8px">
+            <div>
+              <label>Day 1</label>
+              <textarea id="tpl_rch_1" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="row single">
+            <div>
+              <label>Day 2</label>
+              <textarea id="tpl_rch_2" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="row single">
+            <div>
+              <label>Day 3</label>
+              <textarea id="tpl_rch_3" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="right more-actions">
+        <button type="button" class="btn-danger" id="wipeAll" title="Delete all data">Wipe All</button>
         <button type="button" class="ghost" id="moreReset">Reset to defaults</button>
         <button type="button" id="moreCancel" class="ghost">Cancel</button>
         <button type="button" id="moreSave" class="primary">Save</button>
@@ -1932,6 +1982,7 @@ function initMorePanel(){
     </section>
   `;
   document.body.appendChild(modal);
+  initNotificationsUI();
 // --- Make SMS template textareas bigger + auto-grow ---
 {
   // 1) CSS: full width, larger minimum height, vertical resize only
@@ -1959,8 +2010,8 @@ function initMorePanel(){
     el.style.height = (el.scrollHeight + 2) + 'px';
   };
   const wireAutoGrow = () => {
-    modal.querySelectorAll('textarea[id^="tpl_unr_"]').forEach(t => {
-     // autoGrow(t);                       // fit on open
+    modal.querySelectorAll('textarea[id^="tpl_unr_"], textarea[id^="tpl_rch_"]').forEach(t => {
+      // autoGrow(t);                       // fit on open
       t.addEventListener('input', () => autoGrow(t)); // fit while typing
     });
   };
@@ -1973,15 +2024,20 @@ function loadIntoUI(){
   const a = state.settings.agent || {};
   document.getElementById('agentName').value  = a.name  || '';
   document.getElementById('agentPhone').value = a.phone || '';
-  const map = state.settings.smsTemplates?.unreached || {};
+  const mapU = state.settings.smsTemplates?.unreached || {};
   for (let d=1; d<=5; d++){
     const el = document.getElementById(`tpl_unr_${d}`);
-    if (el) el.value = map[d] || DEFAULT_SMS_TEMPLATES.unreached[d];
+    if (el) el.value = mapU[d] || DEFAULT_SMS_TEMPLATES.unreached[d];
+  }
+  const mapR = state.settings.smsTemplates?.reached || {};
+  for (let d=1; d<=3; d++){
+    const el = document.getElementById(`tpl_rch_${d}`);
+    if (el) el.value = mapR[d] || DEFAULT_SMS_TEMPLATES.reached[d];
   }
 
   // ensure textareas fit after values are set
   requestAnimationFrame(()=> {
-    modal.querySelectorAll('textarea[id^="tpl_unr_"]').forEach(t=>{
+    modal.querySelectorAll('textarea[id^="tpl_unr_"], textarea[id^="tpl_rch_"]').forEach(t=>{
       t.style.height = 'auto';
       t.style.height = (t.scrollHeight + 2) + 'px';
     });
@@ -1993,11 +2049,16 @@ function loadIntoUI(){
       name:  (document.getElementById('agentName').value || '').trim(),
       phone: (document.getElementById('agentPhone').value || '').trim()
     };
-    const map = {};
+    const mapU = {};
     for (let d=1; d<=5; d++){
-      map[d] = document.getElementById(`tpl_unr_${d}`).value || '';
+      mapU[d] = document.getElementById(`tpl_unr_${d}`).value || '';
     }
-    state.settings.smsTemplates.unreached = map;
+    const mapR = {};
+    for (let d=1; d<=3; d++){
+      mapR[d] = document.getElementById(`tpl_rch_${d}`).value || '';
+    }
+    state.settings.smsTemplates.unreached = mapU;
+    state.settings.smsTemplates.reached = mapR;
     save();
     toast('Settings saved');
     close();
@@ -2006,6 +2067,10 @@ function loadIntoUI(){
     for (let d=1; d<=5; d++){
       const el = document.getElementById(`tpl_unr_${d}`);
       if (el) el.value = DEFAULT_SMS_TEMPLATES.unreached[d];
+    }
+    for (let d=1; d<=3; d++){
+      const el = document.getElementById(`tpl_rch_${d}`);
+      if (el) el.value = DEFAULT_SMS_TEMPLATES.reached[d];
     }
   }
  function open(){ modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); wireAutoGrow(); document.body.classList.add('modal-open'); }
@@ -2017,6 +2082,14 @@ function loadIntoUI(){
   modal.querySelector('#moreCancel')?.addEventListener('click', close);
   modal.querySelector('#moreSave')?.addEventListener('click', saveFromUI);
   modal.querySelector('#moreReset')?.addEventListener('click', resetDefaults);
+  modal.querySelector('#wipeAll')?.addEventListener('click', () => {
+    if (!confirm('Delete ALL customers, tasks, and calendar overrides? This cannot be undone.')) return;
+    const tPref = localStorage.getItem(THEME_KEY);
+    localStorage.removeItem(storeKey);
+    state.clients=[]; state.tasks=[]; state.settings=defaults().settings;
+    if(tPref) localStorage.setItem(THEME_KEY, tPref);
+    save(); alert('All data cleared.');
+  });
 }
 
 
@@ -2277,7 +2350,7 @@ function notifyTask(t){
       const dt  = new Date(year, month, d);
       const ymd = fmt(dt);
       const items = state.tasks.filter(
-        t => t.date === ymd && matchesFilter(t) && matchesShow(t)
+        t => t.date === ymd && matchesFilter(t) && t.status !== 'done'
       );
       const cell = document.createElement('div');
       cell.className='cal-cell';
@@ -2623,15 +2696,6 @@ if (clientForm) {
   });
   $('#ctNotify')?.addEventListener('change', ()=>{ if ($('#ctNotify').checked) $('#ctImportant').checked = true; });
 
-  /* ========= Wipe All ========= */
-  $('#wipeAll')?.addEventListener('click', () => {
-    if (!confirm('Delete ALL customers, tasks, and calendar overrides? This cannot be undone.')) return;
-    const tPref = localStorage.getItem(THEME_KEY);
-    localStorage.removeItem(storeKey);
-    state.clients=[]; state.tasks=[]; state.settings=defaults().settings;
-    if(tPref) localStorage.setItem(THEME_KEY, tPref);
-    save(); alert('All data cleared.');
-  });
 
   $('#agenda')?.addEventListener('click', (e)=>{
   const cp = e.target.closest('.client-pill');
