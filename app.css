@@ -479,7 +479,6 @@ body.light #ctClient option:hover, body.light #ctClient option:checked { backgro
   .tbl td::before{content:attr(data-label); color:var(--muted); font-size:12.5px}
   .tbl td.actions { display:flex; justify-content:flex-start; gap:6px; min-width:0; }
   .tbl th:last-child { width:auto; }
-.ovr{ display:flex; flex-direction:column; align-items:stretch; }
   .card .hd > input#search{ flex:1 1 200px; min-width:0; }
   .card .hd > select#statusFilter{ flex:0 0 auto; }
 }
