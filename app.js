@@ -587,10 +587,6 @@ btn.addEventListener('click', () => {
 });});
 
 
-// Click on scrim closes the active drawer
-document.querySelectorAll('#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim')
-  .forEach(s => s.addEventListener('click', closeAllDrawers));
-
   // Pools + generator
 
   const UC = s => String(s||'').toUpperCase();
