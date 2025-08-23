@@ -60,23 +60,12 @@ function setBodyPinned(){
   if (tabNames) tabNames.setAttribute('aria-pressed', String(namesPinned));
  afterLayout();
 }
-// Detect whether the open calendar drawer visually overlaps Customers or Agenda
-function findCustomersCard(){
-  const cards = Array.from(document.querySelectorAll('section.card'));
-  for (const c of cards){
-    const t = c.querySelector('.hd strong')?.textContent || '';
-    if (/^\s*Customers\s*$/i.test(t)) return c;
-  }
-  return null;
-}
-// Measure the open drawer and add right margin only if it overlaps content
+// Measure drawer width and reserve space so it doesn't cover main content
 function updateDrawerOverlap(){
   const drawer = ['calendarDrawer','namesDrawer']
     .map(id => document.getElementById(id))
     .find(d => d && d.classList.contains('open'));
   const panel = drawer?.querySelector('.drawer-panel');
-  const agenda = document.getElementById('actionsCard');
-  const customers = findCustomersCard();
 
   if (!panel){
     document.body.classList.remove('drawer-overlap');
@@ -84,20 +73,13 @@ function updateDrawerOverlap(){
     return;
   }
 
-  const pr = panel.getBoundingClientRect();
-  const ar = agenda?.getBoundingClientRect();
-  const cr = customers?.getBoundingClientRect();
+  // account for the fixed tool rail width
+  const railW = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--rail-w')) || 0;
+  const space = panel.getBoundingClientRect().width + railW;
 
-  // how far the drawer intrudes into the main content
-  const rightEdge = Math.max(ar?.right || 0, cr?.right || 0);
-  const overlapX  = Math.max(0, rightEdge - pr.left);
-
-  const GUTTER = 16; // tweak to taste
-  const space  = overlapX ? Math.min(pr.width, overlapX + GUTTER) : 0;
-
-  document.body.classList.toggle('drawer-overlap', space > 0);
-  if (space > 0) document.body.style.setProperty('--drawerW', space + 'px');
-  else document.body.style.removeProperty('--drawerW');
+  document.body.classList.add('drawer-overlap');
+  document.body.style.setProperty('--drawerW', space + 'px');
 }
 
 
