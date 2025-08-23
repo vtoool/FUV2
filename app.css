@@ -90,7 +90,7 @@ a:hover{ text-decoration:underline }
 
 .grid{display:grid; gap:16px; grid-template-columns:1fr; align-items:start}
 .grid > *, .row > * { min-width:0; }
-
+}
 /* =================== HEADER =================== */
 header{
   position:sticky; top:0; z-index:5;
