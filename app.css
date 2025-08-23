@@ -440,7 +440,9 @@ body.light #ctClient option { background: #fff; color: var(--ink); }
 body.light #ctClient option:hover, body.light #ctClient option:checked { background: #e9ecff; color: #1e2758; }
 
 /* =================== TOAST =================== */
-#toaster{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:12px;z-index:9999}
+#toaster{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:12px;z-index:11000;pointer-events:none}
+   #toaster .toast{pointer-events:auto}
+
 .toast{
   min-width:220px;max-width:380px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
   background:var(--panel);color:var(--ink);box-shadow:var(--sh-2);font-size:13.5px;
