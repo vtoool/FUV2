@@ -334,6 +334,17 @@ body.light .kpi .box{ background:#fff; border-color:var(--line) }
 .contact-line .copy-btn{ flex:0 0 auto; }
 #clientsTbl td[data-label="Contact"] .contact-line + .contact-line{ margin-top:6px; }
 #clientsTbl td[data-label="Contact"]{ min-width:240px; }
+/* Center the Actions icons vertically (desktop) */
+.tbl td.actions{
+  display:flex;                 /* turn the cell into a flex box */
+  align-items:center;           /* vertical centering */
+  justify-content:flex-end;     /* keep them right-aligned */
+  gap:6px;                      /* instead of margin-left on each icon */
+  white-space:nowrap;           /* prevent wrapping */
+}
+
+/* When using flex, drop the old left margins */
+.tbl td.actions .btn-icon{ margin-left:0; }
 
 /* =================== AGENDA =================== */
 .agenda-item{display:grid; grid-template-columns:26px 1fr auto; gap:12px; align-items:center; padding:10px 12px; border:1px solid var(--line); border-radius:14px; background:var(--surface)}
