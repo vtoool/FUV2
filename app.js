@@ -225,10 +225,22 @@ function removeInert(el){
 }
 
 // Pull last IATA in route (e.g., JFK-NAP -> NAP) → naive city map
-const IATA_CITY = { NAP: 'Naples', LHR: 'London', CDG: 'Paris', FCO: 'Rome' /* …extend… */ };
+const IATA_CITY = {
+  NAP: 'Naples',
+  LHR: 'London',
+  CDG: 'Paris',
+  FCO: 'Rome',
+  DFW: 'Dallas',
+  BRU: 'Brussels',
+  /* …extend… */
+};
 function inferDestination(route){
-  const last = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean).pop();
-  return IATA_CITY[last] || last || 'your destination';
+  const legs = String(route||'').toUpperCase().split(/[-–—>\s]+/).filter(Boolean);
+  if (!legs.length) return 'your destination';
+  let code;
+  if (legs.length >= 3 && legs[0] === legs[legs.length - 1]) code = legs[legs.length - 2];
+  else code = legs[legs.length - 1];
+  return IATA_CITY[code] || code || 'your destination';
 }
 
 // IATA → IANA timezone map is loaded separately (see iata-tz.js)
@@ -1910,12 +1922,12 @@ function initMorePanel(){
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="right more-actions">
-          <button type="button" class="ghost" id="moreReset">Reset to defaults</button>
-          <button type="button" id="moreCancel" class="ghost">Cancel</button>
-          <button type="button" id="moreSave" class="primary">Save</button>
-        </div>
+      <div class="right more-actions">
+        <button type="button" class="ghost" id="moreReset">Reset to defaults</button>
+        <button type="button" id="moreCancel" class="ghost">Cancel</button>
+        <button type="button" id="moreSave" class="primary">Save</button>
       </div>
     </section>
   `;

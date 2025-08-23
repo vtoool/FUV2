@@ -296,6 +296,13 @@ body.modal-open{ overflow:hidden; }
   filter:brightness(1.08);
 }
 
+body:not(.light) .client-pill:hover,
+body:not(.light) .cust-link:hover,
+body:not(.light) #namesList .name-pill:hover{
+  filter:brightness(1.15);
+  box-shadow:0 0 4px var(--accent);
+}
+
 body.light .client-pill:hover,
 body.light .cust-link:hover,
 body.light #namesList .name-pill:hover{
@@ -404,7 +411,17 @@ body.light .group-hd .label{ background:#fff; }
 .progress > span{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); width:0}
 
 /* Inline notify editor */
-.notify-row{ display:flex; align-items:center; gap:10px; margin:6px 0 0 38px; padding:10px; border:1px dashed var(--line); border-radius:12px; background:var(--surface); }
+.notify-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:6px 0 0 0;
+  padding:10px;
+  border:1px dashed var(--line);
+  border-radius:12px;
+  background:var(--surface);
+  grid-column:2 / span 2;
+}
 .notify-row input[type="time"]{ height:34px; }
 .notify-row button{ height:34px; }
 /* Agenda group header name (when sorting By client) */
@@ -777,17 +794,12 @@ body.light #toolRail .tool{
   flex-direction:column;
 
   overflow:auto;
-  padding-bottom:110px;
+  padding:0 0 10px 0;
 }
 #moreModal .more-actions{
-  position:sticky;
-  bottom:0;
   background:var(--panel);
-  margin-top:auto;
-  padding-top:10px;
-  padding-bottom:10px;
   border-top:1px solid var(--line);
-  z-index:1;
+  padding:10px 0;
 }
 @keyframes pop{ from{ opacity:0; transform:translateY(8px) scale(.985) } to{ opacity:1; transform:none } }
 #addCard{ display:none; }
