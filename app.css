@@ -153,9 +153,9 @@ body.light input, body.light select, body.light textarea{ background:#fff; color
 /* keep the “Nr of tasks” pill from changing cell width */
 .cal-cell .cal-badge{position:absolute; top:24px; right:6px}
 
-/* === 2) If the calendar overlaps, give main content enough right margin === */
+/* === 2) If a drawer overlaps, JS sets body.drawer-overlap & --drawerW so we shrink width === */
 :root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
-/* Margin is now applied only when overlap is detected via JS (body.drawer-overlap) */
+/* Main content width is reduced only when overlap is detected (body.drawer-overlap) */
 
 
 /* =================== BUTTONS =================== */
@@ -806,8 +806,15 @@ body.light #namesList .name-pill.used{
   opacity: .65;
   filter: grayscale(40%);
 }
-body.drawer-overlap #app { margin-right: var(--drawerW); }
+/* When a drawer overlaps, shrink the main app width and reserve space to the right */
+body.drawer-overlap #app {
+  width: calc(100% - var(--drawerW));
+  margin-right: var(--drawerW);
+}
 @media (max-width: 900px){
-  body.drawer-overlap #app { margin-right: 0; }
+  body.drawer-overlap #app {
+    width: 100%;
+    margin-right: 0;
+  }
 }
 /* Default state: centered via .wrap margin */
