@@ -76,18 +76,20 @@ function rectsOverlap(a,b){
 
 // 2) treat PINNED drawer as always needing space
 function updateDrawerOverlap(){
-  const drawer = document.getElementById('calendarDrawer');
-  const panel  = drawer?.querySelector('.drawer-panel');
-  const open   = drawer && drawer.classList.contains('open');
-  const pinned = drawer && drawer.classList.contains('pinned');
-  const agenda = document.getElementById('actionsCard');
+  const drawer = ['calendarDrawer','namesDrawer']
+    .map(id => document.getElementById(id))
+    .find(d => d && d.classList.contains('open'));
+
+  const panel   = drawer?.querySelector('.drawer-panel');
+  const open    = !!drawer && drawer.classList.contains('open');
+  const pinned  = !!drawer && drawer.classList.contains('pinned');
+  const agenda  = document.getElementById('actionsCard');
   const customers = findCustomersCard();
 
   if (!open || !panel){
- document.body.classList.remove('drawer-overlap');
-document.body.style.removeProperty('--drawerW');
-return;
-
+    document.body.classList.remove('drawer-overlap');
+    document.body.style.removeProperty('--drawerW');
+    return;
   }
 
   const pr = panel.getBoundingClientRect();
@@ -98,6 +100,7 @@ return;
   document.body.classList.toggle('drawer-overlap', !!needsSpace);
   if (needsSpace) document.body.style.setProperty('--drawerW', pr.width + 'px');
 }
+
 
 
 // call this instead of plain updateDrawerOverlap() whenever drawers toggle
@@ -581,7 +584,7 @@ btn.addEventListener('click', () => {
     btn.setAttribute('aria-pressed','true');
   }
   setBodyPinned(); afterLayout();
-});
+});});
 
 
 // Click on scrim closes the active drawer
