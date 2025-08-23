@@ -403,35 +403,44 @@ body.light #calSettings{ background:#fff }
 .wdays .cell input[type="checkbox"]{ --chk-size:24px; } /* scale only */
 .wdays .cell span{ font-size:12.5px; }
 
-/* Date-specific overrides row — keep 3-up even in the drawer */
+/* Overrides row — 3-up, stop Type from stretching */
 .ovr{
   margin-top:14px;
   display:grid;
-  grid-template-columns: minmax(120px,1fr) minmax(120px,1fr) auto; /* date | type | button */
+  /* date grows, type is content-sized, button is content-sized */
+  grid-template-columns: minmax(140px,1fr) auto auto;
   align-items:end;
   gap:10px;
 }
 
-/* Inputs */
+/* Inputs in the row */
 #calSettings .ovr input,
 #calSettings .ovr select{ height:34px; }
 
-/* Allow fields to shrink so the button stays inline */
-#ovrDate,
-#ovrType{ min-width:0; }
+/* Date can stretch; Type should not */
+#ovrDate{ min-width:0; }                 /* allow narrow drawers */
+#ovrType{
+  min-width:0;
+  width:max-content;                     /* shrink-to-content (“Off”, “Working day”, etc.) */
+  max-width:190px;                       /* cap in case of long locale strings */
+  white-space:nowrap;                    /* don’t wrap “Working day” */
+  justify-self:start;                    /* prevent grid auto-stretch */
+}
 
-/* Add Override button: stay on the right, don’t wrap */
+/* Add override button stays tight on the right */
 #addOverride{
   height:34px;
   justify-self:end;
   white-space:nowrap;
+  z-index:1;                             /* sits above any focus ring glow */
 }
 
-/* Only on very small screens, stack all three */
+/* Stack only on very small phones */
 @media (max-width:520px){
   .ovr{ grid-template-columns:1fr; }
   #addOverride{ grid-column:1 / -1; justify-self:end; }
 }
+
 
 
 #calSettings .ovr input, #calSettings .ovr select{ height:34px; }
