@@ -2329,7 +2329,8 @@ $('#addOverride')?.addEventListener('click', ()=>{
     return { client, exists };
   }
   $('#resetForm')?.addEventListener('click', ()=>{ $('#clientForm').reset(); $('#clientId').value=''; });
-document.getElementById('saveCustomer')?.addEventListener('click', () => {
+document.getElementById('saveCustomer')?.addEventListener('click', (e) => {
+  e.preventDefault();
   try{
     let res = null;
     const lbEl = document.getElementById('leadBlob');
@@ -2374,17 +2375,9 @@ document.getElementById('saveCustomer')?.addEventListener('click', () => {
       toast('Save failed', 'err', 2200);
     }
   });
-// Let Enter submit the Add/Edit Customer form
+// Let Enter trigger the Add/Edit Customer save handler
 const clientForm = document.getElementById('clientForm');
 if (clientForm) {
-  // Submit funnels into the same handler as clicking Save
-  clientForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    // Don't submit while bulk modal is open
-    if (document.getElementById('bulkModal')) return;
-    document.getElementById('saveCustomer')?.click();
-  });
-
   // Key handling so Enter saves; Shift+Enter adds newline in textareas
   clientForm.addEventListener('keydown', (e) => {
     if (e.isComposing) return; // IME safety
