@@ -403,24 +403,36 @@ body.light #calSettings{ background:#fff }
 .wdays .cell input[type="checkbox"]{ --chk-size:24px; } /* scale only */
 .wdays .cell span{ font-size:12.5px; }
 
-/* Date-specific overrides row */
-.ovr{ margin-top:14px; display:grid; grid-template-columns:minmax(180px,1fr) minmax(160px,1fr); align-items:end; gap:10px; }
-   /* Keep the add button visible in narrow drawers */
-.ovr > :nth-child(3){
-  grid-column: 1 / -1;     /* span both columns when narrow */
-  justify-self: end;
-  align-self: end;
+/* Date-specific overrides row — keep 3-up even in the drawer */
+.ovr{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: minmax(120px,1fr) minmax(120px,1fr) auto; /* date | type | button */
+  align-items:end;
+  gap:10px;
 }
 
-/* When there’s enough width, put the button inline on the right */
-@media (min-width: 620px){
-  .ovr{
-    grid-template-columns: minmax(180px,1fr) minmax(160px,1fr) auto;
-  }
-  .ovr > :nth-child(3){
-    grid-column: auto;     /* back to its own column */
-  }
+/* Inputs */
+#calSettings .ovr input,
+#calSettings .ovr select{ height:34px; }
+
+/* Allow fields to shrink so the button stays inline */
+#ovrDate,
+#ovrType{ min-width:0; }
+
+/* Add Override button: stay on the right, don’t wrap */
+#addOverride{
+  height:34px;
+  justify-self:end;
+  white-space:nowrap;
 }
+
+/* Only on very small screens, stack all three */
+@media (max-width:520px){
+  .ovr{ grid-template-columns:1fr; }
+  #addOverride{ grid-column:1 / -1; justify-self:end; }
+}
+
 
 #calSettings .ovr input, #calSettings .ovr select{ height:34px; }
 #ovrDate{ min-width:180px; }
