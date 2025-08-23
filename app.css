@@ -66,6 +66,7 @@ body.light{
 /* =================== BASE =================== */
 *{box-sizing:border-box}
 html,body{height:100%; max-width:100%; overflow-x:hidden}
+html{scroll-behavior:smooth;}
 :root{ color-scheme: dark light; }
 body{ color-scheme: dark; }
 body.light{ color-scheme: light; }
@@ -246,11 +247,17 @@ body.modal-open{ overflow:hidden; }
   width:36px; height:36px; border-radius:999px;
   background:linear-gradient(180deg,var(--accent),#5d6ef2);
   color:#fff; border:1px solid #5865f2;
-  box-shadow:var(--sh-1);
+  box-shadow:var(--sh-1), 0 0 8px var(--accent);
   font-weight:900; line-height:1; padding:0;
+  animation:add-glow 2s ease-in-out infinite alternate;
 }
 .add-btn:hover{ filter:brightness(1.06); transform:translateY(-1px); }
 .add-btn:active{ transform:translateY(0); }
+
+@keyframes add-glow{
+  from{ box-shadow:var(--sh-1), 0 0 8px var(--accent); }
+  to{ box-shadow:var(--sh-1), 0 0 16px var(--accent); }
+}
 
 /* Sticky footer for the Add/Edit form */
 #addCard .bd{ padding-bottom:74px; }
@@ -277,7 +284,11 @@ body.modal-open{ overflow:hidden; }
   font-weight:400;
 }
 .pill a{ color:inherit; font-weight:inherit; }  /* no blue links inside pills */
-.client-pill, .cust-link{ cursor:pointer; }
+.client-pill, .cust-link{
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
 
 /* Hover effect for clickable pills */
 .client-pill:hover,
@@ -755,6 +766,28 @@ body.light #toolRail .tool{
 .modal .card{
   width:min(920px, 100%); max-height:88vh; overflow:auto; animation:pop .16s ease-out;
 }
+
+#moreModal .card{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#moreModal .card .bd{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:auto;
+  padding-bottom:60px;
+}
+#moreModal .more-actions{
+  position:sticky;
+  bottom:0;
+  background:var(--panel);
+  margin-top:auto;
+  padding-top:10px;
+  padding-bottom:10px;
+  border-top:1px solid var(--line);
+}
 @keyframes pop{ from{ opacity:0; transform:translateY(8px) scale(.985) } to{ opacity:1; transform:none } }
 #addCard{ display:none; }
 
@@ -765,7 +798,7 @@ body.light #toolRail .tool{
    Light mode: normal light pill.  */
 :root{
   --client-dk-bg: var(--pill-dk-bg);
-  --client-dk-br: var(--pill-dk-br);
+  --client-dk-br: var(--accent);
   --client-dk-fg: #fff;                 /* pure white text */
 }
 
@@ -785,7 +818,7 @@ body.light .pill.client,
 body.light .pill--client,
 body.light .client-pill{
   background: var(--pill-li-bg) !important;
-  border-color: var(--pill-li-br) !important;
+  border-color: var(--accent) !important;
   color: var(--pill-li-fg) !important;
 }
 
@@ -799,6 +832,12 @@ body.light .client-pill{
 #namesList .name-pill{
   cursor: pointer;                /* make it feel clickable */
   min-height: 32px;
+  border:1px solid var(--accent);
+  transition: box-shadow .2s;
+}
+
+#namesList .name-pill:hover{
+  box-shadow:0 0 4px var(--accent);
 }
 
 /* clicked/used state — dim + desaturate, but keep it active */
@@ -806,6 +845,7 @@ body.light .client-pill{
   color: var(--muted);
   opacity: .70;
   filter: grayscale(60%);
+  border-color: var(--line);
 }
 
 /* keep a clear keyboard focus outline for accessibility */
