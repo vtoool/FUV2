@@ -58,7 +58,38 @@ function setBodyPinned(){
   const tabNames = document.getElementById('tabNames');
   if (tabCal)   tabCal.setAttribute('aria-pressed', String(calPinned));
   if (tabNames) tabNames.setAttribute('aria-pressed', String(namesPinned));
+  updateDrawerOverlap();
 }
+// Detect whether the open calendar drawer visually overlaps Customers or Agenda
+function findCustomersCard(){
+  const cards = Array.from(document.querySelectorAll('section.card'));
+  for (const c of cards){
+    const t = c.querySelector('.hd strong')?.textContent || '';
+    if (/^\s*Customers\s*$/i.test(t)) return c;
+  }
+  return null;
+}
+function rectsOverlap(a,b){
+  if (!a || !b) return false;
+  return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+}
+function updateDrawerOverlap(){
+  const drawer = document.getElementById('calendarDrawer');
+  const panel  = drawer?.querySelector('.drawer-panel');
+  const open   = drawer && drawer.classList.contains('open');
+  const agenda = document.getElementById('actionsCard');
+  const customers = findCustomersCard();
+  if (!open || !panel){ document.body.classList.remove('drawer-overlap'); return; }
+  const pr = panel.getBoundingClientRect();
+  const needsSpace =
+    rectsOverlap(pr, agenda?.getBoundingClientRect()) ||
+    rectsOverlap(pr, customers?.getBoundingClientRect());
+  document.body.classList.toggle('drawer-overlap', !!needsSpace);
+  if (needsSpace){ document.body.style.setProperty('--drawerW', pr.width + 'px'); }
+}
+
+// call this whenever drawers open/close or the viewport changes
+window.addEventListener('resize', () => updateDrawerOverlap());
 
   const storeKey  = 'followup_crm_v21';
   const THEME_KEY = 'followup_crm_theme';
@@ -445,6 +476,7 @@ function initCalendarDrawer(){
       drawer.classList.remove('open');
       document.getElementById('openCal')?.setAttribute('aria-expanded','false');
       setBodyPinned();
+      updateDrawerOverlap(); 
     }
   });
 
@@ -462,6 +494,7 @@ function initCalendarDrawer(){
       }
       openBtn.setAttribute('aria-expanded', String(opening));
       setBodyPinned();
+      updateDrawerOverlap();  
     });
   }
 }
