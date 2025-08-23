@@ -157,8 +157,7 @@ body.light input, body.light select, body.light textarea{ background:#fff; color
 :root{ --drawerW: 380px; }              /* fallback; JS will set the real width */
 /* NEW: always reserve space when a drawer is pinned (desktop) */
 @media (min-width: 761px){
-  body.drawer-pinned main.wrap,
-  body.drawer-pinned .wrap.grid{
+  body.drawer-pinned #app{
     margin-right: calc(var(--drawerW, 380px) + 12px);
     transition: margin-right .2s ease;
   }
@@ -665,10 +664,10 @@ body.light input[type="checkbox"]:checked{
 #calendarDrawer .card .bd, #namesDrawer .card .bd{ overflow: auto; }
 
 /* Pinned layout: reserve only the open drawer + rail */
-body.drawer-cal-pinned   .wrap{
+body.drawer-cal-pinned   #app{
   margin-right: calc(min(var(--cal-drawer-w), 92vw) + var(--rail-w));
 }
-body.drawer-names-pinned .wrap{
+body.drawer-names-pinned #app{
   margin-right: calc(min(var(--names-drawer-w), 92vw) + var(--rail-w));
 }
 
@@ -819,9 +818,9 @@ body.light #namesList .name-pill.used{
   opacity: .65;
   filter: grayscale(40%);
 }
-
-body.drawer-overlap .centered { margin-right: var(--drawerW); }
+body.drawer-overlap #app { margin-right: var(--drawerW); }
 @media (max-width: 900px){
-  body.drawer-overlap .centered { margin-right: 0; }
+  body.drawer-overlap #app { margin-right: 0; }
 }
 
+#app { margin-right: 0; }
