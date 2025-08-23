@@ -232,6 +232,7 @@ function updateLocalTimes(){
   });
 }
 setInterval(updateLocalTimes, 1000);
+updateLocalTimes();
 
 // Very lightweight template (match your screenshot; tweak copy as you like)
 function computeEmailContent(t, c){
