@@ -1306,7 +1306,9 @@ function refresh(){
   $('#kTotal').textContent = state.clients.length;
   $('#kUn').textContent    = state.clients.filter(c=>c.status==='unreached').length;
   $('#kRe').textContent    = state.clients.filter(c=>c.status==='reached').length;
-  $('#kTasks').textContent = state.tasks.filter(t=>t.status==='open').length;
+    const todayStr = fmt(today());
+    const leftToday = state.tasks.filter(t=>t.status!=='done' && t.date===todayStr).length;
+    $('#kTasks').textContent = leftToday + ' left';
 
   const body = $('#clientsTbl tbody'); 
   body.innerHTML = '';
@@ -2725,15 +2727,30 @@ afterLayout();
 centerMainCards();
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
+const clearSearchBtn = document.getElementById('clearSearch');
 if (searchEl){
   let raf = 0;
   const apply = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(refresh); };
+  const toggleClear = () => {
+    if (!clearSearchBtn) return;
+    clearSearchBtn.style.display = searchEl.value ? 'inline-flex' : 'none';
+  };
 
-  searchEl.addEventListener('input', apply);               // live as you type
+  searchEl.addEventListener('input', () => { toggleClear(); apply(); });               // live as you type
   // ❌ remove the 'change' listener that was here
   searchEl.addEventListener('keydown', (e)=>{
-    if (e.key === 'Escape'){ searchEl.value=''; apply(); } // Esc to clear
+    if (e.key === 'Escape'){ searchEl.value=''; toggleClear(); apply(); } // Esc to clear
   });
+
+  if (clearSearchBtn){
+    clearSearchBtn.addEventListener('click', () => {
+      searchEl.value='';
+      toggleClear();
+      apply();
+      searchEl.focus();
+    });
+    toggleClear();
+  }
 }
 
 document.getElementById('statusFilter')
