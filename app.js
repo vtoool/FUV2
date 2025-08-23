@@ -1589,7 +1589,7 @@ function renderTask(t, opts = {}){
   }
 
   let localTimeHtml = '';
-  if (c.route){
+  if (c.route && showClientPill){
     const tz = tzFromRoute(c.route);
     localTimeHtml = `<span class="pill"><span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>`;
   }
@@ -1601,15 +1601,14 @@ function renderTask(t, opts = {}){
 
   div.innerHTML = `
     <input type="checkbox" ${t.status==='done'?'checked':''} data-taskid="${t.id}"/>
-    <div>
-      <div><strong>${icon} ${escapeHtml(t.title)}</strong>
-${showClientPill && client ? `<span class="pill client-pill">${escapeHtml(client)}</span>` : ''} ${localTimeHtml}
-        ${contactHtml}
-        ${chipsHtml}
+      <div>
+        <div><strong>${icon} ${escapeHtml(t.title)}</strong> ${contactHtml}
+          ${showClientPill && client ? `<span class="pill client-pill">${escapeHtml(client)}</span>` : ''} ${localTimeHtml}
+          ${chipsHtml}
+        </div>
+        <div class="tiny">${escapeHtml(t.label||'')}${src}</div>
+        ${notesHtml}
       </div>
-      <div class="tiny">${escapeHtml(t.label||'')}${src}</div>
-      ${notesHtml}
-    </div>
     <div class="tiny mono">
       ${t.date}${timeBadged}
       <button class="btn-icon" data-bell="${t.id}" title="Notify at time">🔔</button>
@@ -1661,11 +1660,17 @@ function renderGroupedByClient(container, items){
     if (name !== current){
       current = name;
 
-      // Group header with client name + one set of details chips
+      // Group header with client name, local time, and one set of details chips
       const gh = document.createElement('div');
       gh.className = 'group-hd';
+      const c = t.clientId ? clientById(t.clientId) || {} : {};
+      let localTimeHtml = '';
+      if (c.route){
+        const tz = tzFromRoute(c.route);
+        localTimeHtml = `<span class="pill"><span class="mono local-time" data-tz="${tz}">${formatTimeInTz(tz)}</span></span>`;
+      }
       const chipsOnce = detailsChipsFor(t); // uses the task's client
-      gh.innerHTML = `<span class="label">${escapeHtml(name)}</span>${chipsOnce ? `<div class="tiny">${chipsOnce}</div>` : ''}`;
+      gh.innerHTML = `<span class="label">${escapeHtml(name)}</span> ${localTimeHtml}${chipsOnce ? `<div class="tiny">${chipsOnce}</div>` : ''}`;
       container.appendChild(gh);
     }
 
