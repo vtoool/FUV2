@@ -284,7 +284,11 @@ body.modal-open{ overflow:hidden; }
   font-weight:400;
 }
 .pill a{ color:inherit; font-weight:inherit; }  /* no blue links inside pills */
-.client-pill, .cust-link{ cursor:pointer; }
+.client-pill, .cust-link{
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
 
 /* Hover effect for clickable pills */
 .client-pill:hover,
@@ -772,9 +776,7 @@ body.light #toolRail .tool{
   flex:1;
   display:flex;
   flex-direction:column;
-}
-#moreModal #moreContent{
-  flex:1;
+
   overflow:auto;
   padding-bottom:60px;
 }
@@ -797,7 +799,7 @@ body.light #toolRail .tool{
    Light mode: normal light pill.  */
 :root{
   --client-dk-bg: var(--pill-dk-bg);
-  --client-dk-br: var(--pill-dk-br);
+  --client-dk-br: var(--accent);
   --client-dk-fg: #fff;                 /* pure white text */
 }
 
@@ -817,7 +819,7 @@ body.light .pill.client,
 body.light .pill--client,
 body.light .client-pill{
   background: var(--pill-li-bg) !important;
-  border-color: var(--pill-li-br) !important;
+  border-color: var(--accent) !important;
   color: var(--pill-li-fg) !important;
 }
 

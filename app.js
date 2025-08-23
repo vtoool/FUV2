@@ -2451,6 +2451,7 @@ document.getElementById('saveCustomer')?.addEventListener('click', (e) => {
         const i = state.clients.findIndex(x=>x.id===client.id);
         const prev = state.clients[i];
         state.clients[i] = client;
+        state.tasks.forEach(t=>{ if(t.clientId===client.id) t.clientName = client.name; });
         const statusChanged = prev.status!==client.status;
         const anchorChanged = prev.startDate!==client.startDate || prev.reachedStart!==client.reachedStart;
         if(statusChanged){
