@@ -1923,7 +1923,7 @@ function initMorePanel(){
       </div>
       <div class="bd">
         <div class="seg tabs" id="moreTabs">
-          <button data-tab="agent" class="active">Agent</button>
+          <button data-tab="agent" class="primary">Agent</button>
           <button data-tab="unr">Unreached SMS</button>
           <button data-tab="rch">Reached SMS</button>
         </div>
@@ -1960,6 +1960,9 @@ function initMorePanel(){
                 <input type="checkbox" id="moveOffDays2"> Move tasks off non-working days
               </label>
             </div>
+          </div>
+          <div class="slab" style="margin-top:10px">
+            <button type="button" class="btn-danger" id="wipeAll" title="Delete all data">Wipe All Data</button>
           </div>
         </div>
         <div id="tab_unr" class="tab-pane">
@@ -2025,7 +2028,6 @@ function initMorePanel(){
       </div>
 
       <div class="right more-actions">
-        <button type="button" class="btn-danger" id="wipeAll" title="Delete all data">Wipe All</button>
         <button type="button" class="ghost" id="moreReset">Reset to defaults</button>
         <button type="button" id="moreCancel" class="ghost">Cancel</button>
         <button type="button" id="moreSave" class="primary">Save</button>
@@ -2036,12 +2038,14 @@ function initMorePanel(){
   initNotificationsUI();
   const tabBtns = modal.querySelectorAll('#moreTabs button');
   const panes = modal.querySelectorAll('.tab-pane');
+  const scrollArea = modal.querySelector('.bd');
   tabBtns.forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      tabBtns.forEach(b=>b.classList.remove('active'));
+      tabBtns.forEach(b=>b.classList.remove('primary'));
       panes.forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
+      btn.classList.add('primary');
       modal.querySelector('#tab_'+btn.dataset.tab).classList.add('active');
+      scrollArea.scrollTop = 0;
     });
   });
 // --- Make SMS template textareas bigger + auto-grow ---
@@ -2636,7 +2640,7 @@ document.getElementById('saveCustomer')?.addEventListener('click', (e) => {
       closeAddModal();
     }catch(e){
       console.error(e);
-      alert('Could not save customer. If this persists, click “Wipe All” to clear local data and try again.');
+      alert('Could not save customer. If this persists, click “Wipe All Data” to clear local data and try again.');
       toast('Save failed', 'err', 2200);
     }
   });
