@@ -2156,7 +2156,6 @@ function initMorePanel(){
     </section>
   `;
   document.body.appendChild(modal);
-  initNotificationsUI();
   const tabBtns = modal.querySelectorAll('#moreTabs button');
   const panes = modal.querySelectorAll('.tab-content .tab-pane');
   const scrollArea = modal.querySelector('.tab-content');
