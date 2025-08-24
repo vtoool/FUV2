@@ -199,6 +199,15 @@ function formatName(last, first){
   return `-${String(last||'').toUpperCase()}/${String(first||'')}`;
 }
 
+function scrollAgendaIntoView(){
+  const target = document.getElementById('actionsCard');
+  if(!target) return;
+  const header = document.querySelector('header');
+  const headerH = header ? header.getBoundingClientRect().height : 0;
+  const y = target.getBoundingClientRect().top + window.scrollY - headerH;
+  window.scrollTo({ top: y, behavior:'smooth' });
+}
+
 // Pick n unique combos; falls back to best effort if arrays are tiny
 function pickUniqueCombos(firsts, lasts, n=9){
   const out = new Set();
@@ -2156,6 +2165,7 @@ function initMorePanel(){
       btn.classList.add('primary');
       modal.querySelector('#tab_'+btn.dataset.tab).classList.add('active');
       scrollArea.scrollTop = 0;
+      modal.scrollTop = 0;
     });
   });
 // --- Make SMS template textareas bigger + auto-grow ---
@@ -2277,6 +2287,7 @@ function loadIntoUI(){
    modal.style.display='flex';
    modal.style.pointerEvents='auto';
    modal.classList.add('open');
+   modal.scrollTop = 0;
    loadIntoUI();
    wireAutoGrow();
    document.body.classList.add('modal-open');
@@ -2577,13 +2588,7 @@ function notifyTask(t){
           ad.value = ymd;
           ad.dispatchEvent(new Event('change'));
         }
-        const target = document.getElementById('actionsCard');
-        if (target){
-          const header = document.querySelector('header');
-          const headerH = header ? header.getBoundingClientRect().height : 0;
-          const y = target.getBoundingClientRect().top + window.scrollY - headerH;
-          window.scrollTo({ top: y, behavior:'smooth' });
-        }
+        scrollAgendaIntoView();
       });
 
       grid.appendChild(cell);
