@@ -818,11 +818,13 @@ body.light #toolRail .tool{
   padding:0 20px 10px;
 }
 #moreModal .tabs{
-  margin:10px 0;
+  margin:0 0 10px;
+  padding:4px;
   position:sticky;
   top:0;
   z-index:50; /* stay above tab content */
-  background:var(--panel);
+  background:var(--chip);
+  border-bottom:1px solid var(--line);
 }
 #moreModal .tabs button{ flex:1; }
 #moreModal .tab-pane{ display:none; position:relative; z-index:0; }
