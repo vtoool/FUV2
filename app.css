@@ -182,11 +182,11 @@ button.primary{
   background:linear-gradient(180deg,var(--accent),#5d6ef2);
   border-color:color-mix(in oklab, var(--accent) 70%, black 10%); color:#fff;
 }
-/* Danger button (used by “Wipe All”) */
+/* Danger button (used by “Wipe All Data”) */
 
 
 button.ghost{ background:transparent; }
-/* === Wipe All button — mimic Calendar "off day" tile GOOD BTN DANGER=== */
+/* === Wipe All Data button — mimic Calendar "off day" tile GOOD BTN DANGER=== */
 .btn-danger{
   /* same vibe as .cal-cell.offday in dark */
   background:
@@ -796,7 +796,13 @@ body.light #toolRail .tool{
   overflow:auto;
   padding:0 20px 10px;
 }
-#moreModal .tabs{ margin:10px 0; }
+#moreModal .tabs{
+  margin:10px 0;
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:var(--panel);
+}
 #moreModal .tabs button{ flex:1; }
 #moreModal .tab-pane{ display:none; }
 #moreModal .tab-pane.active{ display:block; }
