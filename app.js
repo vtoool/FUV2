@@ -545,7 +545,14 @@ const DEFAULT_SMS_TEMPLATES = {
 
   /* ========= Toast ========= */
   function toast(msg, kind='ok', ms=1800){
-    const host = document.getElementById('toaster') || (()=>{ const d=document.createElement('div'); d.id='toaster'; document.body.appendChild(d); return d; })();
+    let host = document.getElementById('toaster');
+    if(!host){
+      host = document.createElement('div');
+      host.id = 'toaster';
+    }
+    // Ensure the toaster is the last element so it overlays open modals
+    document.body.appendChild(host);
+
     const el = document.createElement('div');
     el.className = 'toast ' + (kind==='err'?'err':'ok');
     el.innerHTML = (kind==='err' ? '⚠️' : '✅') + ' ' + (msg||'');
