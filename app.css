@@ -806,7 +806,8 @@ body.light #toolRail .tool{
 #moreModal .card{
   display:flex;
   flex-direction:column;
-  overflow:hidden;
+  /* Allow dropdowns (e.g., datalist suggestions) to escape the card on mobile */
+  overflow:visible;
 }
 #moreModal .card .bd{
   flex:1;
