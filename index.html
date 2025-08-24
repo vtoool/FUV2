@@ -16,6 +16,10 @@
   <script src="./app.js" defer></script>
 </head>
 <body>
+  <div id="devTimeCtrl" class="dev-time-ctrl">
+    <input type="datetime-local" id="timeOverride" title="Override local time" />
+    <button id="timeOverrideReset" class="tiny">Reset</button>
+  </div>
   <!-- Sticky right-edge tabs -->
   <aside id="toolRail" aria-label="Tools">
     <button class="tool" data-target="calendarDrawer" aria-pressed="false" title="Calendar">
