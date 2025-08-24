@@ -2171,6 +2171,10 @@ function initMorePanel(){
       panes.forEach(p=>p.classList.remove('active'));
       btn.classList.add('primary');
       modal.querySelector('#tab_'+btn.dataset.tab).classList.add('active');
+      // Close any open dropdowns/datalists before switching panes
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
       requestAnimationFrame(()=>{
         scrollArea.scrollTop = 0;
         modal.scrollTop = 0;
