@@ -1323,7 +1323,33 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
 
   function clearFutureTasksForClientFrom(id, fromDate){ const f = fmt(fromDate); state.tasks = state.tasks.filter(t=> !(t.clientId===id && t.source==='auto' && t.status!=='done' && t.date >= f)); }
   function clearManualTasksForClient(id){ state.tasks = state.tasks.filter(t=> !(t.clientId===id && t.source==='manual' && t.status!=='done')); }
-  function markDone(id, done){ const t = state.tasks.find(x=>x.id===id); if(!t) return; t.status = done? 'done':'open'; save(); }
+  function markDone(id, done){
+    const t = state.tasks.find(x=>x.id===id); if(!t) return;
+    t.status = done? 'done':'open';
+    save();
+    if(done && t.label==='Phase 1 (Day 3/3)'){
+      const sameDay = state.tasks.filter(x=> x.clientId===t.clientId && x.label===t.label && x.date===t.date);
+      if(sameDay.every(x=>x.status==='done')){
+        if(confirm('Add one more day to Phase 1 for this client?')){
+          const client = clientById(t.clientId);
+          const p1d3 = parseLocalYMD(t.date);
+          const p1d4 = adjustAutoDateIfNeeded(stepByWorkingDays(p1d3,1));
+          clearFutureTasksForClientFrom(client.id, p1d4);
+          genDayTasks(client, fmt(p1d4), ACTIONS_REACHED, 'Phase 1 (Day 4/4)');
+          const gaps=[3,5,7,7,7];
+          let last=p1d4;
+          for(let i=0;i<gaps.length;i++){
+            let target=addDays(last,gaps[i]);
+            target=adjustAutoDateIfNeeded(target);
+            genDayTasks(client, fmt(target), ACTIONS_REACHED, `Phase ${i+2}`);
+            last=target;
+          }
+          save();
+          refresh();
+        }
+      }
+    }
+  }
   function deleteTask(id){ state.tasks = state.tasks.filter(t=>t.id!==id); save(); }
 
   // Full regeneration per settings/override change
@@ -1896,78 +1922,103 @@ function initMorePanel(){
         <button type="button" class="btn-icon" id="moreClose" title="Close">✖</button>
       </div>
       <div class="bd">
-        <div class="row">
-          <div>
-            <label>Agent name</label>
-            <input id="agentName" placeholder="Jane Agent" />
-          </div>
-          <div>
-            <label>Agent phone</label>
-            <input id="agentPhone" placeholder="+1 555 123 4567" />
-          </div>
+        <div class="seg tabs" id="moreTabs">
+          <button data-tab="agent" class="active">Agent</button>
+          <button data-tab="unr">Unreached SMS</button>
+          <button data-tab="rch">Reached SMS</button>
         </div>
-
-        <div class="slab" style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <span class="tiny mono">Notifications:</span>
-          <button type="button" id="enableNotifs" class="tiny" title="Enable desktop notifications">🔔 Enable</button>
-          <button type="button" id="testNotif" class="tiny" title="Send a test notification">Test</button>
-          <span id="notifStatus" class="pill">Status: Not enabled</span>
-        </div>
-
-        <div class="slab" style="margin-top:10px">
-          <h4>Unreached SMS templates (editable)</h4>
-          <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
-          <div class="row single" style="margin-top:8px">
+        <div id="tab_agent" class="tab-pane active">
+          <div class="row">
             <div>
-              <label>Day 1</label>
-              <textarea id="tpl_unr_1" rows="3"></textarea>
+              <label>Agent name</label>
+              <input id="agentName" placeholder="Jane Agent" />
+            </div>
+            <div>
+              <label>Agent phone</label>
+              <input id="agentPhone" placeholder="+1 555 123 4567" />
             </div>
           </div>
-          <div class="row single">
-            <div>
-              <label>Day 2</label>
-              <textarea id="tpl_unr_2" rows="3"></textarea>
-            </div>
+          <div class="slab" style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="tiny mono">Notifications:</span>
+            <button type="button" id="enableNotifs" class="tiny" title="Enable desktop notifications">🔔 Enable</button>
+            <button type="button" id="testNotif" class="tiny" title="Send a test notification">Test</button>
+            <span id="notifStatus" class="pill">Status: Not enabled</span>
           </div>
-          <div class="row single">
-            <div>
-              <label>Day 3</label>
-              <textarea id="tpl_unr_3" rows="3"></textarea>
+          <div class="slab" style="margin-top:10px">
+            <h4>Working days</h4>
+            <div class="wdays">
+              <div class="cell"><input type="checkbox" id="wd2_mon"><span>Mon</span></div>
+              <div class="cell"><input type="checkbox" id="wd2_tue"><span>Tue</span></div>
+              <div class="cell"><input type="checkbox" id="wd2_wed"><span>Wed</span></div>
+              <div class="cell"><input type="checkbox" id="wd2_thu"><span>Thu</span></div>
+              <div class="cell"><input type="checkbox" id="wd2_fri"><span>Fri</span></div>
+              <div class="cell"><input type="checkbox" id="wd2_sat"><span>Sat</span></div>
+              <div class="cell"><input type="checkbox" id="wd2_sun"><span>Sun</span></div>
             </div>
-          </div>
-          <div class="row single">
-            <div>
-              <label>Day 4</label>
-              <textarea id="tpl_unr_4" rows="3"></textarea>
-            </div>
-          </div>
-          <div class="row single">
-            <div>
-              <label>Day 5</label>
-              <textarea id="tpl_unr_5" rows="3"></textarea>
+            <div style="margin-top:10px">
+              <label style="display:inline-flex;align-items:center;gap:8px">
+                <input type="checkbox" id="moveOffDays2"> Move tasks off non-working days
+              </label>
             </div>
           </div>
         </div>
-
-        <div class="slab" style="margin-top:10px">
-          <h4>Reached SMS templates (editable)</h4>
-          <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
-          <div class="row single" style="margin-top:8px">
-            <div>
-              <label>Day 1</label>
-              <textarea id="tpl_rch_1" rows="3"></textarea>
+        <div id="tab_unr" class="tab-pane">
+          <div class="slab">
+            <h4>Unreached SMS templates (editable)</h4>
+            <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
+            <div class="row single" style="margin-top:8px">
+              <div>
+                <label>Day 1</label>
+                <textarea id="tpl_unr_1" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="row single">
+              <div>
+                <label>Day 2</label>
+                <textarea id="tpl_unr_2" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="row single">
+              <div>
+                <label>Day 3</label>
+                <textarea id="tpl_unr_3" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="row single">
+              <div>
+                <label>Day 4</label>
+                <textarea id="tpl_unr_4" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="row single">
+              <div>
+                <label>Day 5</label>
+                <textarea id="tpl_unr_5" rows="3"></textarea>
+              </div>
             </div>
           </div>
-          <div class="row single">
-            <div>
-              <label>Day 2</label>
-              <textarea id="tpl_rch_2" rows="3"></textarea>
+        </div>
+        <div id="tab_rch" class="tab-pane">
+          <div class="slab">
+            <h4>Reached SMS templates (editable)</h4>
+            <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
+            <div class="row single" style="margin-top:8px">
+              <div>
+                <label>Day 1</label>
+                <textarea id="tpl_rch_1" rows="3"></textarea>
+              </div>
             </div>
-          </div>
-          <div class="row single">
-            <div>
-              <label>Day 3</label>
-              <textarea id="tpl_rch_3" rows="3"></textarea>
+            <div class="row single">
+              <div>
+                <label>Day 2</label>
+                <textarea id="tpl_rch_2" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="row single">
+              <div>
+                <label>Day 3</label>
+                <textarea id="tpl_rch_3" rows="3"></textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -1983,6 +2034,16 @@ function initMorePanel(){
   `;
   document.body.appendChild(modal);
   initNotificationsUI();
+  const tabBtns = modal.querySelectorAll('#moreTabs button');
+  const panes = modal.querySelectorAll('.tab-pane');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      panes.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      modal.querySelector('#tab_'+btn.dataset.tab).classList.add('active');
+    });
+  });
 // --- Make SMS template textareas bigger + auto-grow ---
 {
   // 1) CSS: full width, larger minimum height, vertical resize only
@@ -2024,6 +2085,15 @@ function loadIntoUI(){
   const a = state.settings.agent || {};
   document.getElementById('agentName').value  = a.name  || '';
   document.getElementById('agentPhone').value = a.phone || '';
+  const s = state.settings;
+  document.getElementById('wd2_mon').checked = !!s.workingDays.mon;
+  document.getElementById('wd2_tue').checked = !!s.workingDays.tue;
+  document.getElementById('wd2_wed').checked = !!s.workingDays.wed;
+  document.getElementById('wd2_thu').checked = !!s.workingDays.thu;
+  document.getElementById('wd2_fri').checked = !!s.workingDays.fri;
+  document.getElementById('wd2_sat').checked = !!s.workingDays.sat;
+  document.getElementById('wd2_sun').checked = !!s.workingDays.sun;
+  document.getElementById('moveOffDays2').checked = !!s.moveOffDays;
   const mapU = state.settings.smsTemplates?.unreached || {};
   for (let d=1; d<=5; d++){
     const el = document.getElementById(`tpl_unr_${d}`);
@@ -2049,6 +2119,16 @@ function loadIntoUI(){
       name:  (document.getElementById('agentName').value || '').trim(),
       phone: (document.getElementById('agentPhone').value || '').trim()
     };
+    state.settings.workingDays = {
+      mon: !!document.getElementById('wd2_mon').checked,
+      tue: !!document.getElementById('wd2_tue').checked,
+      wed: !!document.getElementById('wd2_wed').checked,
+      thu: !!document.getElementById('wd2_thu').checked,
+      fri: !!document.getElementById('wd2_fri').checked,
+      sat: !!document.getElementById('wd2_sat').checked,
+      sun: !!document.getElementById('wd2_sun').checked
+    };
+    state.settings.moveOffDays = !!document.getElementById('moveOffDays2').checked;
     const mapU = {};
     for (let d=1; d<=5; d++){
       mapU[d] = document.getElementById(`tpl_unr_${d}`).value || '';
@@ -2059,6 +2139,7 @@ function loadIntoUI(){
     }
     state.settings.smsTemplates.unreached = mapU;
     state.settings.smsTemplates.reached = mapR;
+    regenerateAutoOpenTasksFromAnchors();
     save();
     toast('Settings saved');
     close();
@@ -2073,7 +2154,7 @@ function loadIntoUI(){
       if (el) el.value = DEFAULT_SMS_TEMPLATES.reached[d];
     }
   }
- function open(){ modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); wireAutoGrow(); document.body.classList.add('modal-open'); }
+ function open(){ tabBtns[0].click(); modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); wireAutoGrow(); document.body.classList.add('modal-open'); }
   function close(){ modal.classList.remove('open'); modal.style.display='none'; document.body.classList.remove('modal-open'); }
 
   document.getElementById('moreBtn')?.addEventListener('click', open);
