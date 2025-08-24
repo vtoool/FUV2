@@ -2913,6 +2913,13 @@ function centerMainCards(){
 function initTimeControl(){
   const input = document.getElementById('timeOverride');
   const reset = document.getElementById('timeOverrideReset');
+  const localTimeEl = document.getElementById('localTime');
+  if(localTimeEl){
+    try{
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      localTimeEl.setAttribute('data-tz', tz);
+    }catch(_){ /* ignore */ }
+  }
   if(!input || !reset) return;
   if(state.settings.timeOverride){
     input.value = state.settings.timeOverride;
