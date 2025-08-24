@@ -2156,7 +2156,6 @@ function initMorePanel(){
     </section>
   `;
   document.body.appendChild(modal);
-  initNotificationsUI();
   const tabBtns = modal.querySelectorAll('#moreTabs button');
   const panes = modal.querySelectorAll('.tab-content .tab-pane');
   const scrollArea = modal.querySelector('.tab-content');
@@ -3018,12 +3017,9 @@ function centerMainCards(){
 
   customers?.classList.add('centered');
   agenda?.classList.add('centered');
-  /* ========= Notifications boot ========= */
-  initNotificationsUI();
-  startNotificationTicker();
+}
 
-
-  /* ========= Bootstrap ========= */
+/* ========= Bootstrap ========= */
 function bootstrap(){
   initAddModal();
   buildHomeList();
@@ -3039,38 +3035,39 @@ function bootstrap(){
   afterLayout();
   centerMainCards();
   updateLocalTimes();
-// 🔎 Customers search + status filter
-const searchEl = document.getElementById('search');
-const clearSearchBtn = document.getElementById('clearSearch');
-if (searchEl){
-  let raf = 0;
-  const apply = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(refresh); };
-  const toggleClear = () => {
-    if (!clearSearchBtn) return;
-    clearSearchBtn.style.display = searchEl.value ? 'inline-flex' : 'none';
-  };
+  initNotificationsUI();
+  startNotificationTicker();
 
-  searchEl.addEventListener('input', () => { toggleClear(); apply(); });               // live as you type
-  // ❌ remove the 'change' listener that was here
-  searchEl.addEventListener('keydown', (e)=>{
-    if (e.key === 'Escape'){ searchEl.value=''; toggleClear(); apply(); } // Esc to clear
-  });
+  // 🔎 Customers search + status filter
+  const searchEl = document.getElementById('search');
+  const clearSearchBtn = document.getElementById('clearSearch');
+  if (searchEl){
+    let raf = 0;
+    const apply = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(refresh); };
+    const toggleClear = () => {
+      if (!clearSearchBtn) return;
+      clearSearchBtn.style.display = searchEl.value ? 'inline-flex' : 'none';
+    };
 
-  if (clearSearchBtn){
-    clearSearchBtn.addEventListener('click', () => {
-      searchEl.value='';
-      toggleClear();
-      apply();
-      searchEl.focus();
+    searchEl.addEventListener('input', () => { toggleClear(); apply(); });               // live as you type
+    // ❌ remove the 'change' listener that was here
+    searchEl.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape'){ searchEl.value=''; toggleClear(); apply(); } // Esc to clear
     });
-    toggleClear();
+
+    if (clearSearchBtn){
+      clearSearchBtn.addEventListener('click', () => {
+        searchEl.value='';
+        toggleClear();
+        apply();
+        searchEl.focus();
+      });
+      toggleClear();
+    }
   }
-}
 
   document.getElementById('statusFilter')
-  ?.addEventListener('change', () => refresh());           // keep this one
-
-    centerMainCards();
+    ?.addEventListener('change', () => refresh());           // keep this one
 }
 
 bootstrap();
