@@ -104,20 +104,8 @@ header .wrap{ padding-block:10px; }
 h1{font-size:28px; margin:0 0 4px; font-weight:800; line-height:1.1}
 .sub{color:var(--muted); font-size:13.5px}
 
-.dev-time-ctrl{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.dev-time-ctrl input,
-.dev-time-ctrl button{
-  height:28px;
-  padding:4px 8px;
-}
-.dev-time-ctrl .tiny{white-space:nowrap;}
-
 /* =================== CARDS / CONTROLS =================== */
-.card{background:var(--panel); border:1px solid var(--line); border-radius:20px; box-shadow:var(--sh-1);} 
+.card{background:var(--panel); border:1px solid var(--line); border-radius:20px; box-shadow:var(--sh-1);}
 .card .hd{
   padding:14px 16px; border-bottom:1px solid var(--line);
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
@@ -944,16 +932,3 @@ body.drawer-overlap #app {
 /* Local time colouring */
 .local-time.lt-red{ color: var(--danger); }
 .local-time.lt-green{ color: var(--accent-2); }
-
-#devTimeCtrl{
-  position:fixed;
-  top:calc(var(--header-h) + 8px);
-  left:4px;
-  z-index:1000;
-  display:flex;
-  gap:4px;
-  align-items:center;
-}
-#devTimeCtrl input{
-  max-width:180px;
-}

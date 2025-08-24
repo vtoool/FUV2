@@ -47,12 +47,7 @@ const $  = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
 
 function getNow(){
-  let base;
-  if (state?.settings?.timeOverride){
-    base = new Date(state.settings.timeOverride);
-  } else {
-    base = new Date();
-  }
+  const base = new Date();
   const tz = state?.settings?.officeTz;
   if (tz){
     try{
@@ -854,8 +849,7 @@ function defaults(){
       agent: { name:'', phone:'' },
       smsTemplates: JSON.parse(JSON.stringify(DEFAULT_SMS_TEMPLATES)),
       officeCity: '',
-      officeTz: '',
-      timeOverride: ''
+      officeTz: ''
     }
   };
 }
@@ -877,7 +871,6 @@ s.settings.smsTemplates.reached = {
 };
 if (!s.settings.officeCity) s.settings.officeCity = '';
 if (!s.settings.officeTz) s.settings.officeTz = '';
-if (!s.settings.timeOverride) s.settings.timeOverride = '';
 
       return s;
     }catch(e){ return defaults(); }
@@ -3025,38 +3018,6 @@ function centerMainCards(){
 
   customers?.classList.add('centered');
   agenda?.classList.add('centered');
-}
-
-function initTimeControl(){
-  const input = document.getElementById('timeOverride');
-  const reset = document.getElementById('timeOverrideReset');
-  const localTimeEl = document.getElementById('localTime');
-  if(localTimeEl){
-    try{
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      localTimeEl.setAttribute('data-tz', tz);
-    }catch(_){ /* ignore */ }
-  }
-  if(!input || !reset) return;
-  if(state.settings.timeOverride){
-    input.value = state.settings.timeOverride;
-  }
-  input.addEventListener('change', ()=>{
-    state.settings.timeOverride = input.value;
-    save();
-    updateLocalTimes();
-  });
-  reset.addEventListener('click', ()=>{
-    input.value='';
-    state.settings.timeOverride='';
-    save();
-    updateLocalTimes();
-  });
-}
-
-
-
-
   /* ========= Notifications boot ========= */
   initNotificationsUI();
   startNotificationTicker();
@@ -3074,8 +3035,7 @@ function bootstrap(){
   initCalendarDrawer();
   initNamesDrawer();
   initSideTabs();
-initMorePanel();
-  initTimeControl();
+  initMorePanel();
   afterLayout();
   centerMainCards();
   updateLocalTimes();
