@@ -826,8 +826,14 @@ body.light #toolRail .tool{
   border-bottom:1px solid var(--line);
   display:flex;
   gap:4px;
+  align-items:center;
+  flex:none;
 }
-#moreModal .tabs button{ flex:1; }
+#moreModal .tabs button{
+  flex:1;
+  height:34px;
+  line-height:34px;
+}
 #moreModal .tab-content{
   flex:1;
   overflow:auto;
