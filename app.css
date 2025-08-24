@@ -796,6 +796,10 @@ body.light #toolRail .tool{
   overflow:auto;
   padding:0 20px 10px;
 }
+#moreModal .tabs{ margin:10px 0; }
+#moreModal .tabs button{ flex:1; }
+#moreModal .tab-pane{ display:none; }
+#moreModal .tab-pane.active{ display:block; }
 #moreModal .more-actions{
   background:var(--panel);
   border-top:1px solid var(--line);
