@@ -43,8 +43,32 @@ const LAST = [
 ];
 
   /* ========= Helpers ========= */
-  const $  = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
+const $  = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function getNow(){
+  let base;
+  if (state?.settings?.timeOverride){
+    base = new Date(state.settings.timeOverride);
+  } else {
+    base = new Date();
+  }
+  const tz = state?.settings?.officeTz;
+  if (tz){
+    try{
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+      }).formatToParts(base);
+      const get = type => Number(parts.find(p=>p.type===type).value);
+      return new Date(Date.UTC(get('year'), get('month')-1, get('day'), get('hour'), get('minute'), get('second')));
+    }catch(_){
+      return base;
+    }
+  }
+  return base;
+}
   // === Drawer pin/unpin synchronizer (call after any open/close)
 function setBodyPinned(){
   const calPinned   = !!document.querySelector('#calendarDrawer.open.pinned');
@@ -269,13 +293,13 @@ function buildHomeList(){
 }
 
 function formatTimeInTz(tz){
-  return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', hour12:false, timeZone: tz }).format(new Date());
+  return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', hour12:false, timeZone: tz }).format(getNow());
 }
 
 function tzAbbr(tz){
   try{
     return new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName:'short' })
-      .formatToParts(new Date())
+      .formatToParts(getNow())
       .find(p=>p.type==='timeZoneName').value;
   }catch(_){
     return tz;
@@ -283,7 +307,7 @@ function tzAbbr(tz){
 }
 
 function updateLocalTimes(){
-  const now = new Date();
+  const now = getNow();
   const blink = Math.floor(now.getTime() / 1000) % 2 === 0;
   $$('.local-time').forEach(el=>{
     const tz = el.getAttribute('data-tz');
@@ -429,7 +453,7 @@ function computeSmsText(t, client){
   }
 
   function uid(){ return 'id'+Math.random().toString(36).slice(2)+Date.now().toString(36); }
-  function today(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+  function today(){ const d=getNow(); d.setHours(0,0,0,0); return d; }
   function addDays(date, n){ const d=new Date(date); d.setDate(d.getDate()+n); return d; }
   function fmt(d){ if(!(d instanceof Date)) d=new Date(d); const z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; }
   function parseLocalYMD(ymd){ if(!ymd) return today(); const [y,m,d]=ymd.split('-').map(Number); const dt=new Date(y,(m||1)-1,d||1); dt.setHours(0,0,0,0); return dt; }
@@ -801,7 +825,10 @@ function defaults(){
       moveOffDays: true,
       overrides: {},
       agent: { name:'', phone:'' },
-      smsTemplates: JSON.parse(JSON.stringify(DEFAULT_SMS_TEMPLATES))
+      smsTemplates: JSON.parse(JSON.stringify(DEFAULT_SMS_TEMPLATES)),
+      officeCity: '',
+      officeTz: '',
+      timeOverride: ''
     }
   };
 }
@@ -821,6 +848,9 @@ s.settings.smsTemplates.reached = {
   ...DEFAULT_SMS_TEMPLATES.reached,
   ...(s.settings.smsTemplates.reached || {})
 };
+if (!s.settings.officeCity) s.settings.officeCity = '';
+if (!s.settings.officeTz) s.settings.officeTz = '';
+if (!s.settings.timeOverride) s.settings.timeOverride = '';
 
       return s;
     }catch(e){ return defaults(); }
@@ -1938,6 +1968,13 @@ function initMorePanel(){
               <input id="agentPhone" placeholder="+1 555 123 4567" />
             </div>
           </div>
+          <div class="row">
+            <div>
+              <label>Office city</label>
+              <input id="officeCity" list="homeList" placeholder="LAX" />
+            </div>
+            <div></div>
+          </div>
           <div class="slab" style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <span class="tiny mono">Notifications:</span>
             <button type="button" id="enableNotifs" class="tiny" title="Enable desktop notifications">🔔 Enable</button>
@@ -2090,6 +2127,7 @@ function loadIntoUI(){
   document.getElementById('agentName').value  = a.name  || '';
   document.getElementById('agentPhone').value = a.phone || '';
   const s = state.settings;
+  document.getElementById('officeCity').value = s.officeCity || '';
   document.getElementById('wd2_mon').checked = !!s.workingDays.mon;
   document.getElementById('wd2_tue').checked = !!s.workingDays.tue;
   document.getElementById('wd2_wed').checked = !!s.workingDays.wed;
@@ -2123,6 +2161,8 @@ function loadIntoUI(){
       name:  (document.getElementById('agentName').value || '').trim(),
       phone: (document.getElementById('agentPhone').value || '').trim()
     };
+    state.settings.officeCity = (document.getElementById('officeCity').value || '').trim().toUpperCase();
+    state.settings.officeTz = window.IATA_TZ?.[state.settings.officeCity] || '';
     state.settings.workingDays = {
       mon: !!document.getElementById('wd2_mon').checked,
       tue: !!document.getElementById('wd2_tue').checked,
@@ -2360,7 +2400,7 @@ function notifyTask(t){
     if (hhmm && /^\d{2}:\d{2}$/.test(hhmm)) { [H,M] = hhmm.split(':').map(Number); }
     return new Date(y, (m||1)-1, d||1, H, M, 0, 0);
   }
-  function notifyEligibleTodayImportant(now=new Date()){
+  function notifyEligibleTodayImportant(now=getNow()){
     const f = fmtToday();
     const list = state.tasks.filter(t => t.important === true && t.status !== 'done' && t.date === f);
     return list.filter(t => {
@@ -2420,7 +2460,7 @@ function notifyTask(t){
   }
 
   /* ========= Calendar ========= */
-  let calCursor = new Date(); calCursor.setDate(1);
+  let calCursor = getNow(); calCursor.setDate(1);
   function buildCalendar(){
     const grid = $('#calendarGrid'); if(!grid) return;
     const year=calCursor.getFullYear(), month=calCursor.getMonth();
@@ -2870,6 +2910,26 @@ function centerMainCards(){
   agenda?.classList.add('centered');
 }
 
+function initTimeControl(){
+  const input = document.getElementById('timeOverride');
+  const reset = document.getElementById('timeOverrideReset');
+  if(!input || !reset) return;
+  if(state.settings.timeOverride){
+    input.value = state.settings.timeOverride;
+  }
+  input.addEventListener('change', ()=>{
+    state.settings.timeOverride = input.value;
+    save();
+    updateLocalTimes();
+  });
+  reset.addEventListener('click', ()=>{
+    input.value='';
+    state.settings.timeOverride='';
+    save();
+    updateLocalTimes();
+  });
+}
+
 
 
 
@@ -2889,10 +2949,12 @@ function bootstrap(){
   setShowButtons();
   initCalendarDrawer();
   initNamesDrawer();
-  initSideTabs(); 
+  initSideTabs();
 initMorePanel();
-afterLayout();
-centerMainCards();
+  initTimeControl();
+  afterLayout();
+  centerMainCards();
+  updateLocalTimes();
 // 🔎 Customers search + status filter
 const searchEl = document.getElementById('search');
 const clearSearchBtn = document.getElementById('clearSearch');
@@ -2921,7 +2983,7 @@ if (searchEl){
   }
 }
 
-document.getElementById('statusFilter')
+  document.getElementById('statusFilter')
   ?.addEventListener('change', () => refresh());           // keep this one
 
     centerMainCards();
