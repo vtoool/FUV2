@@ -1353,6 +1353,82 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
 
   function clearFutureTasksForClientFrom(id, fromDate){ const f = fmt(fromDate); state.tasks = state.tasks.filter(t=> !(t.clientId===id && t.source==='auto' && t.status!=='done' && t.date >= f)); }
   function clearManualTasksForClient(id){ state.tasks = state.tasks.filter(t=> !(t.clientId===id && t.source==='manual' && t.status!=='done')); }
+
+  function openPhase1Modal(t){
+    document.body.classList.add('modal-open');
+    const modal = document.createElement('div');
+    modal.className = 'modal open';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="card" style="max-width:340px;">
+        <h3>Phase 1 complete</h3>
+        <p>What would you like to do next?</p>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+          <button class="primary" id="p1AddDay">Add 1 more day</button>
+          <button id="p1Continue">Continue to Phase 2</button>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="date" id="p1Date">
+            <button id="p1Custom">Set Phase 2 date</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    function close(refreshNeeded){
+      document.removeEventListener('keydown', escHandler, true);
+      modal.remove();
+      document.body.classList.remove('modal-open');
+      if(refreshNeeded) refresh();
+    }
+
+    const escHandler = (e)=>{ if(e.key==='Escape') close(false); };
+    document.addEventListener('keydown', escHandler, true);
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) close(false); });
+
+    modal.querySelector('#p1AddDay').addEventListener('click', ()=>{ addOneMoreDay(t); close(true); });
+    modal.querySelector('#p1Continue').addEventListener('click', ()=>{ close(true); });
+    modal.querySelector('#p1Custom').addEventListener('click', ()=>{
+      const val = modal.querySelector('#p1Date').value;
+      if(!val) return;
+      setCustomPhase2Date(t, parseLocalYMD(val));
+      close(true);
+    });
+  }
+
+  function addOneMoreDay(t){
+    const client = clientById(t.clientId);
+    const p1d3 = parseLocalYMD(t.date);
+    const p1d4 = adjustAutoDateIfNeeded(stepByWorkingDays(p1d3,1));
+    clearFutureTasksForClientFrom(client.id, p1d4);
+    genDayTasks(client, fmt(p1d4), ACTIONS_REACHED, 'Phase 1 (Day 4/4)');
+    const gaps=[3,5,7,7,7];
+    let last=p1d4;
+    for(let i=0;i<gaps.length;i++){
+      let target=addDays(last,gaps[i]);
+      target=adjustAutoDateIfNeeded(target);
+      genDayTasks(client, fmt(target), ACTIONS_REACHED, `Phase ${i+2}`);
+      last=target;
+    }
+    save();
+  }
+
+  function setCustomPhase2Date(t, p2){
+    const client = clientById(t.clientId);
+    const p1d3 = parseLocalYMD(t.date);
+    const p1d4 = adjustAutoDateIfNeeded(stepByWorkingDays(p1d3,1));
+    clearFutureTasksForClientFrom(client.id, p1d4);
+    const p2adj = adjustAutoDateIfNeeded(p2);
+    genDayTasks(client, fmt(p2adj), ACTIONS_REACHED, 'Phase 2');
+    const gaps=[5,7,7,7];
+    let last=p2adj;
+    for(let i=0;i<gaps.length;i++){
+      let target=addDays(last,gaps[i]);
+      target=adjustAutoDateIfNeeded(target);
+      genDayTasks(client, fmt(target), ACTIONS_REACHED, `Phase ${i+3}`);
+      last=target;
+    }
+    save();
+  }
   function markDone(id, done){
     const t = state.tasks.find(x=>x.id===id); if(!t) return;
     t.status = done? 'done':'open';
@@ -1360,23 +1436,7 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
     if(done && t.label==='Phase 1 (Day 3/3)'){
       const sameDay = state.tasks.filter(x=> x.clientId===t.clientId && x.label===t.label && x.date===t.date);
       if(sameDay.every(x=>x.status==='done')){
-        if(confirm('Add one more day to Phase 1 for this client?')){
-          const client = clientById(t.clientId);
-          const p1d3 = parseLocalYMD(t.date);
-          const p1d4 = adjustAutoDateIfNeeded(stepByWorkingDays(p1d3,1));
-          clearFutureTasksForClientFrom(client.id, p1d4);
-          genDayTasks(client, fmt(p1d4), ACTIONS_REACHED, 'Phase 1 (Day 4/4)');
-          const gaps=[3,5,7,7,7];
-          let last=p1d4;
-          for(let i=0;i<gaps.length;i++){
-            let target=addDays(last,gaps[i]);
-            target=adjustAutoDateIfNeeded(target);
-            genDayTasks(client, fmt(target), ACTIONS_REACHED, `Phase ${i+2}`);
-            last=target;
-          }
-          save();
-          refresh();
-        }
+        openPhase1Modal(t);
       }
     }
   }
