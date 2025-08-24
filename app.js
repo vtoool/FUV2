@@ -148,6 +148,17 @@ window.addEventListener('resize', afterLayout);
 window.addEventListener('load', updateDrawerOverlap);
 document.fonts?.ready?.then?.(updateDrawerOverlap);
 
+function updateHeaderHeight(){
+  const h = document.querySelector('header');
+  if (h){
+    document.documentElement.style.setProperty('--header-h', h.getBoundingClientRect().height + "px");
+  }
+}
+window.addEventListener('load', updateHeaderHeight);
+window.addEventListener('resize', updateHeaderHeight);
+document.fonts?.ready?.then?.(updateHeaderHeight);
+
+
 
 
   const storeKey  = 'followup_crm_v21';
