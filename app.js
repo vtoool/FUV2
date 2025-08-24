@@ -2168,8 +2168,7 @@ function initMorePanel(){
       modal.scrollTop = 0;
     });
   });
-// --- Make SMS template textareas bigger + auto-grow ---
-{
+  // --- Make SMS template textareas bigger + auto-grow ---
   // 1) CSS: full width, larger minimum height, vertical resize only
   if (!document.getElementById('moreModalTextareaStyles')) {
     const st = document.createElement('style');
@@ -2194,7 +2193,10 @@ function initMorePanel(){
     el.style.height = 'auto';
     el.style.height = (el.scrollHeight + 2) + 'px';
   };
+  let autoGrowWired = false;
   const wireAutoGrow = () => {
+    if (autoGrowWired) return;
+    autoGrowWired = true;
     modal.querySelectorAll('textarea[id^="tpl_unr_"], textarea[id^="tpl_rch_"]').forEach(t => {
       // autoGrow(t);                       // fit on open
       t.addEventListener('input', () => autoGrow(t)); // fit while typing
@@ -2202,8 +2204,6 @@ function initMorePanel(){
   };
 
   // Run auto-grow after values are populated
-
-}
 
 function loadIntoUI(){
   const a = state.settings.agent || {};
