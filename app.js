@@ -2041,112 +2041,114 @@ function initMorePanel(){
         <button type="button" class="btn-icon" id="moreClose" title="Close">✖</button>
       </div>
       <div class="bd">
-        <div class="seg tabs" id="moreTabs">
-          <button data-tab="agent" class="primary">Agent</button>
-          <button data-tab="unr">Unreached SMS</button>
-          <button data-tab="rch">Reached SMS</button>
+        <div class="seg tabs" id="moreTabs" role="tablist">
+          <button data-tab="agent" role="tab" aria-controls="pane_agent" class="primary" aria-selected="true">Agent</button>
+          <button data-tab="unr" role="tab" aria-controls="pane_unr" aria-selected="false">Unreached SMS</button>
+          <button data-tab="rch" role="tab" aria-controls="pane_rch" aria-selected="false">Reached SMS</button>
         </div>
-        <div id="tab_agent" class="tab-pane active">
-          <div class="row">
-            <div>
-              <label>Agent name</label>
-              <input id="agentName" placeholder="Jane Agent" />
+        <div class="tab-content">
+          <div id="pane_agent" role="tabpanel" class="tab-pane active">
+            <div class="row">
+              <div>
+                <label>Agent name</label>
+                <input id="agentName" placeholder="Jane Agent" />
+              </div>
+              <div>
+                <label>Agent phone</label>
+                <input id="agentPhone" placeholder="+1 555 123 4567" />
+              </div>
             </div>
-            <div>
-              <label>Agent phone</label>
-              <input id="agentPhone" placeholder="+1 555 123 4567" />
+            <div class="row">
+              <div>
+                <label>Office city</label>
+                <input id="officeCity" list="homeList" placeholder="LAX" />
+              </div>
+              <div></div>
+            </div>
+            <div class="slab" style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span class="tiny mono">Notifications:</span>
+              <button type="button" id="enableNotifs" class="tiny" title="Enable desktop notifications">🔔 Enable</button>
+              <button type="button" id="testNotif" class="tiny" title="Send a test notification">Test</button>
+              <span id="notifStatus" class="pill">Status: Not enabled</span>
+            </div>
+            <div class="slab" style="margin-top:10px">
+              <h4>Working days</h4>
+              <div class="wdays">
+                <div class="cell"><input type="checkbox" id="wd2_mon"><span>Mon</span></div>
+                <div class="cell"><input type="checkbox" id="wd2_tue"><span>Tue</span></div>
+                <div class="cell"><input type="checkbox" id="wd2_wed"><span>Wed</span></div>
+                <div class="cell"><input type="checkbox" id="wd2_thu"><span>Thu</span></div>
+                <div class="cell"><input type="checkbox" id="wd2_fri"><span>Fri</span></div>
+                <div class="cell"><input type="checkbox" id="wd2_sat"><span>Sat</span></div>
+                <div class="cell"><input type="checkbox" id="wd2_sun"><span>Sun</span></div>
+              </div>
+              <div style="margin-top:10px">
+                <label style="display:inline-flex;align-items:center;gap:8px">
+                  <input type="checkbox" id="moveOffDays2"> Move tasks off non-working days
+                </label>
+              </div>
+            </div>
+            <div class="slab" style="margin-top:10px">
+              <button type="button" class="btn-danger" id="wipeAll" title="Delete all data">Wipe All Data</button>
             </div>
           </div>
-          <div class="row">
-            <div>
-              <label>Office city</label>
-              <input id="officeCity" list="homeList" placeholder="LAX" />
-            </div>
-            <div></div>
-          </div>
-          <div class="slab" style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <span class="tiny mono">Notifications:</span>
-            <button type="button" id="enableNotifs" class="tiny" title="Enable desktop notifications">🔔 Enable</button>
-            <button type="button" id="testNotif" class="tiny" title="Send a test notification">Test</button>
-            <span id="notifStatus" class="pill">Status: Not enabled</span>
-          </div>
-          <div class="slab" style="margin-top:10px">
-            <h4>Working days</h4>
-            <div class="wdays">
-              <div class="cell"><input type="checkbox" id="wd2_mon"><span>Mon</span></div>
-              <div class="cell"><input type="checkbox" id="wd2_tue"><span>Tue</span></div>
-              <div class="cell"><input type="checkbox" id="wd2_wed"><span>Wed</span></div>
-              <div class="cell"><input type="checkbox" id="wd2_thu"><span>Thu</span></div>
-              <div class="cell"><input type="checkbox" id="wd2_fri"><span>Fri</span></div>
-              <div class="cell"><input type="checkbox" id="wd2_sat"><span>Sat</span></div>
-              <div class="cell"><input type="checkbox" id="wd2_sun"><span>Sun</span></div>
-            </div>
-            <div style="margin-top:10px">
-              <label style="display:inline-flex;align-items:center;gap:8px">
-                <input type="checkbox" id="moveOffDays2"> Move tasks off non-working days
-              </label>
-            </div>
-          </div>
-          <div class="slab" style="margin-top:10px">
-            <button type="button" class="btn-danger" id="wipeAll" title="Delete all data">Wipe All Data</button>
-          </div>
-        </div>
-        <div id="tab_unr" class="tab-pane">
-          <div class="slab">
-            <h4>Unreached SMS templates (editable)</h4>
-            <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
-            <div class="row single" style="margin-top:8px">
-              <div>
-                <label>Day 1</label>
-                <textarea id="tpl_unr_1" rows="3"></textarea>
+          <div id="pane_unr" role="tabpanel" class="tab-pane" hidden>
+            <div class="slab">
+              <h4>Unreached SMS templates (editable)</h4>
+              <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
+              <div class="row single" style="margin-top:8px">
+                <div>
+                  <label>Day 1</label>
+                  <textarea id="tpl_unr_1" rows="3"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="row single">
-              <div>
-                <label>Day 2</label>
-                <textarea id="tpl_unr_2" rows="3"></textarea>
+              <div class="row single">
+                <div>
+                  <label>Day 2</label>
+                  <textarea id="tpl_unr_2" rows="3"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="row single">
-              <div>
-                <label>Day 3</label>
-                <textarea id="tpl_unr_3" rows="3"></textarea>
+              <div class="row single">
+                <div>
+                  <label>Day 3</label>
+                  <textarea id="tpl_unr_3" rows="3"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="row single">
-              <div>
-                <label>Day 4</label>
-                <textarea id="tpl_unr_4" rows="3"></textarea>
+              <div class="row single">
+                <div>
+                  <label>Day 4</label>
+                  <textarea id="tpl_unr_4" rows="3"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="row single">
-              <div>
-                <label>Day 5</label>
-                <textarea id="tpl_unr_5" rows="3"></textarea>
+              <div class="row single">
+                <div>
+                  <label>Day 5</label>
+                  <textarea id="tpl_unr_5" rows="3"></textarea>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div id="tab_rch" class="tab-pane">
-          <div class="slab">
-            <h4>Reached SMS templates (editable)</h4>
-            <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
-            <div class="row single" style="margin-top:8px">
-              <div>
-                <label>Day 1</label>
-                <textarea id="tpl_rch_1" rows="3"></textarea>
+          <div id="pane_rch" role="tabpanel" class="tab-pane" hidden>
+            <div class="slab">
+              <h4>Reached SMS templates (editable)</h4>
+              <div class="tiny">Placeholders: <code>FIRSTNAME</code>, <code>(agent name)</code> (used in email local-part like <em>(agent name)@business-tickets.com</em>), <code>(agent phone number)</code>, <code>(agent)</code>.</div>
+              <div class="row single" style="margin-top:8px">
+                <div>
+                  <label>Day 1</label>
+                  <textarea id="tpl_rch_1" rows="3"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="row single">
-              <div>
-                <label>Day 2</label>
-                <textarea id="tpl_rch_2" rows="3"></textarea>
+              <div class="row single">
+                <div>
+                  <label>Day 2</label>
+                  <textarea id="tpl_rch_2" rows="3"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="row single">
-              <div>
-                <label>Day 3</label>
-                <textarea id="tpl_rch_3" rows="3"></textarea>
+              <div class="row single">
+                <div>
+                  <label>Day 3</label>
+                  <textarea id="tpl_rch_3" rows="3"></textarea>
+                </div>
               </div>
             </div>
           </div>
@@ -2163,14 +2165,17 @@ function initMorePanel(){
   document.body.appendChild(modal);
   initNotificationsUI();
   const tabBtns = modal.querySelectorAll('#moreTabs button');
-  const panes = modal.querySelectorAll('.tab-pane');
-  const scrollArea = modal.querySelector('.bd');
+  const panes = modal.querySelectorAll('.tab-content .tab-pane');
+  const scrollArea = modal.querySelector('.tab-content');
   tabBtns.forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      tabBtns.forEach(b=>b.classList.remove('primary'));
-      panes.forEach(p=>p.classList.remove('active'));
+      tabBtns.forEach(b=>{ b.classList.remove('primary'); b.setAttribute('aria-selected','false'); });
+      panes.forEach(p=>{ p.classList.remove('active'); p.hidden = true; });
       btn.classList.add('primary');
-      modal.querySelector('#tab_'+btn.dataset.tab).classList.add('active');
+      btn.setAttribute('aria-selected','true');
+      const pane = modal.querySelector('#pane_'+btn.dataset.tab);
+      pane.classList.add('active');
+      pane.hidden = false;
       // Close any open dropdowns/datalists before switching panes
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
