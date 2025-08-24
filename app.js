@@ -2489,10 +2489,10 @@ function notifyTask(t){
           ad.dispatchEvent(new Event('change'));
         }
         const target = document.getElementById('actionsCard');
-        if (target?.scrollIntoView){
-          target.scrollIntoView({ behavior:'smooth', block:'start' });
-        } else if (target){
-          window.scrollTo({ top: target.offsetTop - 70, behavior:'smooth' });
+        if (target){
+          const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
+          const y = target.getBoundingClientRect().top + window.scrollY - headerH;
+          window.scrollTo({ top: y, behavior:'smooth' });
         }
       });
 
