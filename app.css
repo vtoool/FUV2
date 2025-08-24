@@ -456,6 +456,10 @@ body.light .group-hd .label{ font-weight:700; }
 
 /* Flash agenda date input when calendar changes it */
 #agendaDate.glow{ animation:agenda-date-flash .95s ease }
+#agendaDate{
+  position:relative;
+  z-index:10060; /* keep native picker above the sticky header */
+}
 @keyframes agenda-date-flash{ 0%{box-shadow:0 0 0 0 var(--accent);} 50%{box-shadow:0 0 0 4px var(--accent);} 100%{box-shadow:0 0 0 0 var(--accent);} }
 #calTitle{ display:block; text-align:center; }
 

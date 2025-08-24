@@ -1372,14 +1372,16 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
     modal.style.display = 'flex';
     modal.innerHTML = `
       <div class="card" style="max-width:340px;">
-        <h3>Phase 1 complete</h3>
-        <p>What would you like to do next?</p>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
-          <button class="primary" id="p1AddDay">Add 1 more day</button>
-          <button id="p1Continue">Continue to Phase 2</button>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <input type="date" id="p1Date">
-            <button id="p1Custom">Set Phase 2 date</button>
+        <div class="bd">
+          <h3>Phase 1 complete</h3>
+          <p>What would you like to do next?</p>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+            <button class="primary" id="p1AddDay">Add 1 more day</button>
+            <button id="p1Continue">Continue to Phase 2</button>
+            <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
+              <input type="date" id="p1Date">
+              <button id="p1Custom">Set Phase 2 date</button>
+            </div>
           </div>
         </div>
       </div>`;
@@ -2269,8 +2271,24 @@ function loadIntoUI(){
       if (el) el.value = DEFAULT_SMS_TEMPLATES.reached[d];
     }
   }
- function open(){ tabBtns[0].click(); modal.style.display='flex'; modal.classList.add('open'); loadIntoUI(); wireAutoGrow(); document.body.classList.add('modal-open'); }
-  function close(){ modal.classList.remove('open'); modal.style.display='none'; document.body.classList.remove('modal-open'); }
+ const escHandlerMore = (e)=>{ if(e.key==='Escape') close(); };
+ function open(){
+   tabBtns[0].click();
+   modal.style.display='flex';
+   modal.style.pointerEvents='auto';
+   modal.classList.add('open');
+   loadIntoUI();
+   wireAutoGrow();
+   document.body.classList.add('modal-open');
+   document.addEventListener('keydown', escHandlerMore, true);
+ }
+  function close(){
+    modal.classList.remove('open');
+    modal.style.display='none';
+    modal.style.pointerEvents='none';
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', escHandlerMore, true);
+  }
 
   document.getElementById('moreBtn')?.addEventListener('click', open);
   modal.addEventListener('click', (e)=>{ if(e.target===modal) close(); });
@@ -2561,7 +2579,8 @@ function notifyTask(t){
         }
         const target = document.getElementById('actionsCard');
         if (target){
-          const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
+          const header = document.querySelector('header');
+          const headerH = header ? header.getBoundingClientRect().height : 0;
           const y = target.getBoundingClientRect().top + window.scrollY - headerH;
           window.scrollTo({ top: y, behavior:'smooth' });
         }
