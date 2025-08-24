@@ -2171,8 +2171,12 @@ function initMorePanel(){
       panes.forEach(p=>p.classList.remove('active'));
       btn.classList.add('primary');
       modal.querySelector('#tab_'+btn.dataset.tab).classList.add('active');
-      scrollArea.scrollTop = 0;
-      modal.scrollTop = 0;
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          scrollArea.scrollTop = 0;
+          modal.scrollTop = 0;
+        });
+      });
     });
   });
   // --- Make SMS template textareas bigger + auto-grow ---
@@ -2242,6 +2246,10 @@ function loadIntoUI(){
     modal.querySelectorAll('textarea[id^="tpl_unr_"], textarea[id^="tpl_rch_"]').forEach(t=>{
       t.style.height = 'auto';
       t.style.height = (t.scrollHeight + 2) + 'px';
+    });
+    requestAnimationFrame(()=>{
+      scrollArea.scrollTop = 0;
+      modal.scrollTop = 0;
     });
   });
 }
