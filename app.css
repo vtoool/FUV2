@@ -813,22 +813,28 @@ body.light #toolRail .tool{
   flex:1;
   display:flex;
   flex-direction:column;
-
-  overflow:auto;
-  padding:0 20px 10px;
+  overflow:hidden;
+  padding:0;
 }
 #moreModal .tabs{
-  margin:0 0 10px;
+  margin:0;
   padding:4px;
   position:sticky;
   top:0;
   z-index:50; /* stay above tab content */
   background:var(--chip);
   border-bottom:1px solid var(--line);
+  display:flex;
+  gap:4px;
 }
 #moreModal .tabs button{ flex:1; }
-#moreModal .tab-pane{ display:none; position:relative; z-index:0; }
-#moreModal .tab-pane.active{ display:block; }
+#moreModal .tab-content{
+  flex:1;
+  overflow:auto;
+  padding:10px 20px 20px;
+}
+#moreModal .tab-content .tab-pane{ display:none; }
+#moreModal .tab-content .tab-pane.active{ display:block; }
 #moreModal .more-actions{
   background:var(--panel);
   border-top:1px solid var(--line);
