@@ -666,9 +666,124 @@ setBodyPinned(); afterLayout();
         drawer.classList.remove('open','pinned');
       }
       openBtn.setAttribute('aria-expanded', String(opening));
-setBodyPinned(); afterLayout(); 
+setBodyPinned(); afterLayout();
     });
   }
+}
+
+// --- Drawer: Kayak Flex search tool ---
+function initKayakDrawer(){
+  let drawer = document.getElementById('kayakDrawer');
+  if(!drawer){
+    drawer = document.createElement('div');
+    drawer.id = 'kayakDrawer';
+    drawer.innerHTML = `
+      <div class="drawer-scrim"></div>
+      <aside class="drawer-panel">
+        <section class="card" id="kayakCard">
+          <div class="hd">
+            <strong>Kayak Flex Search</strong>
+            <span class="space"></span>
+            <button type="button" id="kayakClose" class="btn-icon" title="Close">✖</button>
+          </div>
+          <div class="bd">
+            <div class="row single">
+              <div>
+                <label>Kayak link</label>
+                <input id="kayakUrl" placeholder="Paste Kayak multi-city URL">
+              </div>
+            </div>
+            <div class="row single">
+              <div>
+                <label>Flexibility</label>
+                <select id="kayakFlex">
+                  <option value="1">±1 day</option>
+                  <option value="2">±2 days</option>
+                  <option value="3">±3 days</option>
+                  <option value="4">±4 days</option>
+                  <option value="5">±5 days</option>
+                  <option value="6">±6 days</option>
+                  <option value="7">±7 days</option>
+                </select>
+              </div>
+            </div>
+            <div class="row single">
+              <div class="right">
+                <button type="button" id="kayakGo" class="primary">Generate links</button>
+              </div>
+            </div>
+            <div id="kayakResults" style="margin-top:10px;display:grid;gap:6px;"></div>
+          </div>
+        </section>
+      </aside>`;
+    document.body.appendChild(drawer);
+  }
+
+  const close = () => {
+    drawer.classList.remove('open','pinned');
+    setBodyPinned(); afterLayout();
+  };
+  drawer.querySelector('#kayakClose')?.addEventListener('click', close);
+  drawer.querySelector('.drawer-scrim')?.addEventListener('click', ()=>{
+    if (!drawer.classList.contains('pinned')) close();
+  });
+
+  const urlInput = drawer.querySelector('#kayakUrl');
+  const flexSel = drawer.querySelector('#kayakFlex');
+  const results = drawer.querySelector('#kayakResults');
+
+  drawer.querySelector('#kayakGo')?.addEventListener('click', ()=>{
+    const url = urlInput.value.trim();
+    const flex = parseInt(flexSel.value,10) || 0;
+    results.innerHTML = '';
+    if (!url) return;
+    try{
+      const info = buildKayakFlex(url, flex);
+      if (!info){ results.textContent = 'Could not parse link'; return; }
+      const fmt = d => d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      const cur = document.createElement('div');
+      cur.innerHTML = `<strong>Current dates:</strong> ${fmt(info.current[0])} - ${fmt(info.current[1])}`;
+      results.appendChild(cur);
+      const title = document.createElement('div');
+      title.innerHTML = '<strong>Flex:</strong>';
+      results.appendChild(title);
+      info.list.forEach(item => {
+        const a = document.createElement('a');
+        a.href = item.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = `${fmt(item.d1)} - ${fmt(item.d2)}`;
+        results.appendChild(a);
+      });
+    } catch(err){
+      results.textContent = 'Error';
+    }
+  });
+}
+
+function buildKayakFlex(srcUrl, flex){
+  const u = new URL(srcUrl);
+  const parts = u.pathname.split('/');
+  const dateIdxs = [];
+  for(let i=0;i<parts.length;i++){
+    if(/^\d{4}-\d{2}-\d{2}$/.test(parts[i])) dateIdxs.push(i);
+  }
+  if(dateIdxs.length < 2) return null;
+  const d1 = new Date(parts[dateIdxs[0]]);
+  const d2 = new Date(parts[dateIdxs[1]]);
+  const list = [];
+  for(let i=-flex;i<=flex;i++){
+    for(let j=-flex;j<=flex;j++){
+      const nd1 = new Date(d1); nd1.setDate(nd1.getDate()+i);
+      const nd2 = new Date(d2); nd2.setDate(nd2.getDate()+j);
+      const newParts = [...parts];
+      newParts[dateIdxs[0]] = nd1.toISOString().split('T')[0];
+      newParts[dateIdxs[1]] = nd2.toISOString().split('T')[0];
+      const newUrl = u.origin + newParts.join('/') + u.search;
+      list.push({ d1: nd1, d2: nd2, url: newUrl });
+    }
+  }
+  return { current:[d1,d2], list };
 }
 
 
@@ -699,7 +814,7 @@ function initNamesDrawer(){
 listEl.style.gap = '14px';
 // Tool rail -> open corresponding drawer to the left of the rail
 const railButtons = document.querySelectorAll('#toolRail .tool');
-const drawers = ['calendarDrawer','namesDrawer']
+const drawers = ['calendarDrawer','namesDrawer','kayakDrawer']
   .map(id => document.getElementById(id))
   .filter(Boolean);
 
@@ -3037,11 +3152,12 @@ function bootstrap(){
   mountSortGroupLabel();
   setSortButtons();
   setShowButtons();
-  initCalendarDrawer();
-  initNamesDrawer();
-  initSideTabs();
-  initMorePanel();
-  afterLayout();
+    initCalendarDrawer();
+    initKayakDrawer();
+    initNamesDrawer();
+    initSideTabs();
+    initMorePanel();
+    afterLayout();
   centerMainCards();
   updateLocalTimes();
   initNotificationsUI();

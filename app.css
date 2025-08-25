@@ -679,7 +679,7 @@ body.light .bulk-item{
 }
 
 /* Containers live BELOW the sticky header and never block the page */
-#calendarDrawer, #namesDrawer{
+#calendarDrawer, #namesDrawer, #kayakDrawer{
   position: fixed;
   left: 0; right: 0; top: var(--header-h); bottom: 0;   /* start under header */
   pointer-events: none;                                  /* page stays usable */
@@ -687,7 +687,7 @@ body.light .bulk-item{
 }
 
 /* Panels are interactive, slide in from the right */
-#calendarDrawer .drawer-panel, #namesDrawer .drawer-panel{
+#calendarDrawer .drawer-panel, #namesDrawer .drawer-panel, #kayakDrawer .drawer-panel{
   position: absolute;
   top: 0; bottom: 0; right: var(--rail-w);
   width: min(var(--cal-drawer-w), 92vw);                 /* calendar width */
@@ -699,24 +699,27 @@ body.light .bulk-item{
   display: flex; flex-direction: column;
   pointer-events: auto;                                  /* panel clickable */
 }
-#namesDrawer .drawer-panel{ width: min(var(--names-drawer-w), 92vw); }
+#namesDrawer .drawer-panel, #kayakDrawer .drawer-panel{ width: min(var(--names-drawer-w), 92vw); }
 
 /* Scrim never darkens or blocks clicks */
-#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim{
+#calendarDrawer .drawer-scrim, #namesDrawer .drawer-scrim, #kayakDrawer .drawer-scrim{
   position: absolute; inset: 0;
   opacity: 0; background: transparent; pointer-events: none;
 }
 
 /* Open: just slide in the panel */
 #calendarDrawer.open .drawer-panel,
-#namesDrawer.open .drawer-panel{ transform: none; }
+#namesDrawer.open .drawer-panel,
+#kayakDrawer.open .drawer-panel{ transform: none; }
 
 /* Drawer card internals */
-#calendarDrawer .card, #namesDrawer .card{
+#calendarDrawer .card, #namesDrawer .card, #kayakDrawer .card{
   border: 0; border-radius: 0; height: 100%;
   display: flex; flex-direction: column;
 }
-#calendarDrawer .card .bd, #namesDrawer .card .bd{ overflow: auto; }
+#calendarDrawer .card .bd, #namesDrawer .card .bd, #kayakDrawer .card .bd{ overflow: auto; }
+
+#kayakResults a{ display:block; }
 
 /* (Removed pinned layout spacing; margin is only added on overlap) */
 
