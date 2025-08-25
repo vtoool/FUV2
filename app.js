@@ -1009,7 +1009,8 @@ if (!s.settings.officeTz) s.settings.officeTz = '';
   }
   const state = load();
     // Avoid launching confetti on initial page load
-    let todayCelebrated = true;
+    const todayStr = fmt(today());
+    let todayCelebrated = state.tasks.filter(t=>t.status!=='done' && t.date===todayStr).length === 0;
   function launchConfetti(){
     if (typeof confetti !== 'function') return;
     const duration = 5000;
@@ -3204,10 +3205,11 @@ function bootstrap(){
     afterLayout();
   centerMainCards();
   updateLocalTimes();
-    initNotificationsUI();
-    startNotificationTicker();
 
     $('#testConfettiBtn')?.addEventListener('click', launchConfetti);
+
+    initNotificationsUI();
+    startNotificationTicker();
 
     // 🔎 Customers search + status filter
     const searchEl = document.getElementById('search');
