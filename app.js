@@ -561,11 +561,20 @@ function applyTheme(t){
   document.body.classList.toggle('light', t==='light');
   const btn = $('#themeToggle');
   if (btn) btn.textContent = (t==='light' ? '🌙 Dark' : '☀️ Light');
-}  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
-  $('#themeToggle')?.addEventListener('click', ()=>{
-    const next = document.body.classList.contains('light') ? 'dark' : 'light';
-    localStorage.setItem(THEME_KEY, next); applyTheme(next);
-  });
+}
+
+const mql = window.matchMedia('(prefers-color-scheme: dark)');
+applyTheme(localStorage.getItem(THEME_KEY) || (mql.matches ? 'dark' : 'light'));
+mql.addEventListener('change', e => {
+  if (!localStorage.getItem(THEME_KEY)) {
+    applyTheme(e.matches ? 'dark' : 'light');
+  }
+});
+
+$('#themeToggle')?.addEventListener('click', ()=>{
+  const next = document.body.classList.contains('light') ? 'dark' : 'light';
+  localStorage.setItem(THEME_KEY, next); applyTheme(next);
+});
 
   /* ========= Add/Edit modal ========= */
   function closeAddModal(){
