@@ -769,8 +769,16 @@ function buildKayakFlex(srcUrl, flex){
     if(/^\d{4}-\d{2}-\d{2}$/.test(parts[i])) dateIdxs.push(i);
   }
   if(dateIdxs.length < 2) return null;
-  const d1 = new Date(parts[dateIdxs[0]]);
-  const d2 = new Date(parts[dateIdxs[1]]);
+  // Parse dates as local time to avoid timezone shifting which causes
+  // displayed dates to be off by one day. Using the numeric constructor
+  // ensures the created Date instance represents midnight in the user's
+  // locale instead of midnight UTC.
+  const parseLocal = str => {
+    const [y,m,d] = str.split('-').map(Number);
+    return new Date(y, m-1, d);
+  };
+  const d1 = parseLocal(parts[dateIdxs[0]]);
+  const d2 = parseLocal(parts[dateIdxs[1]]);
   const list = [];
   for(let i=-flex;i<=flex;i++){
     for(let j=-flex;j<=flex;j++){
