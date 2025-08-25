@@ -361,9 +361,10 @@ body.light .kpi .box{ background:#fff; border-color:var(--line) }
 
 /* =================== TABLE (+ mobile cards) =================== */
 .tbl{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed}
-.tbl th,.tbl td{padding:12px; border-bottom:1px solid var(--line); text-align:left; font-size:13.5px; vertical-align:middle; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.tbl th{color:#a8b0c4; font-weight:700; position:sticky; top:0; background:var(--panel)}
-.tbl td { vertical-align: middle; }
+.tbl th,.tbl td{padding:12px; text-align:left; font-size:13.5px; vertical-align:middle; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tbl th{color:#a8b0c4; font-weight:700; position:sticky; top:0; background:var(--panel); border-bottom:1px solid var(--line);}
+.tbl tbody tr{ background: color-mix(in oklab, var(--card) 94%, var(--line) 6%); }
+.tbl tbody tr + tr td{ border-top:1px dashed var(--line); }
 
 /* Actions cell */
 .tbl td.actions{
@@ -570,6 +571,7 @@ body.light .ovr-list li{ background:#fff }
   .tbl thead{display:none}
   .tbl tr{display:block; background:var(--surface); border:1px solid var(--line); border-radius:12px; margin:10px 0}
   .tbl td{display:flex; gap:10px; justify-content:space-between; align-items:center; white-space:normal}
+  .tbl tbody tr + tr td{ border-top:0; }
   .tbl td::before{content:attr(data-label); color:var(--muted); font-size:12.5px}
   .tbl td.actions { display:flex; justify-content:flex-start; gap:6px; min-width:0; }
   .tbl th:last-child { width:auto; }
