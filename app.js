@@ -1008,7 +1008,8 @@ if (!s.settings.officeTz) s.settings.officeTz = '';
     }catch(e){ return defaults(); }
   }
   const state = load();
-  let todayCelebrated = false;
+    // Avoid launching confetti on initial page load
+    let todayCelebrated = true;
   function launchConfetti(){
     if (typeof confetti !== 'function') return;
     const duration = 5000;
@@ -3203,11 +3204,13 @@ function bootstrap(){
     afterLayout();
   centerMainCards();
   updateLocalTimes();
-  initNotificationsUI();
-  startNotificationTicker();
+    initNotificationsUI();
+    startNotificationTicker();
 
-  // 🔎 Customers search + status filter
-  const searchEl = document.getElementById('search');
+    $('#testConfettiBtn')?.addEventListener('click', launchConfetti);
+
+    // 🔎 Customers search + status filter
+    const searchEl = document.getElementById('search');
   const clearSearchBtn = document.getElementById('clearSearch');
   if (searchEl){
     let raf = 0;
