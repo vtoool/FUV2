@@ -1008,6 +1008,33 @@ if (!s.settings.officeTz) s.settings.officeTz = '';
     }catch(e){ return defaults(); }
   }
   const state = load();
+  let todayCelebrated = false;
+  function launchConfetti(){
+    if (typeof confetti !== 'function') return;
+    const duration = 5000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 120, gravity: 0.8, zIndex: 1000 };
+    const colors = ['#7c5cff', '#5a7cff', '#4d90ff', '#9b5cff', '#00d4ff', '#6f7cff'];
+
+    confetti(Object.assign({}, defaults, { particleCount: 80, origin: { x: 0.5, y: 0 }, colors }));
+    confetti(Object.assign({}, defaults, { particleCount: 40, angle: 60, origin: { x: 0, y: 1 }, colors }));
+    confetti(Object.assign({}, defaults, { particleCount: 40, angle: 120, origin: { x: 1, y: 1 }, colors }));
+
+    const interval = setInterval(function(){
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0){
+        clearInterval(interval);
+        return;
+      }
+      confetti(Object.assign({}, defaults, {
+        particleCount: 5,
+        startVelocity: 20,
+        gravity: 0.6,
+        origin: { x: Math.random(), y: 0 },
+        colors
+      }));
+    }, 250);
+  }
   function save(){ localStorage.setItem(storeKey, JSON.stringify(state)); refresh(); buildCalendar(); }
 
   /* ========= Working days logic ========= */
@@ -1616,6 +1643,14 @@ function refresh(){
     const todayStr = fmt(today());
     const leftToday = state.tasks.filter(t=>t.status!=='done' && t.date===todayStr).length;
     $('#kTasks').textContent = leftToday + ' left';
+    if (leftToday === 0){
+      if (!todayCelebrated){
+        todayCelebrated = true;
+        launchConfetti();
+      }
+    }else{
+      todayCelebrated = false;
+    }
 
   const body = $('#clientsTbl tbody'); 
   body.innerHTML = '';
