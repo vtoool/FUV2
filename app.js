@@ -160,6 +160,7 @@ document.fonts?.ready?.then?.(updateHeaderHeight);
   const THEME_KEY = 'followup_crm_theme';
 const SORT_KEY  = 'followup_crm_sort';
 const SHOW_KEY  = 'followup_crm_show';
+const SORT_DIR_KEY = 'followup_crm_sort_dir';
 
 function firstNameOf(full){
   const n = String(full||'').trim();
@@ -1895,6 +1896,7 @@ $('#clientsTbl')?.addEventListener('click', e=>{
   let currentAgendaDate = today();
   // ✨ Default sort is "client"
 let sortMode = localStorage.getItem(SORT_KEY) || 'client';  // 'type' | 'client'
+let sortDir  = localStorage.getItem(SORT_DIR_KEY) || 'old'; // 'old' | 'new'
 let showMode = localStorage.getItem(SHOW_KEY) || 'all';     // 'all' | 'open' | 'done'
 let agendaFilter = '';
  
@@ -2068,6 +2070,7 @@ function renderGroupedByClient(container, items){
 const items = state.tasks
   .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
   .sort(sortTasksForMode);
+if (sortDir === 'new') items.reverse();
     cont.innerHTML = '';
     if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); updateLocalTimes(); return; }
     if (sortMode === 'client') renderGroupedByClient(cont, items);
@@ -2084,6 +2087,7 @@ const items = state.tasks
 const items = state.tasks
   .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
   .sort(sortTasksForMode);
+if (sortDir === 'new') items.reverse();
       const head = document.createElement('div'); head.className = 'tiny'; head.innerHTML = `<div class="badge mono">${f}</div>`;
       cont.appendChild(head);
       if(items.length===0){ const none = document.createElement('div'); none.className='tiny'; none.textContent='No tasks'; cont.appendChild(none); }
@@ -2114,12 +2118,19 @@ let renderAgenda = ()=> buildAgenda(currentAgendaDate);
 function setSortButtons(){
   const byClient = $('#sortClient');
   const byType   = $('#sortType');
-  if (!byClient || !byType) return;
+  const byOld    = $('#sortOld');
+  const byNew    = $('#sortNew');
+  if (!byClient || !byType || !byOld || !byNew) return;
 
   byClient.classList.toggle('primary',  sortMode === 'client');
   byType.classList.toggle('primary',    sortMode === 'type');
   byClient.setAttribute('aria-pressed', String(sortMode==='client'));
   byType.setAttribute('aria-pressed',   String(sortMode==='type'));
+
+  byOld.classList.toggle('primary', sortDir === 'old');
+  byNew.classList.toggle('primary', sortDir === 'new');
+  byOld.setAttribute('aria-pressed', String(sortDir==='old'));
+  byNew.setAttribute('aria-pressed', String(sortDir==='new'));
 
   // Keep the label just "Sort:" so it matches the Show: group
   const lbl = document.getElementById('sortLabel');
@@ -2135,13 +2146,17 @@ function mountSortGroupLabel(){
 
   const byClient = document.getElementById('sortClient');
   const byType   = document.getElementById('sortType');
-  if (!byClient || !byType || !byClient.parentElement) return;
+  const byOld    = document.getElementById('sortOld');
+  const byNew    = document.getElementById('sortNew');
+  if (!byClient || !byType || !byOld || !byNew || !byClient.parentElement) return;
 
   // If buttons are inside an old segmented/group container, pull them out
   const oldWrap = byClient.closest('.seg, .btn-group');
   if (oldWrap){
     oldWrap.parentElement.insertBefore(byClient, oldWrap);
     oldWrap.parentElement.insertBefore(byType, oldWrap);
+    oldWrap.parentElement.insertBefore(byOld, oldWrap);
+    oldWrap.parentElement.insertBefore(byNew, oldWrap);
     if (!oldWrap.querySelector('button')) oldWrap.remove();
   }
 
@@ -2174,11 +2189,20 @@ function mountSortGroupLabel(){
     group.id = 'sortGroup';
     group.className = 'seg';    // ← NOT "btn-group"
   }
+  let orderGroup = document.getElementById('sortOrder');
+  if (!orderGroup){
+    orderGroup = document.createElement('div');
+    orderGroup.id = 'sortOrder';
+    orderGroup.className = 'seg';
+  }
 
   wrap.appendChild(label);
   wrap.appendChild(group);
   group.appendChild(byClient);
   group.appendChild(byType);
+  wrap.appendChild(orderGroup);
+  orderGroup.appendChild(byOld);
+  orderGroup.appendChild(byNew);
 }
 
 function initMorePanel(){
@@ -2539,8 +2563,10 @@ if (showAllEl && showOpenEl && showDoneEl){
 
 const sortClientEl = document.getElementById('sortClient');
 const sortTypeEl   = document.getElementById('sortType');
+const sortOldEl    = document.getElementById('sortOld');
+const sortNewEl    = document.getElementById('sortNew');
 
-if (sortClientEl && sortTypeEl) {
+if (sortClientEl && sortTypeEl && sortOldEl && sortNewEl) {
   sortClientEl.addEventListener('click', () => {
     sortMode = 'client';
     localStorage.setItem(SORT_KEY, sortMode);
@@ -2550,6 +2576,18 @@ if (sortClientEl && sortTypeEl) {
   sortTypeEl.addEventListener('click', () => {
     sortMode = 'type';
     localStorage.setItem(SORT_KEY, sortMode);
+    setSortButtons();
+    renderAgenda();
+  });
+  sortOldEl.addEventListener('click', () => {
+    sortDir = 'old';
+    localStorage.setItem(SORT_DIR_KEY, sortDir);
+    setSortButtons();
+    renderAgenda();
+  });
+  sortNewEl.addEventListener('click', () => {
+    sortDir = 'new';
+    localStorage.setItem(SORT_DIR_KEY, sortDir);
     setSortButtons();
     renderAgenda();
   });
