@@ -1625,23 +1625,6 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
     }
   }
   function deleteTask(id){ state.tasks = state.tasks.filter(t=>t.id!==id); save(); }
-  function postponeTask(id){
-    const t = state.tasks.find(x=>x.id===id); if(!t) return;
-    const newDate = prompt('New date (YYYY-MM-DD)', t.date);
-    if(!newDate) return;
-    const newTime = prompt('New time (HH:MM, optional)', t.notifyTime || '');
-    t.date = newDate;
-    if(newTime){
-      t.notifyTime = newTime;
-      t.notifyAt = combineYmdTimeLocal(newDate, newTime).toISOString();
-      t.requireInteraction = true;
-    }else{
-      delete t.notifyTime; delete t.notifyAt;
-    }
-    t.status = 'open';
-    save();
-    try{ toast('Task postponed'); }catch(_){ }
-  }
 
   // Full regeneration per settings/override change
   function regenerateAutoOpenTasksFromAnchors(){
@@ -3156,6 +3139,77 @@ if (clientForm) {
   $('#ctNotify')?.addEventListener('change', ()=>{ if ($('#ctNotify').checked) $('#ctImportant').checked = true; });
 
 
+  /* ===== Postpone Task modal ===== */
+  let postponeTargetId = null;
+  function openPostponePopover(id){
+    const t = state.tasks.find(x=>x.id===id); if(!t) return;
+    postponeTargetId = id;
+    const pop = document.getElementById('postponePop'); if(!pop) return;
+
+    $('#ppDate').value = t.date || '';
+    $('#ppTime').value = t.notifyTime || '';
+    $('#ppNotes').value = t.notes || '';
+    $('#ppImportant').checked = !!t.important;
+    $('#ppNotify').checked = !!t.notifyAt;
+    $('#ppNotify').disabled = !$('#ppTime').value;
+
+    pop.style.display = 'flex';
+    document.body.classList.add('modal-open');
+
+    pop._keydown = (e)=>{
+      if(e.key==='Escape'){ e.preventDefault(); closePostponePopover(); }
+      if(e.key==='Enter' && !e.shiftKey && e.target.id!=='ppNotes'){
+        e.preventDefault(); savePostponeFromPopover();
+      }
+    };
+    document.addEventListener('keydown', pop._keydown);
+    pop._backdrop = (e)=>{ if(e.target===pop) closePostponePopover(); };
+    pop.addEventListener('click', pop._backdrop);
+  }
+  function closePostponePopover(){
+    const pop = document.getElementById('postponePop'); if(!pop) return;
+    if(pop._keydown){ document.removeEventListener('keydown', pop._keydown); pop._keydown=null; }
+    if(pop._backdrop){ pop.removeEventListener('click', pop._backdrop); pop._backdrop=null; }
+    pop.style.display='none';
+    document.body.classList.remove('modal-open');
+    postponeTargetId = null;
+  }
+  function savePostponeFromPopover(){
+    const id = postponeTargetId;
+    const t = state.tasks.find(x=>x.id===id); if(!t){ closePostponePopover(); return; }
+    const date = $('#ppDate').value || t.date;
+    const time = $('#ppTime').value || '';
+    const notes = ($('#ppNotes').value||'').trim();
+    const notify = !!$('#ppNotify').checked && !!time;
+    const important = notify ? true : !!$('#ppImportant').checked;
+
+    t.date = date;
+    t.notes = notes;
+    t.important = important;
+    if(time){
+      t.notifyTime = time;
+      if(notify) t.notifyAt = combineYmdTimeLocal(date, time).toISOString();
+      else delete t.notifyAt;
+      t.requireInteraction = true;
+    }else{
+      delete t.notifyTime; delete t.notifyAt; delete t.requireInteraction;
+    }
+    t.status = 'open';
+    save();
+    try{ toast('Task postponed'); }catch(_){ }
+    closePostponePopover();
+  }
+  $('#ppClose')?.addEventListener('click', closePostponePopover);
+  $('#ppCancel')?.addEventListener('click', closePostponePopover);
+  $('#ppSave')?.addEventListener('click', savePostponeFromPopover);
+  $('#ppTime')?.addEventListener('input', ()=>{
+    const has = !!$('#ppTime').value;
+    $('#ppNotify').disabled = !has;
+    if(!has){ $('#ppNotify').checked = false; }
+  });
+  $('#ppNotify')?.addEventListener('change', ()=>{ if($('#ppNotify').checked) $('#ppImportant').checked = true; });
+
+
   $('#agenda')?.addEventListener('click', (e)=>{
   const cp = e.target.closest('.client-pill');
   if (cp){
@@ -3178,7 +3232,7 @@ if (clientForm) {
   const postpone = e.target.closest('[data-postpone]');
   if (postpone){
     const id = postpone.getAttribute('data-postpone');
-    postponeTask(id);
+    openPostponePopover(id);
     return;
   }
   const bell = e.target.closest('[data-bell]');
