@@ -304,6 +304,48 @@
             </div>
           </div>
 
+          <!-- Postpone Task modal -->
+          <div id="postponePop" class="popover" style="display:none">
+            <div class="sheet">
+              <div class="pop-head" style="display:flex; align-items:center; gap:8px;">
+                <strong>Postpone task</strong>
+                <div class="space"></div>
+                <button type="button" class="btn-icon" id="ppClose" title="Close">✖</button>
+              </div>
+
+              <div class="row">
+                <div>
+                  <label>Date</label>
+                  <input id="ppDate" type="date" />
+                </div>
+                <div>
+                  <label>Time (optional)</label>
+                  <input id="ppTime" type="time" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div></div>
+                <div style="display:flex; align-items:center; gap:10px; padding-top:26px">
+                  <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="ppImportant"> Important</label>
+                  <label style="display:inline-flex;align-items:center;gap:6px" title="Enable desktop alert at the chosen time"><input type="checkbox" id="ppNotify" disabled> Notify me</label>
+                </div>
+              </div>
+
+              <div class="row single">
+                <div>
+                  <label>Notes (optional)</label>
+                  <textarea id="ppNotes" rows="3" placeholder="Context for this task…"></textarea>
+                </div>
+              </div>
+
+              <div class="right" style="margin-top:8px">
+                <button type="button" id="ppCancel" class="ghost">Cancel</button>
+                <button type="button" id="ppSave" class="primary">Save</button>
+              </div>
+            </div>
+          </div>
+
           <div class="mt12 progress"><span id="progressBar"></span></div>
           <div id="agenda" class="mt12"></div>
         </div>
