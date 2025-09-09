@@ -1625,6 +1625,23 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
     }
   }
   function deleteTask(id){ state.tasks = state.tasks.filter(t=>t.id!==id); save(); }
+  function postponeTask(id){
+    const t = state.tasks.find(x=>x.id===id); if(!t) return;
+    const newDate = prompt('New date (YYYY-MM-DD)', t.date);
+    if(!newDate) return;
+    const newTime = prompt('New time (HH:MM, optional)', t.notifyTime || '');
+    t.date = newDate;
+    if(newTime){
+      t.notifyTime = newTime;
+      t.notifyAt = combineYmdTimeLocal(newDate, newTime).toISOString();
+      t.requireInteraction = true;
+    }else{
+      delete t.notifyTime; delete t.notifyAt;
+    }
+    t.status = 'open';
+    save();
+    try{ toast('Task postponed'); }catch(_){ }
+  }
 
   // Full regeneration per settings/override change
   function regenerateAutoOpenTasksFromAnchors(){
@@ -1995,6 +2012,7 @@ function renderTask(t, opts = {}){
       </div>
     <div class="tiny mono">
       ${t.date}${timeBadged}
+      <button class="btn-icon" data-postpone="${t.id}" title="Postpone task">⏭️</button>
       <button class="btn-icon" data-bell="${t.id}" title="Notify at time">🔔</button>
       <button class="btn-icon" data-del="${t.id}" title="Delete task">🗑️</button>
     </div>`;
@@ -3155,6 +3173,12 @@ if (clientForm) {
   if (del){
     const id = del.getAttribute('data-del');
     if (confirm('Delete this task?')) deleteTask(id);
+    return;
+  }
+  const postpone = e.target.closest('[data-postpone]');
+  if (postpone){
+    const id = postpone.getAttribute('data-postpone');
+    postponeTask(id);
     return;
   }
   const bell = e.target.closest('[data-bell]');
