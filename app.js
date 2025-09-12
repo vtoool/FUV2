@@ -197,11 +197,12 @@ function formatName(last, first){
 
 function scrollAgendaIntoView(){
   const target = document.getElementById('actionsCard');
-  if(!target) return;
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const header = document.querySelector('header');
-  const headerH = header ? header.getBoundingClientRect().height : 0;
-  const y = target.getBoundingClientRect().top + window.scrollY - headerH;
-  window.scrollTo({ top: y, behavior:'smooth' });
+  if (header) {
+    window.scrollBy({ top: -header.getBoundingClientRect().height, behavior: 'smooth' });
+  }
 }
 
 // Pick n unique combos; falls back to best effort if arrays are tiny
