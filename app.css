@@ -964,3 +964,23 @@ body.drawer-overlap #app {
 /* Local time colouring */
 .local-time.lt-red{ color: var(--danger); }
 .local-time.lt-green{ color: var(--accent-2); }
+
+/* Back to top button */
+#backToTop{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:var(--sh-1);
+  z-index:10;
+}
+#backToTop:hover{ opacity:.9; }

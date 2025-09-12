@@ -3322,6 +3322,9 @@ function bootstrap(){
   centerMainCards();
   updateLocalTimes();
 
+    document.getElementById('backToTop')
+      ?.addEventListener('click', scrollAgendaIntoView);
+
     $('#testConfettiBtn')?.addEventListener('click', launchConfetti);
 
     initNotificationsUI();
