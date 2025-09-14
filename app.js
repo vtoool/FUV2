@@ -2072,7 +2072,6 @@ function renderGroupedByClient(container, items){
 const items = state.tasks
   .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
   .sort(sortTasksForMode);
-if (sortDir === 'new') items.reverse();
     cont.innerHTML = '';
     if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); updateLocalTimes(); return; }
     if (sortMode === 'client') renderGroupedByClient(cont, items);
@@ -2084,12 +2083,13 @@ if (sortDir === 'new') items.reverse();
   function buildAgendaRange(from, to){
     const cont = $('#agenda'); cont.innerHTML = '';
     const days = Math.ceil((to-from)/86400000)+1;
-    for(let i=0;i<days;i++){
-      const d = addDays(from,i), f = fmt(d);
+    const dayList = Array.from({length:days}, (_,i)=>addDays(from,i));
+    if (sortDir === 'new') dayList.reverse();
+    for(const d of dayList){
+      const f = fmt(d);
 const items = state.tasks
   .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
   .sort(sortTasksForMode);
-if (sortDir === 'new') items.reverse();
       const head = document.createElement('div'); head.className = 'tiny'; head.innerHTML = `<div class="badge mono">${f}</div>`;
       cont.appendChild(head);
       if(items.length===0){ const none = document.createElement('div'); none.className='tiny'; none.textContent='No tasks'; cont.appendChild(none); }
