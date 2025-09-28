@@ -2003,7 +2003,24 @@ let agendaFilter = '';
   function typeOrder(t){ return ({call:1, callvm:2, voicemail:3, sms:4, email:5, custom:6}[t]||9); }
   function clientDisplayName(t){ return t.clientName || (t.clientId ? (clientById(t.clientId)||{}).name : '') || ''; }
   function clientNameLower(t){ return clientDisplayName(t).toLowerCase(); }
+  function clientStartDateValue(t){
+    if (!t.clientId) return null;
+    const c = clientById(t.clientId);
+    return c?.startDate || null;
+  }
+  function compareClientAge(a, b){
+    const aDate = clientStartDateValue(a);
+    const bDate = clientStartDateValue(b);
+    if (aDate && bDate && aDate !== bDate){
+      return sortDir === 'old' ? aDate.localeCompare(bDate) : bDate.localeCompare(aDate);
+    }
+    if (aDate && !bDate) return -1;
+    if (!aDate && bDate) return 1;
+    return 0;
+  }
   function sortTasksForMode(a,b){
+    const byStart = compareClientAge(a, b);
+    if (byStart) return byStart;
     const byType = typeOrder(a.type) - typeOrder(b.type);
     const byName = clientNameLower(a).localeCompare(clientNameLower(b));
     const byTitle = (a.title||'').localeCompare(b.title||'');
@@ -2164,7 +2181,6 @@ function renderGroupedByClient(container, items){
     const items = state.tasks
       .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
       .sort(sortTasksForMode);
-    if (sortDir === 'old') items.reverse();
     cont.innerHTML = '';
     if(items.length===0){ cont.innerHTML = `<div class="tiny">No tasks for ${f}.</div>`; updateProgress(); updateLocalTimes(); return; }
     if (sortMode === 'client') renderGroupedByClient(cont, items);
@@ -2183,7 +2199,6 @@ function renderGroupedByClient(container, items){
       const items = state.tasks
         .filter(t => t.date===f && matchesFilter(t) && matchesShow(t))
         .sort(sortTasksForMode);
-      if (sortDir === 'old') items.reverse();
       const head = document.createElement('div'); head.className = 'tiny'; head.innerHTML = `<div class="badge mono">${f}</div>`;
       cont.appendChild(head);
       if(items.length===0){ const none = document.createElement('div'); none.className='tiny'; none.textContent='No tasks'; cont.appendChild(none); }
