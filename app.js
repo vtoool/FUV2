@@ -1716,6 +1716,12 @@ function openRingCentralSMS(rawPhone, text = SMS_DEFAULT_TEXT){
         openPhase1Modal(t);
       }
     }
+    if(done && t.source==='manual'){
+      const manualDay = state.tasks.filter(x=> x.clientId===t.clientId && x.source==='manual' && x.date===t.date);
+      if(manualDay.length && manualDay.every(x=>x.status==='done')){
+        openManualFollowupModal(t);
+      }
+    }
   }
   function deleteTask(id){ state.tasks = state.tasks.filter(t=>t.id!==id); save(); }
 
@@ -1982,6 +1988,65 @@ $('#clientsTbl')?.addEventListener('click', e=>{
     addTask({...base, type:'sms',   title:'SMS'});
     addTask({...base, type:'email', title:'Email'});
     save();
+  }
+
+  function openManualFollowupModal(t){
+    const client = t?.clientId ? clientById(t.clientId) : null;
+    if(!client) return;
+    document.body.classList.add('modal-open');
+    const modal = document.createElement('div');
+    modal.className = 'modal open';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="card" style="max-width:420px;">
+        <div class="bd" style="display:flex;flex-direction:column;gap:12px;">
+          <h3>Manual follow-up complete</h3>
+          <p>Set the next manual follow-up for <strong>${escapeHtml(client.name||'this client')}</strong>.</p>
+          <label class="stack" style="display:flex;flex-direction:column;gap:4px;">
+            <span class="tiny">Next follow-up date</span>
+            <input type="date" id="manualNextDate" min="${fmt(today())}" />
+          </label>
+          <label style="display:inline-flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="manualNextClear" checked /> Clear ALL future auto tasks
+          </label>
+          <label style="display:inline-flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="manualNextRemovePrev" checked /> Remove previous manual tasks
+          </label>
+          <label class="stack" style="display:flex;flex-direction:column;gap:4px;">
+            <span class="tiny">Notes (optional)</span>
+            <input type="text" id="manualNextNotes" placeholder="Context for these tasks" />
+          </label>
+          <div class="tiny">Creates: 2 Calls, 1 SMS, 1 Email.</div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+            <button type="button" id="manualNextSkip" class="ghost">Not now</button>
+            <button type="button" id="manualNextSave" class="primary">Save next follow-up</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const dateInput = modal.querySelector('#manualNextDate');
+    dateInput?.focus();
+
+    function close(){
+      document.removeEventListener('keydown', escHandler, true);
+      modal.remove();
+      document.body.classList.remove('modal-open');
+    }
+
+    const escHandler = (e)=>{ if(e.key==='Escape') close(); };
+    document.addEventListener('keydown', escHandler, true);
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) close(); });
+
+    modal.querySelector('#manualNextSkip')?.addEventListener('click', ()=>{ close(); });
+    modal.querySelector('#manualNextSave')?.addEventListener('click', ()=>{
+      const nextDate = dateInput?.value || '';
+      const shouldClear = modal.querySelector('#manualNextClear')?.checked ?? true;
+      const removePrev = modal.querySelector('#manualNextRemovePrev')?.checked ?? false;
+      const notes = modal.querySelector('#manualNextNotes')?.value || '';
+      scheduleManualFU(client, nextDate, shouldClear, notes, removePrev);
+      close();
+    });
   }
 
   
