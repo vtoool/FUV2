@@ -988,25 +988,117 @@ function defaults(){
   };
 }
 
+function normalizeImportedData(raw){
+  const normalized = {
+    clients: [],
+    tasks: [],
+    settings: defaults().settings
+  };
+
+  if (raw && typeof raw === 'object'){
+    if (Array.isArray(raw.clients)){
+      try { normalized.clients = JSON.parse(JSON.stringify(raw.clients)); }
+      catch(_) { normalized.clients = []; }
+    }
+    if (Array.isArray(raw.tasks)){
+      try { normalized.tasks = JSON.parse(JSON.stringify(raw.tasks)); }
+      catch(_) { normalized.tasks = []; }
+    }
+
+    const srcSettings = raw.settings;
+    if (srcSettings && typeof srcSettings === 'object'){
+      const base = normalized.settings;
+      const wdKeys = ['mon','tue','wed','thu','fri','sat','sun'];
+      if (srcSettings.workingDays && typeof srcSettings.workingDays === 'object'){
+        base.workingDays = { ...base.workingDays };
+        wdKeys.forEach(k => {
+          if (k in srcSettings.workingDays){
+            base.workingDays[k] = !!srcSettings.workingDays[k];
+          }
+        });
+      }
+      if ('moveOffDays' in srcSettings){
+        base.moveOffDays = !!srcSettings.moveOffDays;
+      }
+      if (srcSettings.overrides && typeof srcSettings.overrides === 'object'){
+        const ov = {};
+        for (const [date, val] of Object.entries(srcSettings.overrides)){
+          if (typeof date === 'string'){
+            const valStr = typeof val === 'string' ? val : String(val ?? '');
+            if (valStr){ ov[date] = valStr; }
+          }
+        }
+        base.overrides = ov;
+      }else{
+        base.overrides = {};
+      }
+      if (srcSettings.agent && typeof srcSettings.agent === 'object'){
+        base.agent = {
+          name: String(srcSettings.agent.name || '').trim(),
+          phone: String(srcSettings.agent.phone || '').trim()
+        };
+      }else{
+        base.agent = { name:'', phone:'' };
+      }
+      base.smsTemplates = {
+        unreached: { ...DEFAULT_SMS_TEMPLATES.unreached },
+        reached: { ...DEFAULT_SMS_TEMPLATES.reached }
+      };
+      if (srcSettings.smsTemplates && typeof srcSettings.smsTemplates === 'object'){
+        const u = srcSettings.smsTemplates.unreached || {};
+        const r = srcSettings.smsTemplates.reached || {};
+        for (const [key, text] of Object.entries(u)){
+          if (text !== undefined && text !== null){
+            base.smsTemplates.unreached[key] = String(text);
+          }
+        }
+        for (const [key, text] of Object.entries(r)){
+          if (text !== undefined && text !== null){
+            base.smsTemplates.reached[key] = String(text);
+          }
+        }
+        for (const [key, value] of Object.entries(srcSettings.smsTemplates)){
+          if (key === 'unreached' || key === 'reached') continue;
+          try {
+            base.smsTemplates[key] = JSON.parse(JSON.stringify(value));
+          }catch(_){
+            base.smsTemplates[key] = value;
+          }
+        }
+      }
+      if (srcSettings.officeCity){
+        base.officeCity = String(srcSettings.officeCity || '').trim().toUpperCase();
+      }
+      if (srcSettings.officeTz){
+        base.officeTz = String(srcSettings.officeTz || '').trim();
+      }
+      for (const [extraKey, extraVal] of Object.entries(srcSettings)){
+        if (['workingDays','moveOffDays','overrides','agent','smsTemplates','officeCity','officeTz'].includes(extraKey)) continue;
+        try {
+          base[extraKey] = JSON.parse(JSON.stringify(extraVal));
+        }catch(_){
+          base[extraKey] = extraVal;
+        }
+      }
+    }
+  }
+
+  const baseSettings = normalized.settings;
+  if (baseSettings.officeCity){
+    baseSettings.officeTz = window.IATA_TZ?.[baseSettings.officeCity] || baseSettings.officeTz || '';
+  }else{
+    baseSettings.officeCity = '';
+    if (!baseSettings.officeTz) baseSettings.officeTz = '';
+  }
+
+  return normalized;
+}
+
   function load(){
     try{
-      const s = JSON.parse(localStorage.getItem(storeKey) || 'null') || defaults();
-      if(!s.settings) s.settings = defaults().settings;
-      // ensure new fields exist without nuking old settings
-if (!s.settings.agent) s.settings.agent = { name:'', phone:'' };
-if (!s.settings.smsTemplates) s.settings.smsTemplates = JSON.parse(JSON.stringify(DEFAULT_SMS_TEMPLATES));
-s.settings.smsTemplates.unreached = {
-  ...DEFAULT_SMS_TEMPLATES.unreached,
-  ...(s.settings.smsTemplates.unreached || {})
-};
-s.settings.smsTemplates.reached = {
-  ...DEFAULT_SMS_TEMPLATES.reached,
-  ...(s.settings.smsTemplates.reached || {})
-};
-if (!s.settings.officeCity) s.settings.officeCity = '';
-if (!s.settings.officeTz) s.settings.officeTz = '';
-
-      return s;
+      const raw = JSON.parse(localStorage.getItem(storeKey) || 'null');
+      if (!raw) return defaults();
+      return normalizeImportedData(raw);
     }catch(e){ return defaults(); }
   }
   const state = load();
@@ -2279,6 +2371,27 @@ function initMorePanel(){
               </div>
             </div>
             <div class="slab" style="margin-top:10px">
+              <h4>Backup &amp; Restore</h4>
+              <div class="tiny">Export everything (clients, tasks, settings) or import a backup to restore.</div>
+              <div class="backup-actions">
+                <button type="button" id="backupCopy">Copy JSON</button>
+                <button type="button" id="backupDownload">Download JSON</button>
+                <button type="button" id="backupImportFile">Import from file…</button>
+                <input type="file" id="backupFileInput" accept="application/json,.json" hidden />
+              </div>
+              <div class="row single" style="margin-top:8px">
+                <div>
+                  <label for="backupText">Import from pasted JSON</label>
+                  <textarea id="backupText" class="mono" rows="5" spellcheck="false" placeholder="{ &quot;clients&quot;: [], &quot;tasks&quot;: [], &quot;settings&quot;: { … } }"></textarea>
+                  <div class="backup-actions backup-actions--inline">
+                    <button type="button" class="tiny" id="backupImportText">Import JSON</button>
+                    <button type="button" class="tiny ghost" id="backupClearText">Clear</button>
+                  </div>
+                </div>
+              </div>
+              <div id="backupStatus" class="backup-status tiny mono info" aria-live="polite"></div>
+            </div>
+            <div class="slab" style="margin-top:10px">
               <button type="button" class="btn-danger" id="wipeAll" title="Delete all data">Wipe All Data</button>
             </div>
           </div>
@@ -2412,7 +2525,199 @@ function initMorePanel(){
 
   // Run auto-grow after values are populated
 
+  const backupTextarea    = modal.querySelector('#backupText');
+  const backupStatusEl    = modal.querySelector('#backupStatus');
+  const backupCopyBtn     = modal.querySelector('#backupCopy');
+  const backupDownloadBtn = modal.querySelector('#backupDownload');
+  const backupImportFile  = modal.querySelector('#backupImportFile');
+  const backupFileInput   = modal.querySelector('#backupFileInput');
+  const backupImportText  = modal.querySelector('#backupImportText');
+  const backupClearText   = modal.querySelector('#backupClearText');
+
+  const setBackupStatus = (msg = '', type = 'info') => {
+    if (!backupStatusEl) return;
+    backupStatusEl.textContent = msg;
+    backupStatusEl.classList.remove('ok', 'error', 'info');
+    if (type) backupStatusEl.classList.add(type);
+  };
+
+  const buildBackupPayload = () => {
+    const snapshot = normalizeImportedData(state);
+    return {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: snapshot
+    };
+  };
+
+  const buildBackupJson = () => JSON.stringify(buildBackupPayload(), null, 2);
+
+  const confirmImport = () => confirm('Importing a backup will replace all existing clients, tasks, and settings. Continue?');
+
+  const applyBackupData = (data, label) => {
+    const normalized = normalizeImportedData(data);
+    state.clients = normalized.clients;
+    state.tasks = normalized.tasks;
+    state.settings = normalized.settings;
+    todayCelebrated = state.tasks.filter(t=>t.status!=='done' && t.date===fmt(today())).length === 0;
+    save();
+    try{ if (typeof renderAgenda === 'function') renderAgenda(); }
+    catch(_){ try{ renderAgenda(); }catch(__){} }
+    try{ renderOverrideList(); }catch(_){ }
+    try{
+      const calSettings = document.getElementById('calSettings');
+      if (calSettings && calSettings.classList.contains('open')){
+        loadSettingsIntoUI();
+      }
+    }catch(_){ }
+    loadIntoUI();
+    if (backupTextarea){ backupTextarea.value = ''; }
+    setBackupStatus(label ? `Imported ${label}.` : 'Backup imported.', 'ok');
+    toast('Backup imported');
+  };
+
+  const parseAndImportBackup = (rawText, label) => {
+    let parsed;
+    try{
+      parsed = JSON.parse(rawText);
+    }catch(_){
+      throw new Error('Backup is not valid JSON.');
+    }
+    const dataBlock = (parsed && typeof parsed === 'object' && parsed.data && typeof parsed.data === 'object')
+      ? parsed.data
+      : parsed;
+    if (!dataBlock || typeof dataBlock !== 'object'){
+      throw new Error('Backup JSON is missing the expected data block.');
+    }
+    if (!Array.isArray(dataBlock.clients) || !Array.isArray(dataBlock.tasks) || typeof dataBlock.settings !== 'object'){
+      throw new Error('Backup JSON must include clients, tasks, and settings.');
+    }
+    applyBackupData(dataBlock, label);
+  };
+
+  backupCopyBtn?.addEventListener('click', async ()=>{
+    const json = buildBackupJson();
+    const notifySuccess = () => {
+      setBackupStatus('Backup copied to clipboard.', 'ok');
+      toast('Backup copied to clipboard');
+    };
+    try{
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(json);
+        notifySuccess();
+        return;
+      }
+      throw new Error('Clipboard API unavailable');
+    }catch(_){
+      try{
+        const tmp = document.createElement('textarea');
+        tmp.value = json;
+        tmp.setAttribute('readonly', '');
+        tmp.style.position = 'fixed';
+        tmp.style.opacity = '0';
+        document.body.appendChild(tmp);
+        tmp.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(tmp);
+        if (!ok) throw new Error('execCommand failed');
+        notifySuccess();
+        return;
+      }catch(err){
+        if (backupTextarea){
+          backupTextarea.value = json;
+          try{ backupTextarea.focus(); backupTextarea.select(); }catch(__){}
+        }
+        setBackupStatus('Copy failed. Backup JSON is in the text box.', 'error');
+        alert('Copy failed. The backup JSON has been placed in the text box so you can copy it manually.');
+      }
+    }
+  });
+
+  backupDownloadBtn?.addEventListener('click', ()=>{
+    try{
+      const json = buildBackupJson();
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `followup-crm-backup-${stamp}.json`;
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(()=>{
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 0);
+      setBackupStatus(`Backup downloaded as ${fileName}.`, 'ok');
+    }catch(err){
+      console.error(err);
+      setBackupStatus('Download failed. See console for details.', 'error');
+      alert('Could not download the backup.');
+    }
+  });
+
+  backupImportFile?.addEventListener('click', ()=>{
+    backupFileInput?.click();
+  });
+
+  backupFileInput?.addEventListener('change', ()=>{
+    const file = backupFileInput.files?.[0];
+    if (!file){ return; }
+    if (!confirmImport()){ backupFileInput.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        parseAndImportBackup(String(reader.result || ''), `from ${file.name}`);
+      }catch(err){
+        console.error(err);
+        setBackupStatus(`Import failed: ${err.message}`, 'error');
+        alert(`Could not import backup: ${err.message}`);
+      }finally{
+        backupFileInput.value = '';
+      }
+    };
+    reader.onerror = () => {
+      setBackupStatus('Could not read the selected file.', 'error');
+      alert('Could not read the selected backup file.');
+      backupFileInput.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  backupImportText?.addEventListener('click', ()=>{
+    const raw = (backupTextarea?.value || '').trim();
+    if (!raw){
+      setBackupStatus('Paste backup JSON first.', 'error');
+      if (backupTextarea){
+        try{ backupTextarea.focus(); }catch(_){ }
+      }
+      return;
+    }
+    if (!confirmImport()) return;
+    try{
+      parseAndImportBackup(raw, 'from pasted JSON');
+    }catch(err){
+      console.error(err);
+      setBackupStatus(`Import failed: ${err.message}`, 'error');
+      alert(`Could not import backup: ${err.message}`);
+    }
+  });
+
+  backupClearText?.addEventListener('click', ()=>{
+    if (backupTextarea){
+      backupTextarea.value = '';
+      try{ backupTextarea.focus(); }catch(_){ }
+    }
+    setBackupStatus('', 'info');
+  });
+
+  backupTextarea?.addEventListener('input', ()=>{
+    setBackupStatus('', 'info');
+  });
+
 function loadIntoUI(){
+  setBackupStatus('', 'info');
   const a = state.settings.agent || {};
   document.getElementById('agentName').value  = a.name  || '';
   document.getElementById('agentPhone').value = a.phone || '';
